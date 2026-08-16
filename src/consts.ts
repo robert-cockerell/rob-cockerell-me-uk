@@ -3,4 +3,4 @@
 
 export const SITE_TITLE = 'Rob Cockerell';
 export const SITE_DESCRIPTION =
-	'Notes on product management, career optionality, and building things on the side.';
+	'Writing and links on product management, technology, and whatever else has my attention.';
