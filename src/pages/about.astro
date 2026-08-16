@@ -1,0 +1,30 @@
+---
+import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
+import Layout from '../layouts/BlogPost.astro';
+---
+
+<Layout
+	title="About"
+	description="Who I am, what I think about, and how to reach me."
+	pubDate={new Date('August 16 2026')}
+	heroImage={AboutHeroImage}
+>
+	<p>
+		I'm a product manager based in Oxford, UK, working mostly at the intersection of
+		stakeholder management, workshop facilitation, and turning ambiguous requirements into
+		something a team can actually ship. I like the parts of product work that involve getting a
+		room of disagreeing people to a shared answer — and I'm endlessly curious about how that
+		skill transfers to building things of my own.
+	</p>
+	<p>
+		Outside the day job, I'm interested in career optionality: what it actually takes to build
+		skills, income, and confidence outside a single employer, without blowing up the stable
+		parts of life that are working fine. This site is part of that — a place to write in public,
+		test small ideas, and keep a record of what I'm building rather than just thinking about
+		building it.
+	</p>
+	<p>
+		If something here is useful, wrong, or worth arguing about, get in touch — details are on
+		the <a href="/contact/">contact page</a>.
+	</p>
+</Layout>

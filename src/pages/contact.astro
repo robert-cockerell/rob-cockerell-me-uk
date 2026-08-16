@@ -1,0 +1,40 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead
+			title={`Contact | ${SITE_TITLE}`}
+			description="How to get in touch with Rob."
+		/>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Contact</h1>
+			<p>
+				The simplest way to reach me is email:
+				<a href="mailto:robert@cockerell.co.uk">robert@cockerell.co.uk</a>.
+			</p>
+			<p>
+				<!--
+				  Optional: swap the mailto above (or add to it) with a Formspree form
+				  once you've created a free account at https://formspree.io — a basic
+				  contact form is three lines:
+
+				  <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+				    <input type="email" name="email" placeholder="Your email" required />
+				    <textarea name="message" placeholder="Message" required></textarea>
+				    <button type="submit">Send</button>
+				  </form>
+				-->
+			</p>
+		</main>
+		<Footer />
+	</body>
+</html>
