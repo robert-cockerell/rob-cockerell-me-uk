@@ -72,9 +72,10 @@ describe('fixture files in test-data/', () => {
 		assert.deepEqual(unimplementedResetRows(f), []);
 	});
 
-	it('forecasts.csv is ready for D1: 81 half-hour periods in UTC on the four scenario dates', () => {
+	it('forecasts.csv is ready for D1: 80 half-hour periods in UTC on the four scenario dates', () => {
 		const rows = parseForecasts(f.forecasts);
-		assert.equal(rows.length, 81);
+		// 16 June 19, 8 December 19, 30 March 21, 26 October 21.
+		assert.equal(rows.length, 80);
 		const dates = new Set(rows.map((r) => r.periodStart.toISOString().slice(0, 10)));
 		assert.deepEqual([...dates].sort(), ['2026-03-30', '2026-06-16', '2026-10-26', '2026-12-08']);
 		assert.ok(rows.every((r) => r.region === 'South England'));
@@ -145,7 +146,7 @@ describe('SU.05 and SU.06: load the baseline and set the clock', () => {
 		assert.equal((await store.listEvents()).length, 0);
 		assert.equal(store.requests.length, 0, 'request log starts empty');
 		assert.equal(report.skipped.length, 1);
-		assert.match(report.skipped[0], /route A/);
+		assert.match(report.skipped[0], /route A/i);
 	});
 
 	it('SU.06: the clock set to Tue 16 June 2026 07:00 is what the clock endpoint serves', async () => {
@@ -252,7 +253,10 @@ describe('stand-in API', () => {
 		await handleApi(get('Reservations/?resourceId=113'), 'Reservations/', deps);
 		await handleApi(get('Reservations/', 'POST'), 'Reservations/', deps);
 		await handleApi(get('Nothing'), 'Nothing', deps);
-		await handleClock(new Request('http://localhost/demos/charging-planner/stand-in/clock'), deps);
+		await handleClock(
+			new Request('http://localhost/demos/charging-planner/stand-in/clock', { headers: { 'user-agent': 'unit-test' } }),
+			deps,
+		);
 		const log = await store.listRequests({ limit: 10 });
 		assert.deepEqual(
 			log.map((e) => [e.method, e.path, e.status]).reverse(),
@@ -369,7 +373,7 @@ describe('resets (CRP script §3.4)', () => {
 		const call = calls.find((c) => c.name === 'resetPlannerData');
 		const args = call?.args as { withoutEntryIds: string[]; forecasts: unknown[] };
 		assert.deepEqual(args.withoutEntryIds, ['1044']);
-		assert.equal(args.forecasts.length, 81);
+		assert.equal(args.forecasts.length, 80);
 		assert.equal((await currentDemoTime(deps)).toISOString(), local('2026-06-16 16:20').toISOString());
 	});
 
@@ -414,7 +418,7 @@ describe('resets (CRP script §3.4)', () => {
 		const { deps } = testDeps();
 		const report = await applyOverride(deps, 'O-01');
 		assert.equal(report.ok, false);
-		assert.match(report.skipped[0], /route A/);
+		assert.match(report.skipped[0], /route A/i);
 	});
 });
 

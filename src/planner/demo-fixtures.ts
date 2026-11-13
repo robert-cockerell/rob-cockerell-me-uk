@@ -1,6 +1,6 @@
 // The seam between the test equipment's resets and the planner's own data.
 //
-// The stand-in's resets (src/planner/standin/resets.ts) reload the stand-in and
+// The stand-in's resets (src/planner/standin/operations.ts) reload the stand-in and
 // set the demo clock. Reloading D1 to D3 needs the planner's schema, which is
 // route A's work once Rob approves it (DEC-55). Route A sets `plannerFixtures`
 // below to its loader; until then the resets report the D1 to D3 part as
