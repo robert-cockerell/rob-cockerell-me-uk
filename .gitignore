@@ -29,3 +29,5 @@ _to_delete/
 design/planner.css
 
 supabase/.temp/
+
+.vercel/
