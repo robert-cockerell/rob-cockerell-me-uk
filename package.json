@@ -10,7 +10,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test:unit": "npm run test:unit:standin",
+    "test:unit:standin": "node --test \"src/planner/standin/**/*.node-test.ts\"",
+    "demo:reset": "node --env-file-if-exists=.env src/planner/standin/cli/reset.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",

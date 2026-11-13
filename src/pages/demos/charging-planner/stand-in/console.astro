@@ -1,0 +1,460 @@
+---
+// Tester console for the LibreBooking stand-in (test equipment, Stage 1 item 4).
+// Protected by GM_STANDIN_CONSOLE_KEY, off when GM_PUBLIC_DEMO is on, and never
+// linked from the planner.
+import ConsoleLayout from '../../../../planner/standin/ConsoleLayout.astro';
+import { demoNow } from '../../../../planner/standin/clock.ts';
+import { runConsoleAction } from '../../../../planner/standin/console-actions.ts';
+import {
+	CONSOLE_COOKIE,
+	CONSOLE_PATH,
+	consoleAccess,
+	consoleToken,
+	keyMatches,
+} from '../../../../planner/standin/console-access.ts';
+import { standinSettings } from '../../../../planner/standin/env.ts';
+import {
+	parseClockSettings,
+	parseEvents,
+	parseResets,
+	RESERVATION_SETS,
+} from '../../../../planner/standin/fixtures.ts';
+import { formatLondonLocal, londonZoneName, parseLondonLocal } from '../../../../planner/standin/london.ts';
+import type { OperationReport } from '../../../../planner/standin/operations.ts';
+import { standinDeps } from '../../../../planner/standin/runtime.ts';
+import { RESOURCE_STATUSES } from '../../../../planner/standin/types.ts';
+
+export const prerender = false;
+
+const FLASH_COOKIE = 'gm_standin_flash';
+const cookieOptions = {
+	path: CONSOLE_PATH,
+	httpOnly: true,
+	sameSite: 'strict' as const,
+	secure: Astro.url.protocol === 'https:',
+};
+
+const settings = standinSettings();
+const access = consoleAccess({
+	publicDemo: settings.publicDemo,
+	key: settings.consoleKey,
+	cookie: Astro.cookies.get(CONSOLE_COOKIE)?.value,
+});
+
+if (access === 'off') {
+	return new Response('Not found', { status: 404 });
+}
+
+function flash(report: OperationReport) {
+	Astro.cookies.set(FLASH_COOKIE, JSON.stringify(report), { ...cookieOptions, maxAge: 120 });
+}
+
+if (Astro.request.method === 'POST') {
+	const form = await Astro.request.formData();
+	const action = form.get('action');
+	if (access === 'no-key') {
+		return new Response('The console has no key. Set GM_STANDIN_CONSOLE_KEY', { status: 503 });
+	}
+	if (action === 'login') {
+		const given = form.get('key');
+		if (typeof given === 'string' && keyMatches(given, settings.consoleKey as string)) {
+			Astro.cookies.set(CONSOLE_COOKIE, consoleToken(given), { ...cookieOptions, maxAge: 60 * 60 * 12 });
+		} else {
+			flash({ ok: false, done: [], skipped: ["That key isn't right"] });
+		}
+		return Astro.redirect(CONSOLE_PATH, 303);
+	}
+	if (action === 'logout') {
+		Astro.cookies.delete(CONSOLE_COOKIE, { path: CONSOLE_PATH });
+		return Astro.redirect(CONSOLE_PATH, 303);
+	}
+	if (access !== 'open') {
+		return new Response('Forbidden', { status: 403 });
+	}
+	let report: OperationReport;
+	try {
+		report = await runConsoleAction(form, standinDeps());
+	} catch (error) {
+		console.error('[stand-in console]', error);
+		report = { ok: false, done: [], skipped: [`Nothing more was done: ${(error as Error).message}`] };
+	}
+	flash(report);
+	const since = form.get('since');
+	return Astro.redirect(
+		typeof since === 'string' && since ? `${CONSOLE_PATH}?since=${encodeURIComponent(since)}` : CONSOLE_PATH,
+		303,
+	);
+}
+
+let report: OperationReport | null = null;
+const flashCookie = Astro.cookies.get(FLASH_COOKIE);
+if (flashCookie) {
+	try {
+		report = flashCookie.json() as OperationReport;
+	} catch {
+		report = null;
+	}
+	Astro.cookies.delete(FLASH_COOKIE, { path: CONSOLE_PATH });
+}
+
+const sinceText = Astro.url.searchParams.get('since')?.trim() ?? '';
+const since = sinceText ? parseLondonLocal(sinceText) : null;
+
+let loadError: string | null = null;
+
+async function loadView() {
+	const deps = standinDeps();
+	const [clock, resources, reservations, events, requests] = await Promise.all([
+		deps.store.getClock(),
+		deps.store.listResources(),
+		deps.store.listReservations(),
+		deps.store.listEvents(),
+		deps.store.listRequests({ sinceDemo: since ?? undefined, limit: 500 }),
+	]);
+	const now = demoNow(clock, deps.systemNow());
+	const names = new Map(resources.map((r) => [r.resourceId, r.name]));
+	return {
+		clock,
+		now,
+		resources,
+		reservations,
+		names,
+		events,
+		requests,
+		writes: requests.filter((r) => r.method !== 'GET' && r.method !== 'HEAD').length,
+		eventFixtures: parseEvents(deps.fixtures.events),
+		resetRows: parseResets(deps.fixtures.resets),
+		clockPresets: parseClockSettings(deps.fixtures.clock),
+		plannerLoader: deps.planner !== null,
+	};
+}
+
+const view =
+	access === 'open'
+		? await loadView().catch((error: unknown) => {
+				console.error('[stand-in console]', error);
+				loadError = (error as Error).message;
+				return null;
+			})
+		: null;
+
+const local = (d: Date | null) => (d ? formatLondonLocal(d) : '–');
+---
+
+<ConsoleLayout title="Stand-in console – Greener Miles test equipment">
+	<h1>LibreBooking stand-in: tester console</h1>
+	<p>
+		Test equipment for the conference room pilot, not part of the charging planner. Greener Miles and all
+		its data are invented.
+	</p>
+
+	{
+		report && (
+			<div class:list={['notice', { refused: !report.ok }]} role="status">
+				<p>{report.ok ? 'Done.' : 'Not done.'}</p>
+				<ul>
+					{report.done.map((line) => <li>{line}</li>)}
+					{report.skipped.map((line) => <li>Not done: {line}</li>)}
+				</ul>
+			</div>
+		)
+	}
+
+	{
+		access === 'no-key' && (
+			<p class="notice">The console is locked: GM_STANDIN_CONSOLE_KEY isn't set on this deployment.</p>
+		)
+	}
+
+	{
+		access === 'locked' && (
+			<form method="post" novalidate>
+				<input type="hidden" name="action" value="login" />
+				<p>
+					<label for="key">Console key</label>
+					<input id="key" name="key" type="password" autocomplete="current-password" required />
+					<button type="submit">Open the console</button>
+				</p>
+			</form>
+		)
+	}
+
+	{access === 'open' && loadError && <p class="notice refused">The stand-in's data can't be read: {loadError}</p>}
+
+	{
+		access === 'open' && view && (
+			<>
+				<form method="post" class="inline">
+					<input type="hidden" name="action" value="logout" />
+					<button type="submit">Lock the console</button>
+				</form>
+
+				<h2 id="clock">Demo clock</h2>
+				<p>
+					Now: <strong class="mono">{local(view.now)}</strong> {londonZoneName(view.now)} (
+					{view.clock.running ? 'running on' : 'held'}). Set at {local(view.clock.demoAt)}.
+				</p>
+				<form method="post" novalidate>
+					<input type="hidden" name="action" value={view.clock.running ? 'clock-hold' : 'clock-run'} />
+					<button type="submit">{view.clock.running ? 'Hold the clock here' : 'Let the clock run on from here'}</button>
+				</form>
+				<form method="post" novalidate>
+					<fieldset>
+						<legend>Set the clock from the run order (demo-clock.csv)</legend>
+						<input type="hidden" name="action" value="clock-preset" />
+						<label for="order">Setting</label>
+						<select id="order" name="order">
+							{view.clockPresets.map((c) => (
+								<option value={c.order}>
+									{c.order}. {c.scenarioStep}: {c.local} {c.ukOffset}
+									{c.note ? ` – ${c.note}` : ''}
+								</option>
+							))}
+						</select>
+						<label>
+							<input type="checkbox" name="running" checked={view.clock.running} /> Run on from there
+						</label>
+						<button type="submit">Set the clock</button>
+					</fieldset>
+				</form>
+				<form method="post" novalidate>
+					<fieldset>
+						<legend>Set the clock to any date and time (Europe/London)</legend>
+						<input type="hidden" name="action" value="clock" />
+						<label for="clock-date">Date</label>
+						<input id="clock-date" name="date" type="date" value={local(view.now).slice(0, 10)} />
+						<label for="clock-time">Time</label>
+						<input id="clock-time" name="time" type="time" value={local(view.now).slice(11, 16)} />
+						<label>
+							<input type="checkbox" name="running" checked={view.clock.running} /> Run on from there
+						</label>
+						<button type="submit">Set the clock</button>
+					</fieldset>
+				</form>
+
+				<h2 id="resets">Resets and overrides (resets-and-overrides.csv)</h2>
+				{!view.plannerLoader && (
+					<p>
+						D1, D2 and D3 can't be reloaded yet: route A adds that once its schema is approved (DEC-55). Resets
+						still reload the stand-in and set the clock; O-01 and O-01r do nothing until then.
+					</p>
+				)}
+				<table>
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">Before</th>
+							<th scope="col">Store</th>
+							<th scope="col">What it does</th>
+							<th scope="col">Apply</th>
+						</tr>
+					</thead>
+					<tbody>
+						{view.resetRows.map((r) => (
+							<tr>
+								<td>{r.id}</td>
+								<td>{r.beforeStep}</td>
+								<td>{r.store}</td>
+								<td>{r.detail}</td>
+								<td>
+									<form method="post" class="inline">
+										<input type="hidden" name="action" value="reset" />
+										<input type="hidden" name="id" value={r.id} />
+										<button type="submit">Apply {r.id}</button>
+									</form>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+
+				<h2 id="events">Scenario changes (stand-in-events.csv)</h2>
+				<p>Set the clock first, as the script does. Applying an event doesn't move the clock.</p>
+				<table>
+					<thead>
+						<tr>
+							<th scope="col">Event</th>
+							<th scope="col">Step</th>
+							<th scope="col">Clock</th>
+							<th scope="col">Who</th>
+							<th scope="col">Change</th>
+							<th scope="col">Applied</th>
+							<th scope="col">Apply</th>
+						</tr>
+					</thead>
+					<tbody>
+						{view.eventFixtures.map((e) => {
+							const applied = view.events.filter((x) => x.eventRef === e.eventId);
+							return (
+								<tr>
+									<td>{e.eventId}</td>
+									<td>{e.scenarioStep}</td>
+									<td class="mono">{local(e.demoAt)}</td>
+									<td>{e.actor}</td>
+									<td>
+										{e.action === 'check in'
+											? `Check in ${e.bikeRef} (${e.reservationRef}) at ${e.value.slice(11)}`
+											: `Set ${e.bikeRef} (${e.resourceId}) ${e.value}`}
+									</td>
+									<td>{applied.length ? `Yes, at demo ${local(applied[applied.length - 1].demoAt)}` : 'No'}</td>
+									<td>
+										<form method="post" class="inline">
+											<input type="hidden" name="action" value="event" />
+											<input type="hidden" name="id" value={e.eventId} />
+											<button type="submit">Apply {e.eventId}</button>
+										</form>
+									</td>
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+
+				<h2 id="status">Change a resource's status</h2>
+				<form method="post" novalidate>
+					<input type="hidden" name="action" value="status" />
+					<label for="status-resource">Resource</label>
+					<select id="status-resource" name="resourceId">
+						{view.resources.map((r) => (
+							<option value={r.resourceId}>
+								{r.resourceId} {r.name} (now {r.status})
+							</option>
+						))}
+					</select>
+					<label for="status-value">Status</label>
+					<select id="status-value" name="status">
+						{RESOURCE_STATUSES.map((s) => (
+							<option value={s}>{s}</option>
+						))}
+					</select>
+					<button type="submit">Set the status</button>
+				</form>
+
+				<h2 id="checkin">Add a check-in</h2>
+				<form method="post" novalidate>
+					<input type="hidden" name="action" value="checkin" />
+					<p>
+						<label for="checkin-reservation">Reservation</label>
+						<select id="checkin-reservation" name="reservation">
+							{view.reservations.map((r) => (
+								<option value={r.referenceNumber}>
+									{r.referenceNumber} {view.names.get(r.resourceId)}: {local(r.startsAt)} to {local(r.endsAt)}
+									{r.checkedInAt ? ` (checked in ${local(r.checkedInAt)})` : ''}
+								</option>
+							))}
+						</select>
+					</p>
+					<p>
+						<label for="checkin-date">Date</label>
+						<input id="checkin-date" name="date" type="date" />
+						<label for="checkin-time">Time</label>
+						<input id="checkin-time" name="time" type="time" />
+						Leave both blank to check in at the demo time now.
+					</p>
+					<button type="submit">Check the bike in</button>
+				</form>
+
+				<h2 id="set">Load a reservation set</h2>
+				<p>Replaces every reservation and removes check-ins. Resources and the request log stay.</p>
+				<form method="post" novalidate>
+					<input type="hidden" name="action" value="reservation-set" />
+					<label for="set">Set</label>
+					<select id="set" name="set">
+						{RESERVATION_SETS.map((s) => (
+							<option value={s}>{s}</option>
+						))}
+					</select>
+					<button type="submit">Load the set</button>
+				</form>
+
+				<h2 id="data">What the stand-in serves now</h2>
+				<table>
+					<caption>Resources</caption>
+					<thead>
+						<tr>
+							<th scope="col">Resource ID</th>
+							<th scope="col">Bike</th>
+							<th scope="col">Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						{view.resources.map((r) => (
+							<tr>
+								<td>{r.resourceId}</td>
+								<td>{r.name}</td>
+								<td>{r.status}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+				<table>
+					<caption>Reservations</caption>
+					<thead>
+						<tr>
+							<th scope="col">Reference</th>
+							<th scope="col">Bike</th>
+							<th scope="col">Start</th>
+							<th scope="col">End</th>
+							<th scope="col">Checked in</th>
+							<th scope="col">Set</th>
+						</tr>
+					</thead>
+					<tbody>
+						{view.reservations.map((r) => (
+							<tr>
+								<td>{r.referenceNumber}</td>
+								<td>
+									{view.names.get(r.resourceId)} ({r.resourceId})
+								</td>
+								<td class="mono">{local(r.startsAt)}</td>
+								<td class="mono">{local(r.endsAt)}</td>
+								<td class="mono">{local(r.checkedInAt)}</td>
+								<td>{r.fixtureSet}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+
+				<h2 id="log">Request log</h2>
+				<p>
+					Every request to the stand-in's API and clock, newest first, up to 500. Kept across resets; only R0
+					empties it. Console actions aren't in it (CRP-OQ-06).
+				</p>
+				<form method="get" novalidate>
+					<label for="since">Since demo time (YYYY-MM-DD HH:MM)</label>
+					<input id="since" name="since" type="text" value={sinceText} class="mono" />
+					<button type="submit">Show</button>
+				</form>
+				{sinceText && !since && <p class="notice refused">"{sinceText}" isn't a date and time, so the whole log is shown.</p>}
+				<p>
+					{view.requests.length} requests shown. {view.writes} of them used a method other than GET or HEAD
+					(each was refused with 405 and changed nothing).
+				</p>
+				<table>
+					<thead>
+						<tr>
+							<th scope="col">Demo time</th>
+							<th scope="col">System time (UTC)</th>
+							<th scope="col">Method</th>
+							<th scope="col">Path</th>
+							<th scope="col">Status</th>
+							<th scope="col">User agent</th>
+						</tr>
+					</thead>
+					<tbody>
+						{view.requests.map((r) => (
+							<tr>
+								<td class="mono">{local(r.demoAt)}</td>
+								<td class="mono">{r.receivedAt.toISOString().replace('T', ' ').slice(0, 19)}</td>
+								<td>{r.method}</td>
+								<td class="mono">{r.path}</td>
+								<td>{r.status}</td>
+								<td>{r.userAgent ?? '–'}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</>
+		)
+	}
+</ConsoleLayout>
