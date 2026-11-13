@@ -27,3 +27,5 @@ pnpm-debug.log*
 _to_delete/
 
 design/planner.css
+
+supabase/.temp/
