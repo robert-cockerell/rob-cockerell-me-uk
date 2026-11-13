@@ -1,0 +1,8 @@
+id,before_step,applied_by,store,action,detail
+R0,SU.05,Facilitator,all,load baseline,Load all fixtures; reservation set main; no stand-in events
+O-01,S1.12,Facilitator,D1,delete period,Delete South England 2026-06-16T14:30Z (the 15:30 local slot). Pause or pre-empt process 1 so it doesn't restore it
+O-01r,S1.13,Facilitator,D1,reload,Reload forecasts.csv rows for 2026-06-16
+R1,S4.08,Facilitator,all,reset to baseline,As R0. Clock stays 2026-06-16 08:05. Keep device names and the stand-in request log
+R2,S12.01,Facilitator,all,reset to baseline with override,"As R0, but load entries.csv without entry 1044 (CRP-OQ-01, agreed). Clock 2026-06-16 16:20"
+R3,S3.04,Facilitator,all,reset to baseline,"As R0, but load reservation set fri-19 only. Clock 2026-06-19 09:00"
+R3a,S14.01,Facilitator,stand-in,reload reservations,"Load no reservations (resources only). No change to D1, D2 or D3"

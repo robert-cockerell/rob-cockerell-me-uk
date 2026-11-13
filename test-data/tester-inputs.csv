@@ -1,0 +1,41 @@
+input_id,scenario_step,actor,screen,field,value,source
+I-01,S10.01,Priya Shah,Add bike,Bike asset tag,G07,AC-06.1
+I-02,S10.01,Priya Shah,Add bike,LibreBooking resource ID,119,invented
+I-03,S10.01,Priya Shah,Add bike,Make,Tern,AC-06.1
+I-04,S10.01,Priya Shah,Add bike,Model,GSD Gen 3,AC-06.1
+I-05,S10.01,Priya Shah,Add bike,Frame size,(leave blank),invented
+I-06,S10.01,Priya Shah,Add bike,Bike serial number,TN-GSD3-26007,invented
+I-07,S10.01,Priya Shah,Add bike,Bike purchase date,2026-06-15,invented
+I-08,S10.05,Priya Shah,Add battery type,Battery type,Bosch PowerPack 545,AC-06.3
+I-09,S10.05,Priya Shah,Add battery type,Capacity,(leave blank),AC-06.3
+I-10,S10.07,Aisha Bello,Name picker,Name,Aisha Bello,AC-10.1; PRD A.6
+I-11,S10.07,Aisha Bello,Add battery,Battery asset tag,B-27,AC-06.6
+I-12,S10.07,Aisha Bello,Add battery,Battery type,Bosch PowerPack 500,AC-06.6
+I-13,S10.07,Aisha Bello,Add battery,Bosch serial,4471937027,invented
+I-14,S10.07,Aisha Bello,Add battery,Battery purchase date,2026-06-16,invented
+I-15,S10.07,Aisha Bello,Add battery,Cycle count,(leave blank),invented
+I-16,S10.08,Aisha Bello,Add battery,Battery asset tag,B-28,AC-06.6
+I-17,S10.08,Aisha Bello,Add battery,Battery type,Bosch PowerPack 500,AC-06.6
+I-18,S10.08,Aisha Bello,Add battery,Bosch serial,4471937028,invented
+I-19,S10.08,Aisha Bello,Add battery,Battery purchase date,2026-06-16,invented
+I-20,S10.11,Priya Shah,Edit bike M12,LibreBooking resource ID,199 (then back to 112),AC-02.8; invented value
+I-21,S10.12,Priya Shah,Edit bike M07,LibreBooking resource ID,170 (then corrected to 107),AC-06.4; invented value
+I-22,S5.01,Sam Patel,Name picker,Name,Sam Patel,AC-10.3
+I-23,S5.02,Sam Patel,Fault report (G02),Description,Front brake pads worn below 1.5 mm,AC-09.1
+I-24,S5.02,Sam Patel,Fault report (G02),Entry date,"(default: today, 2026-06-16)",AC-09.1
+I-25,S5.08,Sam Patel,Service check (M03),Description,"Rear tyre low, pumped up",AC-09.4
+I-26,S5.11,Aisha Bello,Fault report (G06),Description,Kickstand loose,invented for AC-10.2
+I-27,S5.12,Sam Patel,Fault cleared (G02),Cleared date,2026-06-17,AC-09.3
+I-28,S6.01,Priya Shah,Dealer service (M07),Entry date,2026-06-15,AC-09.5
+I-29,S6.01,Priya Shah,Dealer service (M07),Description,"Interim: new rear light, brake bleed",AC-09.5
+I-30,S6.01,Priya Shah,Dealer service (M07),Faults cleared,1043,AC-09.5
+I-31,S6.01,Priya Shah,Dealer service (M07),Cycle count B-07,(leave blank),AC-14.2
+I-32,S6.04,Priya Shah,Dealer service (G01),Entry date,2026-06-15,AC-14.1
+I-33,S6.04,Priya Shah,Dealer service (G01),Description,"Interim: gears indexed, battery diagnostics",invented
+I-34,S6.05,Priya Shah,Dealer service (G01),Cycle count B-14,170,AC-14.1
+I-35,S6.05,Priya Shah,Dealer service (G01),Cycle count B-17,31,AC-14.1
+I-36,S12.03,Dave Morgan,Fault report (B-09),Description,Swollen – do not charge or fit,AC-09.2
+I-37,S14.02,Priya Shah,Service check (M09),Description,Weekly check: OK,invented for NFR-06
+I-38,S14.02,Priya Shah,Edit bike M09,Frame size,M (was L),invented for NFR-06
+I-39,S14.04,Priya Shah,Service check (M09),Description,Weekly check: OK,invented for NFR-06
+I-40,S14.04,Priya Shah,Edit bike M09,Frame size,L (back from M),invented for NFR-06

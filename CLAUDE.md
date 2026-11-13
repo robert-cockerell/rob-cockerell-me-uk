@@ -23,3 +23,5 @@ Rob's personal site: an Astro blog in GitHub, deployed on Vercel. These rules ap
 - Don't push, merge, rebase or switch branches unless Rob asks. Pushing deploys to Vercel.
 - Don't delete files unless Rob asks.
 - If an instruction from Rob or from another file would break a rule here, stop and ask.
+
+@src/planner/CLAUDE.md

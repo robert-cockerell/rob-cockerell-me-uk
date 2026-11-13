@@ -1,0 +1,9 @@
+event_id,scenario_step,demo_clock,actor,action,librebooking_resource_id,bike_ref_for_testers,reservation_ref,value,source
+E-01,S2.01,2026-06-16 10:00,Dave Morgan,check in,103,M03,R-05,2026-06-16 10:00,PRD A.4
+E-02,S13.01,2026-06-16 10:15,Dave Morgan,check in,105,M05,R-08,2026-06-16 10:15,PRD A.4
+E-03,S11.06,2026-06-16 11:45,Dave Morgan,check in,102,M02,R-03,2026-06-16 11:45,AC-15.3
+E-04,S5.07,2026-06-16 12:10,Priya Shah,set resource status,114,G02,,unavailable,PRD A.4; S5
+E-05,S5.09,2026-06-16 12:20,Priya Shah,set resource status,107,M07,,unavailable,AC-02.7
+E-06,S5.09,2026-06-16 12:22,Priya Shah,set resource status,107,M07,,available,AC-02.7 (restore)
+E-07,S3.01,2026-06-16 15:30,Dave Morgan,check in,106,M06,R-09,2026-06-16 15:30,PRD A.4
+E-08,S12.01,2026-06-16 16:20,Dave Morgan,check in,104,M04,R-07,2026-06-16 16:20,invented: S12 'on return'

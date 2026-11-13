@@ -1,0 +1,23 @@
+case_id,scenario_step,criterion,screen,field,input,other_fields,expected
+V-01,S10.02,AC-06.2,Add bike,Bike asset tag,(blank),As I-02 to I-07,Not saved; message names Bike asset tag
+V-02,S10.02,AC-06.2,Add bike,Bike asset tag,M01,Resource ID 120,Not saved; message says the tag is in use
+V-03,S10.02,AC-06.2,Add bike,Bike asset tag,G7,Resource ID 120,Not saved; message names Bike asset tag and its format
+V-04,S10.02,AC-06.2,Add bike,LibreBooking resource ID,101,Tag G08,Not saved; message says the resource ID is in use
+V-05,S10.02,AC-06.2,Add bike,LibreBooking resource ID,abc,Tag G08,Not saved; message names LibreBooking resource ID
+V-06,S10.02,AC-06.2,Add bike,Model,(blank),"Tag G08, resource ID 120",Not saved; message names Model
+V-07,S10.02,AC-06.2,Add bike,Bike purchase date,2026-06-17,"Tag G08, resource ID 120",Not saved; message says the date can't be in the future
+V-08,S10.02,AC-06.2,Add battery,Battery asset tag,B-05,Type Bosch PowerPack 500,Not saved; message says the tag is in use
+V-09,S10.02,AC-06.2,Add battery,Battery asset tag,B27,Type Bosch PowerPack 500,Not saved; message names Battery asset tag and its format
+V-10,S10.02,AC-06.2,Add battery,Battery type,(blank),Tag B-29,Not saved; message names Battery type
+V-11,S10.02,AC-06.2,Add battery,Cycle count,-1,"Tag B-29, type Bosch PowerPack 500",Not saved; message names Cycle count
+V-12,S5.03,AC-09.6,Fault report (G02),Description,(blank),,Not saved; message names Description
+V-13,S5.03,AC-09.6,Fault report (G02),Entry date,2026-06-17,Description 'Test',Not saved; message says the date can't be in the future
+V-14,S5.03,AC-09.6,"Fault report (started from the menu, if offered)",Bike or battery,(none chosen),Description 'Test',Not saved; message asks for one bike or battery. Not applicable if the screen can only be opened from an asset
+V-15,S5.03,AC-09.6,Service check (M03),Description,(blank),,Not saved; message names Description
+V-16,S5.12,AC-09.3,Fault cleared (G02),Cleared date,2026-06-15,Fault Entry date 2026-06-16,Not saved; message says it can't be before the Entry date
+V-17,S5.12,AC-09.3,Fault cleared (G02),Cleared date,2026-06-18,Now 2026-06-17,Not saved; message says it can't be in the future
+V-18,S4.02,AC-07.3,Battery swap (G01),Fitted from,2026-06-16 08:10,Now 08:05,Not accepted: later than now
+V-19,S4.06,AC-07.3,Battery removal (B-01),Fitted from,2026-06-16 08:00,Now 08:05,Accepted: earlier than now
+V-20,S6.04,AC-14.3,Dealer service (G01),Cycle count B-14,10000,,Not saved; message says why
+V-21,S6.04,AC-14.3,Dealer service (G01),Cycle count B-14,12.5,,Not saved; message says why
+V-22,S6.04,AC-14.3,Dealer service (G01),Cycle count B-14,-3,,Not saved; message says why

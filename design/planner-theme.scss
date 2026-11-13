@@ -1,0 +1,206 @@
+// Greener Miles charging planner – AdminLTE 4 / Bootstrap 5.3 theme
+// Fictional organisation for an article and demo.
+//
+// Compile this file (not AdminLTE's own CSS) for every planner page.
+// It sets Bootstrap's and AdminLTE's variables from the Greener Miles brand
+// (brand/brand-identity.md, brand/tokens.css) BEFORE importing AdminLTE, so
+// no Bootstrap default colour, font or radius reaches the planner (DEC-50).
+//
+// Sass needs literal colours for its colour maths, so the hex values below
+// repeat tokens.css. If a brand colour changes, change it in brand-identity.md,
+// then tokens.css, then here.
+//
+// Load order on every planner page:
+//   1. brand/tokens.css           (CSS custom properties, --gm-*)
+//   2. this file, compiled        (themed Bootstrap + AdminLTE + planner components)
+
+// ---------------------------------------------------------------------------
+// 1. Brand values (mirror tokens.css)
+// ---------------------------------------------------------------------------
+$gm-hedgerow:   #1E6B47;
+$gm-leaf:       #7BC043;
+$gm-grid-amber: #E8A317;
+$gm-ink:        #16262B;
+$gm-slate:      #52646A;
+$gm-mist:       #DCE6DF;
+$gm-chalk:      #F5F3EC;
+$gm-white:      #FFFFFF;
+$gm-band-high:      #E3772A;
+$gm-band-very-high: #A8322D;
+
+// ---------------------------------------------------------------------------
+// 2. Options
+// ---------------------------------------------------------------------------
+$enable-shadows:    false;   // no inset or drop shadows on inputs and buttons
+$enable-gradients:  false;
+$enable-rounded:    true;
+// Dark mode follows the device setting with no script, as tokens.css does (DEC-34)
+$color-mode-type:   media-query;
+$min-contrast-ratio: 4.5;
+
+// ---------------------------------------------------------------------------
+// 3. Colours. No blue, purple or teal anywhere: "info" maps to Slate.
+// ---------------------------------------------------------------------------
+$primary:   $gm-hedgerow;
+$secondary: $gm-slate;
+$success:   $gm-hedgerow;
+$info:      $gm-slate;
+$warning:   $gm-band-high;
+$danger:    $gm-band-very-high;
+$light:     $gm-chalk;
+$dark:      $gm-ink;
+
+$body-bg:              $gm-chalk;
+$body-color:           $gm-ink;
+$body-secondary-color: $gm-slate;
+$body-tertiary-color:  $gm-slate;
+$body-secondary-bg:    $gm-white;
+$body-tertiary-bg:     $gm-white;
+$border-color:         $gm-mist;
+$headings-color:       $gm-ink;
+
+$link-color:                   $gm-hedgerow;
+$link-decoration:              underline;
+$link-underline-offset:        .2em;
+$link-hover-color:             $gm-ink;
+
+// Dark theme (brand identity §4)
+$body-bg-dark:              #0F1A1D;
+$body-color-dark:           #F5F3EC;
+$body-secondary-color-dark: #DCE6DF;
+$body-tertiary-color-dark:  #DCE6DF;
+$body-secondary-bg-dark:    #18282C;
+$body-tertiary-bg-dark:     #18282C;
+$border-color-dark:         #2C3F44;
+$headings-color-dark:       #F5F3EC;
+$link-color-dark:           #8FD65A;
+$link-hover-color-dark:     #F5F3EC;
+
+// ---------------------------------------------------------------------------
+// 4. Typography (brand identity §5). Fonts come from Astro's Fonts API via
+//    the --gm-font-* tokens (DEC-51). AdminLTE's "Source Sans 3" is replaced.
+// ---------------------------------------------------------------------------
+$font-family-sans-serif: var(--gm-font-body);
+$font-family-monospace:  var(--gm-font-data);
+$headings-font-family:   var(--gm-font-heading);
+$headings-font-weight:   600;
+$headings-line-height:   1.2;
+$line-height-base:       1.55;
+$font-weight-bold:       700;
+
+$font-size-base: 1rem;      // 16px
+$font-size-sm:   .875rem;   // 14px
+$font-size-lg:   1.25rem;   // 20px
+$font-size-xs:   .8125rem;  // 13px, never smaller
+$h1-font-size:   2.5rem;    // 40px
+$h2-font-size:   2rem;      // 32px
+$h3-font-size:   1.5rem;    // 24px
+$h4-font-size:   1.25rem;   // 20px
+$h5-font-size:   1rem;
+$h6-font-size:   1rem;
+$small-font-size: .875rem;
+
+// ---------------------------------------------------------------------------
+// 5. Shape (brand identity §7)
+// ---------------------------------------------------------------------------
+$border-radius:      4px;   // inputs, tags
+$border-radius-sm:   4px;
+$border-radius-lg:   8px;
+$border-radius-xl:   16px;  // large panels
+$border-radius-pill: 999px;
+
+$btn-border-radius:    8px;
+$btn-border-radius-sm: 8px;
+$btn-border-radius-lg: 8px;
+$card-border-radius:   8px;
+$alert-border-radius:  8px;
+
+// ---------------------------------------------------------------------------
+// 6. Inputs and buttons: 44px minimum height (NFR-01, NFR-02)
+// ---------------------------------------------------------------------------
+$input-btn-padding-y:     .625rem;  // 10px + 24px line + 2px border = 46px
+$input-btn-padding-x:     .875rem;
+$input-btn-line-height:   1.5;
+$input-btn-padding-y-sm:  .5rem;    // small controls still reach 44px with their line height
+$input-btn-padding-x-sm:  .75rem;
+$input-btn-font-size-sm:  .875rem;
+
+// Focus: 3px Grid Amber ring outside the element, next to a dark edge (brand §4, §7)
+$input-btn-focus-width:      3px;
+$input-btn-focus-color-opacity: 1;
+$input-btn-focus-color:      $gm-grid-amber;
+$input-btn-focus-blur:       0;
+$input-btn-focus-box-shadow: 0 0 0 3px $gm-grid-amber;
+$focus-ring-width:           3px;
+$focus-ring-opacity:         1;
+$focus-ring-color:           $gm-grid-amber;
+
+// Input borders must reach 3:1 against the surface (WCAG 1.4.11), so they use
+// Slate, not Mist. Mist is for card borders and dividers only.
+$input-bg:                 $gm-white;
+$input-color:              $gm-ink;
+$input-border-color:       $gm-slate;
+$input-border-width:       1px;
+$input-focus-border-color: $gm-ink;
+$input-focus-bg:           $gm-white;
+$input-placeholder-color:  $gm-slate;
+$input-disabled-bg:        $gm-chalk;
+$input-disabled-border-color: $gm-mist;
+$form-label-font-weight:   700;
+$form-label-margin-bottom: .25rem;
+$form-text-margin-top:     .25rem;
+$form-text-color:          $gm-slate;
+$form-check-input-width:   1.5em;
+$form-check-input-border:  1px solid $gm-slate;
+$form-check-input-checked-bg-color: $gm-hedgerow;
+$form-check-input-checked-border-color: $gm-hedgerow;
+
+$form-feedback-margin-top:    .25rem;
+$form-feedback-font-size:     1rem;     // errors at body size, not small print
+$form-feedback-invalid-color: $gm-band-very-high;
+$form-feedback-valid-color:   $gm-hedgerow; // not used: the planner shows no "valid" state
+
+$btn-font-weight:  700;
+$btn-padding-y:    .625rem;
+$btn-padding-x:    1.25rem;
+$btn-border-width: 1.5px;  // secondary button border (brand §7)
+
+// ---------------------------------------------------------------------------
+// 7. Components
+// ---------------------------------------------------------------------------
+$card-bg:            $gm-white;
+$card-border-color:  $gm-mist;
+$card-cap-bg:        transparent;
+$card-spacer-y:      1rem;
+$card-spacer-x:      1rem;
+
+$badge-font-size:     .8125rem;
+$badge-font-weight:   700;
+$badge-padding-y:     .3em;
+$badge-padding-x:     .7em;
+$badge-border-radius: 999px;
+
+$alert-padding-y:     1rem;
+$alert-padding-x:     1rem;
+$alert-border-width:  0;
+
+$list-group-bg:           $gm-white;
+$list-group-border-color: $gm-mist;
+$list-group-item-padding-y: .875rem;
+$list-group-item-padding-x: 1rem;
+
+$table-cell-padding-y: .5rem;
+$table-cell-padding-x: .5rem;
+$table-border-color:   $gm-mist;
+
+$navbar-nav-link-padding-x: .75rem;
+$nav-link-font-weight:      700;
+
+// AdminLTE: no sidebar is used (UI spec §3); keep the header plain
+$lte-app-header-bottom-border-color: $gm-mist;
+
+// ---------------------------------------------------------------------------
+// 8. Import AdminLTE (which imports Bootstrap), then the planner components
+// ---------------------------------------------------------------------------
+@import "admin-lte/src/scss/adminlte";
+@import "planner-components";

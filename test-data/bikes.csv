@@ -1,0 +1,19 @@
+bike_asset_tag,librebooking_resource_id,make,model,frame_size,bike_serial_number,bike_purchase_date,last_updated_by,last_updated_at
+M01,101,Raleigh,Motus Grand Tour,M,RL22-0047301,2022-04-11,Priya Shah,2026-06-01 10:00
+M02,102,Raleigh,Motus Grand Tour,L,RL22-0047302,2022-04-11,Priya Shah,2026-06-01 10:00
+M03,103,Raleigh,Motus Grand Tour,M,RL22-0047303,2022-04-11,Priya Shah,2026-06-01 10:00
+M04,104,Raleigh,Motus Grand Tour,S,RL22-0047304,2022-04-11,Priya Shah,2026-06-01 10:00
+M05,105,Raleigh,Motus Grand Tour,M,RL22-0047305,2022-04-11,Priya Shah,2026-06-01 10:00
+M06,106,Raleigh,Motus Grand Tour,L,RL22-0047306,2022-04-11,Priya Shah,2026-06-01 10:00
+M07,107,Raleigh,Motus Grand Tour,M,RL23-0051907,2023-03-14,Priya Shah,2026-06-10 14:03
+M08,108,Raleigh,Motus Grand Tour,M,RL23-0051908,2023-03-14,Priya Shah,2026-06-01 10:00
+M09,109,Raleigh,Motus Grand Tour,L,RL23-0051909,2023-03-14,Priya Shah,2026-06-01 10:00
+M10,110,Raleigh,Motus,M,RL24-0061110,2024-02-20,Priya Shah,2026-06-01 10:00
+M11,111,Raleigh,Motus,L,RL24-0061111,2024-02-20,Priya Shah,2026-06-01 10:00
+M12,112,Raleigh,Motus,M,RL24-0061112,2024-02-20,Priya Shah,2026-06-01 10:00
+G01,113,Tern,GSD Gen 3,,TN-GSD3-24001,2024-05-13,Priya Shah,2026-06-01 10:00
+G02,114,Tern,GSD Gen 3,,TN-GSD3-24002,2024-05-13,Priya Shah,2026-06-01 10:00
+G03,115,Tern,GSD Gen 3,,TN-GSD3-24003,2024-05-13,Priya Shah,2026-06-01 10:00
+G04,116,Tern,GSD Gen 3,,TN-GSD3-24004,2024-05-13,Priya Shah,2026-06-01 10:00
+G05,117,Tern,GSD Gen 3,,TN-GSD3-24005,2025-03-03,Priya Shah,2026-06-01 10:00
+G06,118,Tern,GSD Gen 3,,TN-GSD3-24006,2025-03-03,Priya Shah,2026-06-01 10:00

@@ -1,0 +1,22 @@
+order,scenario_step,demo_date,demo_time,uk_offset,note
+1,SU.06,2026-06-16,07:00,BST,Start of the main demo day
+2,S8.01,2026-06-16,07:05,BST,
+3,S8.05,2026-06-16,08:00,BST,
+4,S4.00,2026-06-16,08:05,BST,Stays at 08:05 through reset R1
+5,S7.00,2026-06-16,09:15,BST,Time invented
+6,S10.00,2026-06-16,09:30,BST,Time invented
+7,S2.01,2026-06-16,10:00,BST,
+8,S13.01,2026-06-16,10:15,BST,
+9,S13.02,2026-06-16,10:30,BST,
+10,S13.03,2026-06-16,10:45,BST,Time invented
+11,S11.00,2026-06-16,11:30,BST,
+12,S11.06,2026-06-16,11:45,BST,
+13,S5.00,2026-06-16,12:00,BST,Time invented
+14,S3.01,2026-06-16,15:30,BST,
+15,S6.00,2026-06-16,16:12,BST,AC-10.5
+16,S5.10,2026-06-17,09:00,BST,Wednesday part of S5; time invented
+17,S12.00,2026-06-16,16:20,BST,After reset R2
+18,S3.04,2026-06-19,09:00,BST,After reset R3; time invented
+19,S14.00,2026-03-30,09:00,BST,After reloading reservation set none
+20,S14.03,2026-10-26,09:00,GMT,
+21,S9.00,2026-12-08,07:00,GMT,

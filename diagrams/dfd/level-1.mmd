@@ -1,0 +1,43 @@
+%% Day planner and fleet records DFD: Level 1 (v0.7)
+%% Fictional worked example. SSADM required system, logical view.
+%% Rectangles: external entities. Rounded boxes: processes. Cylinders: data stores.
+%% Data only moves between entities and stores through a process.
+%% Library staff = volunteers and the coordinator (DEC-12).
+%% v0.7: new read D3 -> 2 Open bike faults (DEC-02 refined).
+%% D2 flows to and from 3 renamed to resolve MM-03.
+flowchart TB
+    STAFF[Library staff]
+    BKS[LibreBooking]
+    CIA[Carbon Intensity API]
+
+    P1("1<br/>Fetch forecast")
+    P2("2<br/>Build day plan")
+    P3("3<br/>Maintain fleet records")
+
+    D1[("D1 Forecasts")]
+    D2[("D2 Bikes and batteries")]
+    D3[("D3 Service and fault log")]
+
+    %% 1 Fetch forecast
+    CIA -- Carbon intensity forecast --> P1
+    P1 -- Forecast periods --> D1
+
+    %% 2 Build day plan
+    BKS -- Bookings and resource status --> P2
+    D1 -- Forecast periods --> P2
+    D2 -- Bike list --> P2
+    D3 -- Open bike faults --> P2
+    P2 -- Day plan --> STAFF
+
+    %% 3 Maintain fleet records
+    STAFF -- Asset details --> P3
+    STAFF -- Battery fitted --> P3
+    STAFF -- Fault report --> P3
+    STAFF -- Fault cleared --> P3
+    STAFF -- Service check --> P3
+    STAFF -- Dealer service --> P3
+    P3 -- Asset and fitting updates --> D2
+    P3 -- Service and fault entries --> D3
+    D2 -- Asset and fitting details --> P3
+    D3 -- Service and fault history --> P3
+    P3 -- Asset record --> STAFF

@@ -1,0 +1,20 @@
+librebooking_resource_id,resource_status,bike_ref_for_testers,source
+101,available,M01,PRD A.4
+102,available,M02,PRD A.4
+103,available,M03,PRD A.4
+104,available,M04,PRD A.4
+105,available,M05,PRD A.4
+106,available,M06,PRD A.4
+107,available,M07,PRD A.4
+108,available,M08,PRD A.4
+109,available,M09,PRD A.4
+110,available,M10,PRD A.4
+111,available,M11,PRD A.4
+112,available,M12,PRD A.4
+113,available,G01,PRD A.4
+114,available,G02,PRD A.4
+115,available,G03,PRD A.4
+116,available,G04,PRD A.4
+117,hidden,G05,PRD A.4
+118,available,G06,PRD A.4
+119,available,G07,invented for AC-06.1 (bike added in S10)

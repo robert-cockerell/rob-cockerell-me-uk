@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charging planner – component reference</title>
+<!-- Compile design/planner-theme.scss to design/planner.css first, e.g.
+     npx sass --load-path=node_modules --quiet-deps design/planner-theme.scss design/planner.css
+     Fonts: in the planner they come from Astro's Fonts API (DEC-51). Opened as a file, this page uses the fallbacks. -->
+<link rel="stylesheet" href="../brand/tokens.css">
+<link rel="stylesheet" href="planner.css">
+<style>.gm-logo .gm-logo--dark{display:none}@media (prefers-color-scheme: dark){.gm-logo .gm-logo--light{display:none}.gm-logo .gm-logo--dark{display:inline}}</style>
+<style>
+/* Reference-page scaffolding only. Classes starting .ref- are NOT part of the planner. */
+.ref-intro { max-width: 46rem; }
+.ref-section { padding: 2rem 0; border-top: 2px solid var(--gm-border); }
+.ref-section > h2 { font-size: 1.5rem; display: flex; gap: .75rem; align-items: baseline; }
+.ref-id { font-family: var(--gm-font-data); font-size: .875rem; color: var(--gm-text-muted); font-weight: 500; }
+.ref-note { color: var(--gm-text-muted); font-size: .875rem; max-width: 46rem; }
+.ref-row { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: center; margin: .75rem 0; }
+.ref-label { display: block; font-size: .8125rem; font-weight: 700; color: var(--gm-text-muted); margin-bottom: .25rem; letter-spacing: .5px; }
+.ref-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); align-items: start; }
+.ref-phone { width: 100%; max-width: 390px; border: 1px solid var(--gm-border); border-radius: 16px; overflow: hidden; background: var(--gm-bg); }
+.ref-phone .gm-header, .ref-phone .gm-tabbar, .ref-phone .gm-actionbar { position: static; }
+.ref-phone .gm-main { padding-bottom: 1rem; }
+.ref-phone .gm-header__nav { display: none; }
+.ref-phone .gm-tabbar { display: grid; }
+.ref-focus { box-shadow: var(--gm-focus-ring) !important; border-color: var(--gm-text) !important; outline: none; }
+.ref-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .5rem; }
+.ref-swatch { border: 1px solid var(--gm-border); border-radius: 8px; overflow: hidden; font-size: .8125rem; background: var(--gm-surface); }
+.ref-swatch span { display: block; height: 3rem; }
+.ref-swatch p { margin: 0; padding: .375rem .5rem; }
+.ref-toc { columns: 2 14rem; padding-left: 1.25rem; }
+.ref-header { padding: 1.5rem 0 1rem; }
+</style>
+</head>
+<body class="gm-planner">
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<!-- Lucide icons (ISC licence) -->
+<symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" />
+  <path d="M19 12H5" /></symbol>
+<symbol id="i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" />
+  <path d="M4.929 4.929 19.07 19.071" /></symbol>
+<symbol id="i-battery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M 22 14 L 22 10" />
+  <rect x="2" y="6" width="16" height="12" rx="2" /></symbol>
+<symbol id="i-battery-charging" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-3 5h4l-3 5" />
+  <path d="M14.856 6H16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.935" />
+  <path d="M22 14v-4" />
+  <path d="M5.14 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2.936" /></symbol>
+<symbol id="i-battery-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 16h.01" />
+  <path d="M10 8v4" />
+  <path d="M14 6h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2" />
+  <path d="M22 14v-4" />
+  <path d="M6 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2" /></symbol>
+<symbol id="i-bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5" />
+  <circle cx="5.5" cy="17.5" r="3.5" />
+  <circle cx="15" cy="5" r="1" />
+  <path d="M12 17.5V14l-3-3 4-3 2 3h2" /></symbol>
+<symbol id="i-book-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v16" />
+  <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></symbol>
+<symbol id="i-calendar-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 14v2.2l1.6 1" />
+  <path d="M16 2v3" />
+  <path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338" />
+  <path d="M3 9h5.859" />
+  <path d="M8 2v3" />
+  <circle cx="16" cy="16" r="6" /></symbol>
+<symbol id="i-calendar-days" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3" />
+  <path d="M16 2v3" />
+  <rect x="3" y="3" width="18" height="18" rx="2" />
+  <path d="M3 9h18" />
+  <path d="M8 13h.01" />
+  <path d="M12 13h.01" />
+  <path d="M16 13h.01" />
+  <path d="M8 17h.01" />
+  <path d="M12 17h.01" />
+  <path d="M16 17h.01" /></symbol>
+<symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></symbol>
+<symbol id="i-circle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" />
+  <line x1="12" x2="12" y1="8" y2="12" />
+  <line x1="12" x2="12.01" y1="16" y2="16" /></symbol>
+<symbol id="i-circle-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" />
+  <path d="m16 9-5.5 5.5L8 12" /></symbol>
+<symbol id="i-clipboard-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+  <path d="m9 14 2 2 4-4" /></symbol>
+<symbol id="i-clock-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2" />
+  <path d="M20 12v5" />
+  <path d="M20 21h.01" />
+  <path d="M21.25 8.2A10 10 0 1 0 16 21.16" /></symbol>
+<symbol id="i-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6" />
+  <path d="M10 14 21 3" />
+  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
+<symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" /></symbol>
+<symbol id="i-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20" />
+  <path d="M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13" /></symbol>
+<symbol id="i-link-2-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7" />
+  <path d="M15 7h2a5 5 0 0 1 4 8" />
+  <line x1="8" x2="12" y1="12" y2="12" />
+  <line x1="2" x2="22" y1="2" y2="22" /></symbol>
+<symbol id="i-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+  <path d="M12 22V12" />
+  <polyline points="3.29 7 12 12 20.71 7" />
+  <path d="m7.5 4.27 9 5.15" /></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+  <path d="m15 5 4 4" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" />
+  <path d="M12 5v14" /></symbol>
+<symbol id="i-printer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+  <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
+  <rect x="6" y="14" width="12" height="8" rx="1" /></symbol>
+<symbol id="i-triangle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+  <path d="M12 9v4" />
+  <path d="M12 17h.01" /></symbol>
+<symbol id="i-user-round" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5" />
+  <path d="M20 21a8 8 0 0 0-16 0" /></symbol>
+<symbol id="i-warehouse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11" />
+  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z" />
+  <path d="M6 13h12" />
+  <path d="M6 17h12" /></symbol>
+<symbol id="i-wifi-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01" />
+  <path d="M8.5 16.429a5 5 0 0 1 7 0" />
+  <path d="M5 12.859a10 10 0 0 1 5.17-2.69" />
+  <path d="M19 12.859a10 10 0 0 0-2.007-1.523" />
+  <path d="M2 8.82a15 15 0 0 1 4.177-2.643" />
+  <path d="M22 8.82a15 15 0 0 0-11.288-3.764" />
+  <path d="m2 2 20 20" /></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" /></symbol>
+</svg>
+<main class="gm-main gm-main--wide" style="max-width: 1100px;">
+
+<header class="ref-header ref-intro">
+  <span class="gm-logo"><svg class="gm-logo--light" width="240" height="53" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80"  role="img" aria-label="Greener Miles, community e-bike library"><title>Greener Miles</title><g transform="translate(8 8)"><circle cx="32" cy="32" r="28" fill="#1E6B47"/><path d="M17 47 C17 27 27 17 47 17 C47 37 37 47 17 47 Z" fill="#7BC043"/><path d="M20 44 C27 36 31 33 34 29 C37 25 40 22 44 20" fill="none" stroke="#1E6B47" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="4.5 3.5"/></g><text x="84" y="44" font-family="Lexend, 'Atkinson Hyperlegible', Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="-0.5" fill="#16262B">Greener Miles</text><text x="85" y="64" font-family="'Atkinson Hyperlegible', Arial, sans-serif" font-size="13" letter-spacing="1.2" fill="#52646A">COMMUNITY E-BIKE LIBRARY</text></svg><svg class="gm-logo--dark" width="240" height="53" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80"  role="img" aria-label="Greener Miles, community e-bike library"><title>Greener Miles</title><g transform="translate(8 8)"><circle cx="32" cy="32" r="28" fill="#FFFFFF"/><path d="M17 47 C17 27 27 17 47 17 C47 37 37 47 17 47 Z" fill="#8FD65A"/><path d="M20 44 C27 36 31 33 34 29 C37 25 40 22 44 20" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="4.5 3.5"/></g><text x="84" y="44" font-family="Lexend, 'Atkinson Hyperlegible', Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="-0.5" fill="#FFFFFF">Greener Miles</text><text x="85" y="64" font-family="'Atkinson Hyperlegible', Arial, sans-serif" font-size="13" letter-spacing="1.2" fill="#DCE6DF">COMMUNITY E-BIKE LIBRARY</text></svg></span>
+  <h1 class="mt-3">Charging planner – component reference</h1>
+  <p>Every component the PRD (§6.1) asks for, in every state, built from the themed AdminLTE 4 and Bootstrap 5.3 CSS (<code>planner-theme.scss</code>) and the Greener Miles tokens. Claude Code copies this markup. If a screen needs something that isn't here, it asks before inventing it (UI spec §1).</p>
+  <p class="ref-note">Fictional example: Greener Miles and its data are invented. Sample data is from PRD Appendix A, Tue 16 June 2026. Switch your device to dark mode to see the dark theme. Grey boxes, labels and notes like this one are reference scaffolding, not planner components.</p>
+  <ol class="ref-toc">
+    <li><a href="#c00">Foundations</a></li>
+    <li><a href="#c01">App shell and name chip</a></li>
+    <li><a href="#c02">Band tag</a></li>
+    <li><a href="#c03">Bike state label</a></li>
+    <li><a href="#c04">Next booking label</a></li>
+    <li><a href="#c05">Flags and warnings</a></li>
+    <li><a href="#c06">Phone timeline</a></li>
+    <li><a href="#c07">Plan grid</a></li>
+    <li><a href="#c08">Fleet list</a></li>
+    <li><a href="#c09">Asset summary card</a></li>
+    <li><a href="#c10">History list</a></li>
+    <li><a href="#c11">Asset picker</a></li>
+    <li><a href="#c12">Form fields</a></li>
+    <li><a href="#c13">Error summary</a></li>
+    <li><a href="#c14">Confirm warning</a></li>
+    <li><a href="#c15">Buttons and action bar</a></li>
+    <li><a href="#c16">Notices</a></li>
+    <li><a href="#c17">Empty values and link out</a></li>
+  </ol>
+</header>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c00">
+  <h2>Foundations <span class="ref-id">C00</span></h2>
+  <div class="ref-swatches" aria-label="Colour roles">
+    <div class="ref-swatch"><span style="background:var(--gm-bg)"></span><p><strong>--gm-bg</strong><br>Page</p></div>
+    <div class="ref-swatch"><span style="background:var(--gm-surface)"></span><p><strong>--gm-surface</strong><br>Cards, inputs</p></div>
+    <div class="ref-swatch"><span style="background:var(--gm-text)"></span><p><strong>--gm-text</strong><br>Body text</p></div>
+    <div class="ref-swatch"><span style="background:var(--gm-text-muted)"></span><p><strong>--gm-text-muted</strong><br>Hints, meta</p></div>
+    <div class="ref-swatch"><span style="background:var(--gm-border)"></span><p><strong>--gm-border</strong><br>Card borders only</p></div>
+    <div class="ref-swatch"><span style="background:var(--gm-action)"></span><p><strong>--gm-action</strong><br>Buttons, links</p></div>
+    <div class="ref-swatch"><span style="background:var(--gm-focus)"></span><p><strong>--gm-focus</strong><br>Focus ring only</p></div>
+    <div class="ref-swatch"><span style="background:var(--gm-error)"></span><p><strong>--gm-error</strong><br>Errors, overdue</p></div>
+  </div>
+  <div class="ref-row mt-4" style="align-items: baseline;">
+    <span style="font-family:var(--gm-font-heading);font-size:2rem;font-weight:600">Lexend 600</span>
+    <span>Atkinson Hyperlegible 400 and <strong>700</strong></span>
+    <span class="gm-time">IBM Plex Mono 13:30</span>
+  </div>
+  <p class="ref-note">Type scale: 40, 32, 24, 20, 16, 14 and 13 px. Never smaller than 13 px. Times and asset tags are always IBM Plex Mono. Spacing in 4 px steps; most gaps 8, 16, 24 px.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c01">
+  <h2>App shell and name chip <span class="ref-id">C01 · SCR-01 · REQ-10</span></h2>
+  <p class="ref-note">Phones: header with logo mark, product name and name chip; bottom tab bar with Day plan and Fleet. Tablets and desktops (992 px and wider): the tabs move into the header and the tab bar goes. No AdminLTE sidebar.</p>
+  <div class="ref-grid">
+    <div>
+      <span class="ref-label">Phone, name picked</span>
+      <div class="ref-phone">
+        <a class="gm-skip" href="#main-1">Skip to main content</a>
+        <header class="gm-header">
+          <a class="gm-header__brand" href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="32" height="32" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="28" fill="#1E6B47"/><path d="M17 47 C17 27 27 17 47 17 C47 37 37 47 17 47 Z" fill="#7BC043"/><path d="M20 44 C27 36 31 33 34 29 C37 25 40 22 44 20" fill="none" stroke="#1E6B47" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="4.5 3.5"/></svg>Charging planner</a>
+          <nav class="gm-header__nav" aria-label="Main">
+            <a class="gm-tab" href="#" aria-current="page"><svg class="gm-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg>Day plan</a>
+            <a class="gm-tab" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Fleet</a>
+          </nav>
+          <div class="gm-header__end">
+            <a class="gm-name-chip" href="#"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-user-round"/></svg>Dave Morgan<span class="visually-hidden">. Change name</span></a>
+          </div>
+        </header>
+        <div class="gm-main" id="main-1"><p class="gm-muted mb-0">Page content</p></div>
+        <nav class="gm-tabbar" aria-label="Main">
+          <a class="gm-tab" href="#" aria-current="page"><svg class="gm-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg>Day plan</a>
+          <a class="gm-tab" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Fleet</a>
+        </nav>
+      </div>
+    </div>
+    <div>
+      <span class="ref-label">Name chip states</span>
+      <div class="ref-row">
+        <a class="gm-name-chip" href="#"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-user-round"/></svg>Aisha Bello</a>
+        <a class="gm-name-chip gm-name-chip--empty" href="#"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-user-round"/></svg>Add your name</a>
+        <a class="gm-name-chip ref-focus" href="#"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-user-round"/></svg>Sam Patel</a>
+      </div>
+      <span class="ref-label mt-4">Name picker (SCR-01). Shown before the first save on a device (AC-10.1), or from the chip</span>
+      <div class="card"><div class="card-body">
+        <form class="gm-form" novalidate>
+          <h2 class="h4 m-0">Who's using this device?</h2>
+          <div class="gm-field">
+            <label class="form-label" for="name-1">Your name</label>
+            <div class="form-text" id="name-1-hint">We add it to the changes you make on this device, so others know who to ask. You only need to do this once.</div>
+            <input class="form-control" id="name-1" name="name" type="text" autocomplete="name" aria-describedby="name-1-hint" value="">
+          </div>
+          <div><button class="btn btn-primary" type="submit">Save name and continue</button></div>
+        </form>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c02">
+  <h2>Band tag <span class="ref-id">C02 · REQ-01 · BR-10</span></h2>
+  <p class="ref-note">Band name in text on the band fill, every time. No meaning ("best time"), no gCO₂/kWh figure, no "least bad" highlight (DEC-32, AC-01.4, AC-01.5). Fills belong to bands only on the day plan.</p>
+  <div class="ref-row">
+    <span class="gm-band gm-band--very-low"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-leaf"/></svg>very low</span>
+    <span class="gm-band gm-band--low">low</span>
+    <span class="gm-band gm-band--moderate">moderate</span>
+    <span class="gm-band gm-band--high">high</span>
+    <span class="gm-band gm-band--very-high">very high</span>
+    <span class="gm-band gm-band--none">No forecast</span>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c03">
+  <h2>Bike state label <span class="ref-id">C03 · REQ-02 · BR-01</span></h2>
+  <p class="ref-note">Icon plus text, no fill. Wording exactly as below.</p>
+  <div class="ref-row">
+    <span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span>
+    <span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span>
+    <span class="gm-state gm-state--overdue"><svg class="gm-icon" aria-hidden="true"><use href="#i-clock-alert"/></svg><span>Overdue – not checked in <span class="gm-due">due 11:00</span></span></span>
+    <span class="gm-state gm-state--overdue"><svg class="gm-icon" aria-hidden="true"><use href="#i-clock-alert"/></svg><span>Overdue – not checked in <span class="gm-due">due Mon 16:30</span></span></span>
+    <span class="gm-state gm-state--service"><svg class="gm-icon" aria-hidden="true"><use href="#i-ban"/></svg>Out of service</span>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c04">
+  <h2>Next booking label <span class="ref-id">C04 · REQ-03 · BR-03</span></h2>
+  <div class="ref-row">
+    <span class="gm-next">next out: <strong>14:00</strong></span>
+    <span class="gm-next">next out: <strong>Wed 13:00</strong></span>
+    <span class="gm-next">No booking</span>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c05">
+  <h2>Flags and warnings <span class="ref-id">C05 · REQ-13 · REQ-15 · BR-12</span></h2>
+  <p class="ref-note">Outlined badges with icon and text. They sit beside the state and never change it (DEC-02).</p>
+  <div class="ref-row">
+    <span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span>
+    <span class="gm-flag gm-flag--rebooked"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-calendar-clock"/></svg>Booked again at <span class="gm-time">14:00</span></span>
+    <span class="gm-flag gm-flag--mismatch"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-link-2-off"/></svg>Resource ID doesn't match LibreBooking</span>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c06">
+  <h2>Phone timeline <span class="ref-id">C06 · SCR-02 · REQ-04</span></h2>
+  <p class="ref-note">One slot per half hour, 07:00 to 16:00. The 07:00 slot lists every bike (DEC-40); later slots list only bikes that change, or "No changes". Each bike row links to its record. Extract below: now is 07:00.</p>
+  <div class="ref-grid">
+    <div class="ref-phone">
+      <div class="gm-main">
+        <div class="gm-page-head">
+          <h1>Day plan</h1>
+          <span class="gm-page-head__sub">Tue 16 Jun</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-3 gm-noprint">
+          <a class="gm-linkout" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-book-open"/></svg>Charging rules<span class="visually-hidden"> (opens the volunteer handbook)</span></a>
+        </div>
+        <ol class="gm-timeline">
+          <li class="gm-slot gm-slot--now">
+            <time class="gm-slot__time" datetime="2026-06-16T07:00">07:00</time>
+            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+            <ul class="gm-slot__bikes">
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M07</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span><span class="gm-bike-row__flags"><span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span></span></a></li>
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M08</span><span class="gm-bike-row__body"><span class="gm-state gm-state--overdue"><svg class="gm-icon" aria-hidden="true"><use href="#i-clock-alert"/></svg><span>Overdue – not checked in <span class="gm-due">due Mon 16:30</span></span></span></span></a></li>
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G04</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G05</span><span class="gm-bike-row__body"><span class="gm-state gm-state--service"><svg class="gm-icon" aria-hidden="true"><use href="#i-ban"/></svg>Out of service</span></span></a></li>
+              <li class="gm-muted small ps-1">…and the other 14 bikes</li>
+            </ul>
+          </li>
+          <li class="gm-slot">
+            <time class="gm-slot__time" datetime="2026-06-16T07:30">07:30</time>
+            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+            <ul class="gm-slot__bikes">
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M10</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+            </ul>
+          </li>
+          <li class="gm-slot">
+            <time class="gm-slot__time" datetime="2026-06-16T08:30">08:30</time>
+            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+            <p class="gm-slot__quiet">No changes</p>
+          </li>
+          <li class="gm-slot">
+            <time class="gm-slot__time" datetime="2026-06-16T12:00">12:00</time>
+            <span class="gm-slot__band"><span class="gm-band gm-band--very-low"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-leaf"/></svg>very low</span></span>
+            <ul class="gm-slot__bikes">
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span></a></li>
+              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M01</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">next out: <strong>14:00</strong></span></span></a></li>
+            </ul>
+          </li>
+          <li class="gm-slot">
+            <time class="gm-slot__time" datetime="2026-06-16T15:30">15:30</time>
+            <span class="gm-slot__band"><span class="gm-band gm-band--none">No forecast</span></span>
+            <p class="gm-slot__quiet">No changes</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c07">
+  <h2>Plan grid <span class="ref-id">C07 · SCR-03 · REQ-12</span></h2>
+  <p class="ref-note">From 992 px wide, and always in print. Sticky bike column and slot header. Each cell has the state in text; a cell the same as the one before shows a muted "–" with the state for screen readers. Extract: 4 bikes, 6 slots, now is 11:30.</p>
+  <div class="gm-grid-wrap">
+    <table class="gm-grid">
+      <caption class="visually-hidden">Day plan for Tue 16 June 2026, bikes by half hour</caption>
+      <thead>
+        <tr>
+          <th scope="col">Bike</th>
+          <th scope="col"><span class="gm-grid__time">10:00</span><span class="gm-band gm-band--low">low</span></th>
+          <th scope="col"><span class="gm-grid__time">10:30</span><span class="gm-band gm-band--low">low</span></th>
+          <th scope="col"><span class="gm-grid__time">11:00</span><span class="gm-band gm-band--low">low</span></th>
+          <th scope="col"><span class="gm-grid__time">11:30</span><span class="gm-band gm-band--low">low</span></th>
+          <th scope="col"><span class="gm-grid__time">12:00</span><span class="gm-band gm-band--very-low">very low</span></th>
+          <th scope="col"><span class="gm-grid__time">12:30</span><span class="gm-band gm-band--very-low">very low</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row"><span class="gm-mono">M02</span><br><span class="gm-next">next out: <strong>14:00</strong></span><br><span class="gm-flag gm-flag--rebooked mt-1"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-calendar-clock"/></svg>Booked again at <span class="gm-time">14:00</span></span></th>
+          <td><span class="gm-grid__cell">Out on loan</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">Out on loan</span></td>
+          <td><span class="gm-grid__cell gm-grid__cell--overdue">Overdue <span class="gm-due">due 11:00</span></span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">Overdue, due 11:00</span></td>
+          <td><span class="gm-grid__cell gm-grid__cell--workshop">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+        </tr>
+        <tr>
+          <th scope="row"><span class="gm-mono">M05</span><br><span class="gm-next">No booking</span></th>
+          <td><span class="gm-grid__cell gm-grid__cell--workshop">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+        </tr>
+        <tr>
+          <th scope="row"><span class="gm-mono">M07</span><br><span class="gm-next">No booking</span><br><span class="gm-flag gm-flag--fault mt-1"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span></th>
+          <td><span class="gm-grid__cell gm-grid__cell--workshop">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">In the workshop</span></td>
+        </tr>
+        <tr>
+          <th scope="row"><span class="gm-mono">G02</span><br><span class="gm-next">No booking</span></th>
+          <td><span class="gm-grid__cell gm-grid__cell--service">Out of service</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">Out of service</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">Out of service</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">Out of service</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">Out of service</span></td>
+          <td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">Out of service</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="ref-row gm-noprint">
+    <button class="btn btn-outline-primary" type="button"><svg class="gm-icon" aria-hidden="true"><use href="#i-printer"/></svg>Print day plan</button>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c08">
+  <h2>Fleet list <span class="ref-id">C08 · SCR-04 · REQ-08</span></h2>
+  <p class="ref-note">Bikes and Batteries as two views of one page. The battery view lists all 26 with their location (AC-08.5, DEC-43). Rows are links to the record.</p>
+  <div class="ref-grid">
+    <div class="ref-phone"><div class="gm-main">
+      <div class="gm-page-head"><h1>Fleet</h1></div>
+      <nav class="gm-segment" aria-label="Fleet view">
+        <a href="#">Bikes</a>
+        <a href="#" aria-current="page">Batteries</a>
+      </nav>
+      <ul class="gm-list">
+        <li><a class="gm-list__row" href="#"><span class="gm-list__tag">B-07</span><span class="gm-location gm-location--fitted" style="font-size:1rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-battery"/></svg>Fitted to M07</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+        <li><a class="gm-list__row" href="#"><span class="gm-list__tag">B-09</span><span class="gm-location gm-location--quarantined" style="font-size:1rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-battery-warning"/></svg>Quarantined</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+        <li><a class="gm-list__row" href="#"><span class="gm-list__tag">B-17</span><span class="gm-location gm-location--shelf" style="font-size:1rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-package"/></svg>On the shelf</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+      </ul>
+      <div class="d-grid mt-3"><a class="btn btn-outline-primary" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add a battery</a></div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c09">
+  <h2>Asset summary card <span class="ref-id">C09 · SCR-05 · SCR-06 · REQ-05</span></h2>
+  <p class="ref-note">What staff need first: for a bike, the last service and the fitted battery; for a battery, its location. Then the record's actions. Missing values use the wording in C17.</p>
+  <div class="ref-grid">
+    <div class="ref-phone"><div class="gm-main">
+      <a class="gm-back" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Fleet</a>
+      <section class="gm-summary" aria-labelledby="m07-h">
+        <div class="gm-summary__head">
+          <h1 class="gm-summary__tag m-0" id="m07-h">M07</h1>
+          <span class="gm-summary__model">Raleigh Motus Grand Tour</span>
+          <span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span>
+        </div>
+        <dl class="gm-summary__facts">
+          <div class="gm-summary__fact"><dt>Last service</dt><dd>Service check, <span class="gm-time">11 Jun 2026</span></dd></div>
+          <div class="gm-summary__fact"><dt>Battery fitted</dt><dd><a href="#" class="gm-mono">B-07</a> · Bosch PowerTube 500<br><span class="gm-muted small">Bought 14 Mar 2023 · 301 cycles</span></dd></div>
+        </dl>
+        <p class="gm-summary__stamp m-0">Last updated by Priya Shah, <span class="gm-time">10 Jun 2026 14:03</span></p>
+      </section>
+      <div class="gm-actions">
+        <a class="btn btn-primary" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-battery-charging"/></svg>Swap battery</a>
+        <a class="btn btn-outline-primary" href="#">Remove battery</a>
+        <a class="btn btn-outline-primary" href="#">Report fault</a>
+        <a class="btn btn-outline-primary" href="#">Service check</a>
+        <a class="btn btn-outline-primary" href="#">Dealer service</a>
+      </div>
+      <a class="btn btn-link px-0" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-pencil"/></svg>Edit bike details</a>
+    </div></div>
+
+    <div class="ref-phone"><div class="gm-main">
+      <a class="gm-back" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Fleet</a>
+      <section class="gm-summary gm-summary--quarantined" aria-labelledby="b09-h">
+        <div class="gm-summary__head">
+          <h1 class="gm-summary__tag m-0" id="b09-h">B-09</h1>
+          <span class="gm-summary__model">Bosch PowerTube 500</span>
+        </div>
+        <p class="gm-location gm-location--quarantined m-0"><svg class="gm-icon" aria-hidden="true"><use href="#i-battery-warning"/></svg>Quarantined</p>
+        <p class="m-0 small">Open fault from <span class="gm-time">12 Jun 2026</span>: Swollen – do not charge or fit</p>
+        <dl class="gm-summary__facts">
+          <div class="gm-summary__fact"><dt>Bosch serial</dt><dd class="gm-mono">4 251 802 112 9</dd></div>
+          <div class="gm-summary__fact"><dt>Cycle count</dt><dd>212</dd></div>
+          <div class="gm-summary__fact"><dt>Bought</dt><dd class="gm-time">2 May 2023</dd></div>
+        </dl>
+        <p class="gm-summary__stamp m-0">Last updated by Sam Patel, <span class="gm-time">12 Jun 2026 15:40</span></p>
+      </section>
+      <p class="ref-note mt-2">Battery details here are invented for the reference page.</p>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c10">
+  <h2>History list <span class="ref-id">C10 · REQ-05 · REQ-09</span></h2>
+  <p class="ref-note">Newest first by Entry date, then Entry ID (AC-05.2). Faults show open or closed in text.</p>
+  <div style="max-width: 34rem;">
+    <h2 class="h4">History</h2>
+    <ol class="gm-history">
+      <li class="gm-history__item">
+        <span class="gm-history__type"><svg class="gm-icon" aria-hidden="true"><use href="#i-clipboard-check"/></svg>Service check</span>
+        <time class="gm-history__date" datetime="2026-06-11">11 Jun 2026</time>
+        <p class="gm-history__desc">Weekly check: OK</p>
+        <span class="gm-history__meta">Recorded by Sam Patel, <span class="gm-time">11 Jun 2026 10:12</span></span>
+      </li>
+      <li class="gm-history__item">
+        <span class="gm-history__type"><svg class="gm-icon" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Fault <span class="gm-status gm-status--open">open</span></span>
+        <time class="gm-history__date" datetime="2026-06-09">9 Jun 2026</time>
+        <p class="gm-history__desc">Rear light flickers</p>
+        <span class="gm-history__meta">Recorded by Dave Morgan, <span class="gm-time">9 Jun 2026 08:41</span></span>
+        <span class="gm-history__meta"><a class="btn btn-outline-primary btn-sm mt-1" href="#">Clear this fault</a></span>
+      </li>
+      <li class="gm-history__item">
+        <span class="gm-history__type"><svg class="gm-icon" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Fault <span class="gm-status gm-status--closed">closed</span></span>
+        <time class="gm-history__date" datetime="2026-05-02">2 May 2026</time>
+        <p class="gm-history__desc">Chain slipping on hills</p>
+        <span class="gm-history__meta">Cleared <span class="gm-time">5 May 2026</span> by Sam Patel</span>
+      </li>
+      <li class="gm-history__item">
+        <span class="gm-history__type"><svg class="gm-icon" aria-hidden="true"><use href="#i-wrench"/></svg>Dealer service</span>
+        <time class="gm-history__date" datetime="2026-04-21">21 Apr 2026</time>
+        <p class="gm-history__desc">Interim: brake bleed, new chain</p>
+        <span class="gm-history__meta">Recorded by Priya Shah, <span class="gm-time">22 Apr 2026 16:12</span></span>
+      </li>
+    </ol>
+    <p class="ref-note mt-2">The closed chain fault is invented for the reference page.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c11">
+  <h2>Asset picker <span class="ref-id">C11 · SCR-08 · REQ-07 · NFR-01</span></h2>
+  <p class="ref-note">Native radio buttons styled as cards, so it works without JavaScript. Tap a card (one), tap Save swap (two): NFR-01's two taps. Batteries on the shelf come first, then quarantined, then fitted. A quarantined battery is listed with its warning; choosing it leads to C14 before anything is saved.</p>
+  <div class="ref-phone"><div class="gm-main">
+    <a class="gm-back" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>G01</a>
+    <form class="gm-form" novalidate>
+      <fieldset>
+        <legend class="h4">Swap the battery in <span class="gm-mono">G01</span></legend>
+        <p class="gm-muted">Fitted now: <span class="gm-mono">B-14</span>. It goes on the shelf.</p>
+        <ul class="gm-picker">
+          <li class="gm-picker__option">
+            <input class="gm-picker__input" type="radio" name="battery" id="pick-b17" value="B-17" checked>
+            <label class="gm-picker__label" for="pick-b17"><span class="gm-picker__tag">B-17</span><span class="gm-picker__detail"><span>Bosch PowerPack 500</span><span class="gm-muted">On the shelf</span></span></label>
+          </li>
+          <li class="gm-picker__option">
+            <input class="gm-picker__input" type="radio" name="battery" id="pick-b19" value="B-19">
+            <label class="gm-picker__label ref-focus" for="pick-b19"><span class="gm-picker__tag">B-19</span><span class="gm-picker__detail"><span>Bosch PowerPack 500</span><span class="gm-muted">On the shelf</span></span></label>
+          </li>
+          <li class="gm-picker__option gm-picker__option--quarantined">
+            <input class="gm-picker__input" type="radio" name="battery" id="pick-b09" value="B-09">
+            <label class="gm-picker__label" for="pick-b09"><span class="gm-picker__tag">B-09</span><span class="gm-picker__detail"><span>Bosch PowerTube 500</span><span class="gm-state gm-state--overdue" style="font-size:.875rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-battery-warning"/></svg>Quarantined</span></span></label>
+          </li>
+          <li class="gm-picker__option">
+            <input class="gm-picker__input" type="radio" name="battery" id="pick-b05" value="B-05">
+            <label class="gm-picker__label" for="pick-b05"><span class="gm-picker__tag">B-05</span><span class="gm-picker__detail"><span>Bosch PowerTube 500</span><span class="gm-muted">Fitted to M05</span></span></label>
+          </li>
+        </ul>
+      </fieldset>
+      <details>
+        <summary class="fw-bold" style="min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--gm-link)">Change the time</summary>
+        <div class="gm-field mt-2">
+          <label class="form-label" for="fitted-from">Fitted from</label>
+          <div class="form-text" id="fitted-from-hint">Now, unless you're recording an earlier swap. It can't be in the future.</div>
+          <input class="form-control gm-w-datetime" id="fitted-from" name="fittedFrom" type="datetime-local" value="2026-06-16T08:05" max="2026-06-16T08:05" aria-describedby="fitted-from-hint">
+        </div>
+      </details>
+      <div class="gm-actionbar">
+        <button class="btn btn-primary" type="submit">Save swap</button>
+        <a class="btn btn-link" href="#">Cancel</a>
+      </div>
+    </form>
+    <p class="ref-note mt-2">B-19 is invented for the reference page and shows the focus state.</p>
+  </div></div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c12">
+  <h2>Form fields <span class="ref-id">C12 · SCR-07, SCR-09 to SCR-11 · REQ-06, REQ-09</span></h2>
+  <p class="ref-note">Label above, hint under the label, then the input; error message between hint and input. Optional fields say "(optional)"; required ones say nothing. Boxes sized to the answer. Native date, time and select controls. Numbers use <code>inputmode="numeric"</code> on a text input.</p>
+  <div class="ref-grid">
+    <div>
+      <span class="ref-label">Default, hint, optional</span>
+      <div class="card"><div class="card-body"><div class="gm-form">
+        <div class="gm-field">
+          <label class="form-label" for="f-tag">Asset tag</label>
+          <div class="form-text" id="f-tag-hint">For example, M13 or G07</div>
+          <input class="form-control gm-w-tag gm-mono" id="f-tag" name="assetTag" type="text" value="G07" aria-describedby="f-tag-hint" autocapitalize="characters" spellcheck="false">
+        </div>
+        <div class="gm-field">
+          <label class="form-label" for="f-frame">Frame size <span class="gm-optional">(optional)</span></label>
+          <div class="form-text" id="f-frame-hint">Leave blank for one-size bikes</div>
+          <input class="form-control gm-w-short" id="f-frame" name="frameSize" type="text" aria-describedby="f-frame-hint">
+        </div>
+        <div class="gm-field">
+          <label class="form-label" for="f-type">Battery type</label>
+          <select class="form-select gm-w-datetime" id="f-type" name="batteryType">
+            <option>Bosch PowerTube 500</option>
+            <option>Bosch PowerPack 400</option>
+            <option selected>Bosch PowerPack 500</option>
+          </select>
+        </div>
+        <div class="gm-field">
+          <label class="form-label" for="f-cycles">Cycle count <span class="gm-optional">(optional)</span></label>
+          <div class="form-text" id="f-cycles-hint">From the dealer's job sheet. A whole number from 0 to 9,999</div>
+          <input class="form-control gm-w-short gm-mono" id="f-cycles" name="cycleCount" type="text" inputmode="numeric" pattern="[0-9]*" aria-describedby="f-cycles-hint">
+        </div>
+      </div></div></div>
+    </div>
+    <div>
+      <span class="ref-label">Focus, error, read-only</span>
+      <div class="card"><div class="card-body"><div class="gm-form">
+        <div class="gm-field">
+          <label class="form-label" for="f-desc">What's wrong?</label>
+          <textarea class="form-control ref-focus" id="f-desc" name="description" rows="3">Front brake pads worn below 1.5 mm</textarea>
+        </div>
+        <div class="gm-field gm-field--error">
+          <label class="form-label" for="f-date">Entry date</label>
+          <div class="form-text" id="f-date-hint">The day you found it. Today, unless you're catching up</div>
+          <p class="invalid-feedback" id="f-date-error"><span class="visually-hidden">Error: </span>Entry date can't be in the future</p>
+          <input class="form-control gm-w-date is-invalid" id="f-date" name="entryDate" type="date" value="2026-06-18" aria-describedby="f-date-hint f-date-error" aria-invalid="true">
+        </div>
+        <div class="gm-field gm-field--error">
+          <label class="form-label" for="f-lb">LibreBooking resource ID</label>
+          <p class="invalid-feedback" id="f-lb-error"><span class="visually-hidden">Error: </span>Resource ID 14 is already used by M07. Check the ID in LibreBooking</p>
+          <input class="form-control gm-w-short gm-mono is-invalid" id="f-lb" name="resourceId" type="text" inputmode="numeric" value="14" aria-describedby="f-lb-error" aria-invalid="true">
+        </div>
+        <div class="gm-field">
+          <span class="form-label">Recorded by</span>
+          <p class="m-0">Dave Morgan <a class="ms-2" href="#">Not you?</a></p>
+        </div>
+      </div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c13">
+  <h2>Error summary <span class="ref-id">C13 · AC-06.2 · AC-09.6</span></h2>
+  <p class="ref-note">After a failed save, the form comes back with the user's input, this summary at the top (focused, so screen readers read it), and the same messages by each field (C12). Each link moves to its field.</p>
+  <div style="max-width: 34rem;">
+    <div class="gm-error-summary" role="alert" tabindex="-1" aria-labelledby="es-h">
+      <h2 id="es-h">There's a problem</h2>
+      <ul>
+        <li><a href="#f-date">Entry date can't be in the future</a></li>
+        <li><a href="#f-lb">Resource ID 14 is already used by M07. Check the ID in LibreBooking</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c14">
+  <h2>Confirm warning <span class="ref-id">C14 · REQ-11 · BR-06</span></h2>
+  <p class="ref-note">A page of its own (it works without JavaScript), shown before anything is saved. The safe choice is the primary button. It never blocks.</p>
+  <div class="ref-phone"><div class="gm-main">
+    <section class="gm-confirm" aria-labelledby="cw-h">
+      <h1 class="gm-confirm__title h4" id="cw-h"><svg class="gm-icon" aria-hidden="true"><use href="#i-battery-warning"/></svg><span><span class="gm-mono">B-09</span> is quarantined</span></h1>
+      <p class="gm-confirm__fault">Open fault from <span class="gm-time">12 Jun 2026</span>:<br><strong>Swollen – do not charge or fit</strong></p>
+      <p class="m-0">Fit it to <span class="gm-mono">M04</span> anyway? Only do this to test it.</p>
+      <div class="gm-confirm__actions">
+        <a class="btn btn-primary" href="#">Go back</a>
+        <button class="btn btn-outline-primary" type="submit">Fit anyway</button>
+      </div>
+    </section>
+  </div></div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c15">
+  <h2>Buttons and action bar <span class="ref-id">C15</span></h2>
+  <p class="ref-note">One primary button per screen. Secondary actions are outlined. Cancel is a link. No delete button anywhere (DEC-09). On phones, form buttons sit in a bar that stays above the tab bar.</p>
+  <div class="ref-row">
+    <button class="btn btn-primary" type="button">Save fault</button>
+    <button class="btn btn-primary ref-focus" type="button">Save fault</button>
+    <button class="btn btn-primary" type="button" disabled>Saving…</button>
+    <button class="btn btn-outline-primary" type="button">Report fault</button>
+    <button class="btn btn-outline-primary" type="button"><svg class="gm-icon" aria-hidden="true"><use href="#i-printer"/></svg>Print day plan</button>
+    <a class="btn btn-link" href="#">Cancel</a>
+  </div>
+  <span class="ref-label mt-3">Labels</span>
+  <p class="ref-note m-0">Verb plus thing: "Save swap", "Save fault", "Clear fault", "Save dealer service", "Add a battery". Not "Submit", "OK" or "Confirm".</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c16">
+  <h2>Notices <span class="ref-id">C16 · REQ-17 · PRD §7.3</span></h2>
+  <p class="ref-note">Inline at the top of the page, never toasts or pop-ups. A save confirmation appears on the page the user lands on after saving, and says what changed.</p>
+  <div style="max-width: 40rem;">
+    <div class="gm-notice gm-notice--success" role="status">
+      <svg class="gm-icon" aria-hidden="true"><use href="#i-circle-check"/></svg>
+      <div><p class="gm-notice__title">Swap saved</p><p><span class="gm-mono">G01</span> now has <span class="gm-mono">B-17</span>. <span class="gm-mono">B-14</span> is on the shelf.</p></div>
+    </div>
+    <div class="gm-notice gm-notice--offline" role="status">
+      <svg class="gm-icon" aria-hidden="true"><use href="#i-wifi-off"/></svg>
+      <div><p class="gm-notice__title">You're offline</p><p>This is the plan your phone loaded at <span class="gm-time">07:05</span>. It may be out of date.</p></div>
+    </div>
+    <div class="gm-notice gm-notice--problem" role="alert">
+      <svg class="gm-icon" aria-hidden="true"><use href="#i-circle-alert"/></svg>
+      <div><p class="gm-notice__title">Bookings can't be loaded</p><p>LibreBooking isn't answering, so bike states aren't shown. Fleet records still work. <a href="#">Try again</a></p></div>
+    </div>
+    <div class="gm-notice gm-notice--problem" role="alert">
+      <svg class="gm-icon" aria-hidden="true"><use href="#i-circle-alert"/></svg>
+      <div><p class="gm-notice__title">Nothing was saved</p><p>We couldn't reach the fleet records. Your entry is still in the form. Try again in a minute.</p></div>
+    </div>
+    <div class="gm-notice gm-notice--demo" role="note">
+      <svg class="gm-icon" aria-hidden="true"><use href="#i-info"/></svg>
+      <div><p class="gm-notice__title">This is a demo</p><p>Greener Miles is a made-up e-bike library. You can try everything, but changes aren't saved.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c17">
+  <h2>Empty values and link out <span class="ref-id">C17 · REQ-16</span></h2>
+  <p class="ref-note">Never a blank, "N/A" or "–" for a missing value. Use these words, in muted text.</p>
+  <div class="ref-row">
+    <span class="gm-empty">No booking</span>
+    <span class="gm-band gm-band--none">No forecast</span>
+    <span class="gm-empty">Not recorded</span>
+    <span class="gm-empty">Not yet read</span>
+    <span class="gm-empty">One size</span>
+    <span class="gm-empty">No battery fitted</span>
+  </div>
+  <div class="ref-row">
+    <a class="gm-linkout" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-book-open"/></svg>Charging rules<svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-external-link"/></svg><span class="visually-hidden"> (opens the volunteer handbook in a new tab)</span></a>
+  </div>
+</section>
+
+<p class="ref-note py-4">Reference v0.1, 12 November 2026. Source: <code>design/reference.html</code>, <code>design/planner-theme.scss</code>, <code>design/planner-components.scss</code>, <code>brand/tokens.css</code>. Icons: Lucide (ISC). Built on AdminLTE 4 (MIT) and Bootstrap 5.3 (MIT).</p>
+</main>
+</body>
+</html>

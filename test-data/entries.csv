@@ -1,0 +1,6 @@
+entry_id,entry_type,entry_date,bike_asset_tag,battery_asset_tag,description,recorded_by,recorded_at,cleared_date,cleared_by,source
+1031,dealer service,2026-04-21,M07,,"Interim: brake bleed, new chain",Priya Shah,2026-04-22 15:40,,,PRD A.3
+1039,fault,2026-06-11,M07,,Bell missing,Sam Patel,2026-06-11 10:05,2026-06-11,Sam Patel,invented for AC-05.2 and AC-05.4
+1040,service check,2026-06-11,M07,,Weekly check: OK,Sam Patel,2026-06-11 10:20,,,PRD A.3
+1043,fault,2026-06-09,M07,,Rear light flickers,Dave Morgan,2026-06-11 16:45,,,PRD A.3
+1044,fault,2026-06-12,,B-09,Swollen – do not charge or fit,Dave Morgan,2026-06-12 15:10,,,PRD A.3

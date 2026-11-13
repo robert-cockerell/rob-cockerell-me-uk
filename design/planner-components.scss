@@ -1,0 +1,422 @@
+// Greener Miles charging planner – planner components (PRD §6.1)
+// Imported by planner-theme.scss after AdminLTE. Every class starts .gm-.
+// Colours come from tokens.css (--gm-*) so the dark theme works without
+// extra rules. See docs/ui-spec.md for when to use each component.
+
+// ---------------------------------------------------------------------------
+// Base
+// ---------------------------------------------------------------------------
+body.gm-planner {
+  background: var(--gm-bg);
+  color: var(--gm-text);
+  font-family: var(--gm-font-body);
+  -webkit-text-size-adjust: 100%;
+}
+
+.gm-planner h1, .gm-planner h2, .gm-planner h3, .gm-planner h4 { font-family: var(--gm-font-heading); }
+
+.gm-mono, .gm-time { font-family: var(--gm-font-data); font-variant-numeric: tabular-nums; }
+.gm-muted { color: var(--gm-text-muted); }
+
+.gm-icon {
+  width: 1.25em; height: 1.25em;
+  flex: none;
+  stroke-width: 1.75;
+  vertical-align: -0.25em;
+}
+.gm-icon-sm { width: 1em; height: 1em; vertical-align: -0.15em; }
+
+// Skip link
+.gm-skip {
+  position: absolute; left: 1rem; top: -100px; z-index: 2000;
+  background: var(--gm-surface); color: var(--gm-text); padding: .75rem 1rem; border-radius: var(--gm-radius-md);
+  &:focus { top: 1rem; box-shadow: var(--gm-focus-ring); }
+}
+
+// Focus: one rule for everything interactive (brand §7). Never remove it.
+.gm-planner :focus-visible {
+  outline: 2px solid var(--gm-text);
+  outline-offset: 0;
+  box-shadow: var(--gm-focus-ring);
+}
+
+// Buttons take their colour from the tokens, so dark mode swaps them
+.gm-planner .btn-primary {
+  --bs-btn-bg: var(--gm-action);
+  --bs-btn-border-color: var(--gm-action);
+  --bs-btn-color: var(--gm-action-text);
+  --bs-btn-hover-bg: var(--gm-text);
+  --bs-btn-hover-border-color: var(--gm-text);
+  --bs-btn-hover-color: var(--gm-bg);
+  --bs-btn-active-bg: var(--gm-text);
+  --bs-btn-active-border-color: var(--gm-text);
+  --bs-btn-active-color: var(--gm-bg);
+  --bs-btn-disabled-bg: var(--gm-border);
+  --bs-btn-disabled-border-color: var(--gm-border);
+  --bs-btn-disabled-color: var(--gm-text-muted);
+  --bs-btn-disabled-opacity: 1;
+}
+.gm-planner .btn-outline-primary {
+  --bs-btn-color: var(--gm-action);
+  --bs-btn-bg: var(--gm-surface);
+  --bs-btn-border-color: var(--gm-action);
+  --bs-btn-hover-bg: var(--gm-action);
+  --bs-btn-hover-border-color: var(--gm-action);
+  --bs-btn-hover-color: var(--gm-action-text);
+  --bs-btn-active-bg: var(--gm-action);
+  --bs-btn-active-color: var(--gm-action-text);
+  --bs-btn-disabled-color: var(--gm-text-muted);
+  --bs-btn-disabled-border-color: var(--gm-border);
+  --bs-btn-disabled-opacity: 1;
+}
+.gm-planner .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
+.gm-planner .btn-link { font-weight: 700; color: var(--gm-link); }
+
+// Cards: white surface, Mist border, soft shadow (brand §7)
+.gm-planner .card {
+  --bs-card-bg: var(--gm-surface);
+  --bs-card-border-color: var(--gm-border);
+  box-shadow: var(--gm-shadow-card);
+}
+
+// Form controls in dark mode
+@media (prefers-color-scheme: dark) {
+  .gm-planner .form-control, .gm-planner .form-select {
+    background-color: var(--gm-surface);
+    color: var(--gm-text);
+    border-color: #8A9DA2;
+  }
+  .gm-planner .form-control:focus, .gm-planner .form-select:focus { border-color: var(--gm-text); }
+}
+.gm-planner .form-control:focus, .gm-planner .form-select:focus, .gm-planner .form-check-input:focus { box-shadow: var(--gm-focus-ring); outline: none; }
+
+// ---------------------------------------------------------------------------
+// App shell: header with name chip, bottom tab bar on phones (UI spec §3)
+// ---------------------------------------------------------------------------
+.gm-header {
+  position: sticky; top: 0; z-index: 1020;
+  display: flex; align-items: center; gap: .75rem;
+  min-height: 56px; padding: .5rem 1rem;
+  background: var(--gm-surface);
+  border-bottom: 1px solid var(--gm-border);
+}
+.gm-header__brand { display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--gm-text); font-family: var(--gm-font-heading); font-weight: 600; font-size: 1.125rem; }
+.gm-header__brand img { width: 32px; height: 32px; }
+.gm-header__nav { display: none; gap: .25rem; margin-left: 1rem; }
+.gm-header__end { margin-left: auto; display: flex; align-items: center; gap: .5rem; }
+
+.gm-tab {
+  display: flex; align-items: center; gap: .5rem; min-height: 44px; padding: .5rem .75rem;
+  color: var(--gm-text); font-weight: 700; text-decoration: none; border-radius: var(--gm-radius-md);
+  &[aria-current="page"] { color: var(--gm-link); box-shadow: inset 0 -3px 0 var(--gm-link); border-radius: 0; }
+}
+
+.gm-tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1020;
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--gm-surface); border-top: 1px solid var(--gm-border);
+  padding-bottom: env(safe-area-inset-bottom);
+  .gm-tab { flex-direction: column; gap: .125rem; justify-content: center; min-height: 56px; font-size: .8125rem; border-radius: 0;
+    &[aria-current="page"] { box-shadow: inset 0 3px 0 var(--gm-link); } }
+}
+.gm-main { padding: 1rem 1rem calc(56px + 2rem); max-width: 720px; margin: 0 auto; }
+.gm-main--wide { max-width: none; }
+
+@media (min-width: 992px) {
+  .gm-header__nav { display: flex; }
+  .gm-tabbar { display: none; }
+  .gm-main { padding-bottom: 2rem; }
+}
+
+// Name chip (REQ-10)
+.gm-name-chip {
+  display: inline-flex; align-items: center; gap: .375rem;
+  min-height: 44px; padding: .375rem .75rem;
+  border: 1.5px solid var(--gm-border); border-radius: var(--gm-radius-pill);
+  background: var(--gm-surface); color: var(--gm-text);
+  font-weight: 700; font-size: .875rem; text-decoration: none;
+  &:hover { border-color: var(--gm-text); }
+  &--empty { border-style: dashed; border-color: var(--gm-text-muted); }
+}
+
+// Page heading row
+.gm-page-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: .5rem 1rem; margin-bottom: 1rem;
+  h1 { font-size: 1.5rem; margin: 0; }
+  .gm-page-head__sub { color: var(--gm-text-muted); font-family: var(--gm-font-data); } }
+@media (min-width: 992px) { .gm-page-head h1 { font-size: 2rem; } }
+
+.gm-back { display: inline-flex; align-items: center; gap: .25rem; min-height: 44px; font-weight: 700; color: var(--gm-link); }
+
+// ---------------------------------------------------------------------------
+// Band tag (REQ-01). Fill + band text colour + band name. Never colour alone.
+// ---------------------------------------------------------------------------
+.gm-band {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .2rem .625rem; border-radius: var(--gm-radius-pill);
+  font-size: .8125rem; font-weight: 700; line-height: 1.4; white-space: nowrap;
+  border: 1px solid transparent;
+  &--very-low  { background: var(--gm-band-very-low);  color: var(--gm-band-very-low-text); }
+  &--low       { background: var(--gm-band-low);       color: var(--gm-band-low-text); }
+  &--moderate  { background: var(--gm-band-moderate);  color: var(--gm-band-moderate-text); }
+  &--high      { background: var(--gm-band-high);      color: var(--gm-band-high-text); }
+  &--very-high { background: var(--gm-band-very-high); color: var(--gm-band-very-high-text); }
+  &--none      { background: var(--gm-mist); color: #16262B; border-color: var(--gm-slate); border-style: dashed; }
+}
+
+// ---------------------------------------------------------------------------
+// Bike state label (REQ-02). Icon + text, no fill: fills on the day plan
+// belong to bands only.
+// ---------------------------------------------------------------------------
+.gm-state {
+  display: inline-flex; align-items: flex-start; gap: .375rem;
+  > .gm-icon { margin-top: .1em; }
+  font-weight: 700; color: var(--gm-text);
+  &--loan     { }
+  &--workshop { color: var(--gm-link); }
+  &--overdue  { color: var(--gm-error); }
+  &--service  { color: var(--gm-text-muted); }
+}
+@media (prefers-color-scheme: dark) { .gm-state--overdue { color: #FF9B8F; } }
+.gm-due { font-family: var(--gm-font-data); font-weight: 500; }
+
+// Next booking label (REQ-03)
+.gm-next { font-family: var(--gm-font-data); font-size: .875rem; color: var(--gm-text-muted); white-space: nowrap;
+  strong { color: var(--gm-text); font-weight: 500; } }
+
+// Flags and warnings (REQ-13, REQ-15, BR-12)
+.gm-flag {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .15rem .5rem; border-radius: var(--gm-radius-sm);
+  font-size: .8125rem; font-weight: 700; line-height: 1.4;
+  background: var(--gm-surface); color: var(--gm-text);
+  border: 1.5px solid currentColor;
+  &--fault    { color: #8A2722; }
+  &--rebooked { color: #8A2722; }
+  &--mismatch { color: var(--gm-text); }
+}
+@media (prefers-color-scheme: dark) { .gm-flag--fault, .gm-flag--rebooked { color: #FF9B8F; } }
+
+// ---------------------------------------------------------------------------
+// Phone timeline (REQ-04)
+// ---------------------------------------------------------------------------
+.gm-timeline { list-style: none; margin: 0; padding: 0; }
+.gm-slot {
+  display: grid; grid-template-columns: 4rem 1fr; gap: .25rem .75rem;
+  padding: .75rem 0; border-top: 1px solid var(--gm-border);
+  &__time { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.125rem; padding-top: .1rem; }
+  &__band { grid-column: 2; }
+  &__bikes { grid-column: 2; list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
+  &__quiet { grid-column: 2; color: var(--gm-text-muted); font-size: .875rem; margin: .25rem 0 0; }
+  &--now { background: linear-gradient(90deg, var(--gm-surface), transparent); }
+  &--now .gm-slot__time::after { content: "now"; display: block; font-family: var(--gm-font-body); font-size: .8125rem; font-weight: 700; color: var(--gm-link); }
+}
+.gm-bike-row {
+  display: grid; grid-template-columns: 3.25rem 1fr; gap: .125rem .5rem; align-items: start;
+  padding: .5rem .75rem; background: var(--gm-surface); border: 1px solid var(--gm-border); border-radius: var(--gm-radius-md);
+  text-decoration: none; color: inherit;
+  &__tag { font-family: var(--gm-font-data); font-weight: 500; font-size: 1rem; }
+  &__body { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .75rem; }
+  &__flags { grid-column: 2; display: flex; flex-wrap: wrap; gap: .375rem; }
+}
+a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); } }
+
+// ---------------------------------------------------------------------------
+// Plan grid (REQ-12) for tablets and print
+// ---------------------------------------------------------------------------
+.gm-grid-wrap { position: relative; overflow-x: auto; border: 1px solid var(--gm-border); border-radius: var(--gm-radius-md); background: var(--gm-surface); }
+.gm-grid {
+  border-collapse: separate; border-spacing: 0; font-size: .8125rem; min-width: 100%;
+  th, td { padding: .375rem .375rem; border-bottom: 1px solid var(--gm-border); border-right: 1px solid var(--gm-border); vertical-align: top; }
+  thead th { position: sticky; top: 0; background: var(--gm-surface); z-index: 2; text-align: left; font-weight: 700; }
+  thead th .gm-band { display: flex; justify-content: center; margin-top: .25rem; padding: .15rem .3rem; font-size: .75rem; }
+  th[scope="row"] { position: sticky; left: 0; background: var(--gm-surface); z-index: 1; min-width: 10.5rem; }
+  .gm-flag { white-space: nowrap; }
+  .gm-grid__time { font-family: var(--gm-font-data); font-weight: 500; font-size: .8125rem; }
+  td { min-width: 5.5rem; }
+  .gm-grid__cell { display: block; font-weight: 700; line-height: 1.25; }
+  .gm-grid__cell--workshop { color: var(--gm-link); }
+  .gm-grid__cell--overdue { color: var(--gm-error); }
+  .gm-grid__cell--service { color: var(--gm-text-muted); }
+  .gm-grid__same { color: var(--gm-text-muted); }
+}
+
+// ---------------------------------------------------------------------------
+// Asset summary card (REQ-05, REQ-08)
+// ---------------------------------------------------------------------------
+.gm-summary {
+  background: var(--gm-surface); border: 1px solid var(--gm-border); border-radius: var(--gm-radius-md); box-shadow: var(--gm-shadow-card);
+  padding: 1rem; display: grid; gap: .875rem;
+  &__head { display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; }
+  &__tag { font-family: var(--gm-font-data); font-size: 2rem; font-weight: 500; line-height: 1; }
+  &__model { color: var(--gm-text-muted); }
+  &__facts { display: grid; grid-template-columns: 1fr; gap: .75rem; margin: 0; }
+  &__fact dt { font-size: .875rem; font-weight: 700; color: var(--gm-text-muted); margin: 0; }
+  &__fact dd { margin: .125rem 0 0; font-size: 1.0625rem; }
+  &__stamp { font-size: .875rem; color: var(--gm-text-muted); border-top: 1px solid var(--gm-border); padding-top: .75rem; }
+  &--quarantined { border-left: 6px solid var(--gm-error); }
+}
+@media (min-width: 576px) { .gm-summary__facts { grid-template-columns: 1fr 1fr; } }
+
+.gm-location {
+  display: inline-flex; align-items: center; gap: .375rem; font-weight: 700; font-size: 1.125rem;
+  &--quarantined { color: var(--gm-error); }
+  &--shelf { color: var(--gm-text); }
+  &--fitted { color: var(--gm-link); }
+}
+
+// Actions under a record: big, thumb-friendly
+.gm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin: 1rem 0; }
+.gm-actions .btn { width: 100%; }
+.gm-actions .btn-primary { grid-column: 1 / -1; }
+
+// ---------------------------------------------------------------------------
+// History list (REQ-05, REQ-09)
+// ---------------------------------------------------------------------------
+.gm-history { list-style: none; margin: 0; padding: 0; background: var(--gm-surface); border: 1px solid var(--gm-border); border-radius: var(--gm-radius-md); }
+.gm-history__item {
+  display: grid; grid-template-columns: 1fr auto; gap: .25rem .75rem;
+  padding: .875rem 1rem; border-top: 1px solid var(--gm-border);
+  &:first-child { border-top: 0; }
+}
+.gm-history__type { font-weight: 700; display: inline-flex; align-items: center; gap: .375rem; }
+.gm-history__date { font-family: var(--gm-font-data); font-size: .875rem; text-align: right; }
+.gm-history__desc { grid-column: 1 / -1; margin: 0; }
+.gm-history__meta { grid-column: 1 / -1; font-size: .875rem; color: var(--gm-text-muted); }
+.gm-status {
+  display: inline-block; padding: .05rem .5rem; border-radius: var(--gm-radius-pill); font-size: .8125rem; font-weight: 700;
+  &--open   { background: var(--gm-error); color: #FFFFFF; }
+  &--closed { background: transparent; color: var(--gm-text); border: 1px solid var(--gm-text-muted); }
+}
+
+// ---------------------------------------------------------------------------
+// Asset picker (REQ-07, REQ-08): radio cards, whole row tappable
+// ---------------------------------------------------------------------------
+.gm-picker { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.gm-picker__option { position: relative; }
+.gm-picker__input { position: absolute; opacity: 0; inset: 0; }
+.gm-picker__label {
+  display: grid; grid-template-columns: 1.5rem 3.5rem 1fr; align-items: center; gap: .75rem;
+  min-height: 56px; padding: .625rem .875rem; cursor: pointer;
+  background: var(--gm-surface); border: 1.5px solid var(--gm-border); border-radius: var(--gm-radius-md);
+  &::before { content: ""; width: 1.25rem; height: 1.25rem; border-radius: 50%; border: 1.5px solid var(--gm-text-muted); background: var(--gm-surface); }
+}
+.gm-picker__tag { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.0625rem; }
+.gm-picker__detail { display: flex; flex-direction: column; font-size: .875rem; }
+.gm-picker__input:checked + .gm-picker__label {
+  border-color: var(--gm-action); box-shadow: inset 0 0 0 1px var(--gm-action);
+  &::before { border: 6px solid var(--gm-action); }
+}
+.gm-picker__input:focus-visible + .gm-picker__label { box-shadow: var(--gm-focus-ring); border-color: var(--gm-text); }
+.gm-picker__option--quarantined .gm-picker__label { border-left: 6px solid var(--gm-error); }
+
+// ---------------------------------------------------------------------------
+// Forms (UI spec §5)
+// ---------------------------------------------------------------------------
+.gm-form { display: grid; gap: 1.25rem; max-width: 34rem;
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { float: none; padding: 0; margin-bottom: .5rem; } }
+.gm-field { display: grid; gap: .25rem; }
+.gm-field .form-label { margin: 0; }
+.gm-optional { font-weight: 400; color: var(--gm-text-muted); }
+.gm-field .form-text { margin: 0; color: var(--gm-text-muted); }
+.gm-field--error {
+  border-left: 4px solid var(--gm-error); padding-left: .75rem;
+  .invalid-feedback { display: block; margin: 0; font-weight: 700; color: var(--gm-error); }
+  .form-control, .form-select { border-color: var(--gm-error); border-width: 2px; background-image: none; padding-right: .875rem; }
+}
+@media (prefers-color-scheme: dark) { .gm-field--error .invalid-feedback { color: #FF9B8F; } }
+
+// Width hints: size the box to the expected answer
+.gm-w-tag   { max-width: 8rem; }
+.gm-w-short { max-width: 12rem; }
+.gm-w-date  { max-width: 12rem; }
+.gm-w-datetime { max-width: 16rem; }
+
+// Error summary at the top of a form after a failed save
+.gm-error-summary {
+  border: 3px solid var(--gm-error); border-radius: var(--gm-radius-md); background: var(--gm-surface);
+  padding: 1rem; margin-bottom: 1.5rem;
+  h2 { font-size: 1.25rem; margin: 0 0 .5rem; }
+  ul { margin: 0; padding-left: 1.25rem; }
+  a { color: var(--gm-error); font-weight: 700; }
+  &:focus { box-shadow: var(--gm-focus-ring); outline: 2px solid var(--gm-text); }
+}
+@media (prefers-color-scheme: dark) { .gm-error-summary a { color: #FF9B8F; } }
+
+// Sticky save bar on phones
+.gm-actionbar {
+  position: sticky; bottom: calc(56px + env(safe-area-inset-bottom)); z-index: 10;
+  display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+  padding: .75rem 0; background: var(--gm-bg); border-top: 1px solid var(--gm-border);
+  .btn-primary { flex: 1 1 12rem; }
+}
+@media (min-width: 992px) { .gm-actionbar { position: static; border: 0; .btn-primary { flex: 0 0 auto; } } }
+
+// ---------------------------------------------------------------------------
+// Confirm warning (REQ-11): non-blocking, safe choice first
+// ---------------------------------------------------------------------------
+.gm-confirm {
+  border: 3px solid var(--gm-warning); border-radius: var(--gm-radius-md); background: var(--gm-surface);
+  padding: 1rem; display: grid; gap: .75rem;
+  &__title { display: flex; align-items: center; gap: .5rem; font-size: 1.25rem; margin: 0; }
+  &__fault { margin: 0; padding: .75rem; background: var(--gm-bg); border-radius: var(--gm-radius-sm); }
+  &__actions { display: grid; gap: .5rem; }
+}
+@media (min-width: 576px) { .gm-confirm__actions { grid-template-columns: auto auto; justify-content: start; } }
+
+// ---------------------------------------------------------------------------
+// Notices (REQ-17, PRD §7.3, demo mode). Inline, never toasts.
+// ---------------------------------------------------------------------------
+.gm-notice {
+  display: grid; grid-template-columns: auto 1fr; gap: .75rem; align-items: start;
+  padding: .875rem 1rem; border-radius: var(--gm-radius-md); margin-bottom: 1rem;
+  background: var(--gm-surface); border: 1px solid var(--gm-border); border-left-width: 6px;
+  p { margin: 0; }
+  &__title { font-weight: 700; }
+  &--success { border-left-color: var(--gm-success); }
+  &--offline { border-left-color: var(--gm-warning); }
+  &--problem { border-left-color: var(--gm-error); }
+  &--demo    { border-left-color: var(--gm-grid-amber); background: var(--gm-bg); }
+}
+@media (prefers-color-scheme: dark) { .gm-notice--success { border-left-color: #8FD65A; } }
+
+// Empty and missing values: muted text, never a blank or a dash
+.gm-empty { color: var(--gm-text-muted); }
+
+// Link out (REQ-16)
+.gm-linkout { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; font-weight: 700; color: var(--gm-link); }
+
+// Fleet list rows
+.gm-list { list-style: none; margin: 0; padding: 0; background: var(--gm-surface); border: 1px solid var(--gm-border); border-radius: var(--gm-radius-md); }
+.gm-list__row {
+  display: grid; grid-template-columns: 3.5rem 1fr auto; align-items: center; gap: .75rem;
+  min-height: 56px; padding: .5rem 1rem; border-top: 1px solid var(--gm-border); color: inherit; text-decoration: none;
+  &:first-child { border-top: 0; }
+  &:hover { background: var(--gm-bg); }
+}
+.gm-list__tag { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.0625rem; }
+
+// Segmented switch between Bikes and Batteries on the fleet list
+.gm-segment { display: inline-grid; grid-auto-flow: column; border: 1.5px solid var(--gm-action); border-radius: var(--gm-radius-md); overflow: hidden; margin-bottom: 1rem;
+  a { min-height: 44px; display: flex; align-items: center; padding: 0 1rem; font-weight: 700; color: var(--gm-action); text-decoration: none; }
+  a[aria-current="page"] { background: var(--gm-action); color: var(--gm-action-text); } }
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) { .gm-planner * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+
+// ---------------------------------------------------------------------------
+// Print (REQ-12, NFR-03): grid on A4 landscape, black and white safe
+// ---------------------------------------------------------------------------
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  .gm-header, .gm-tabbar, .gm-actionbar, .gm-noprint, .gm-notice--demo { display: none !important; }
+  body.gm-planner { background: #fff; color: #000; }
+  .gm-timeline { display: none !important; }
+  .gm-print-grid { display: block !important; }
+  .gm-grid-wrap { overflow: visible; border: 0; }
+  .gm-grid { font-size: 8pt; width: 100%; }
+  .gm-grid th, .gm-grid td { border-color: #000; padding: 2pt; min-width: 0; }
+  .gm-band { border: 1px solid #000; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .gm-grid thead th { position: static; }
+  .gm-grid th[scope="row"] { position: static; }
+}

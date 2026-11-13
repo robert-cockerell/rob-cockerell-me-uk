@@ -1,0 +1,65 @@
+%% Day planner and fleet records: logical data structure from 3NF (v0.2)
+%% Fictional worked example. Derived from claude/normalisation.md §8.
+%% Derived, not stored: Period end, Fault status (DEC-13, DEC-14), Battery location (DEC-20),
+%% Bike state, Next booking and the day plan flags (DEC-16, DEC-17).
+%% Each service or fault entry is about exactly one bike or one battery.
+%% A fitting with no bike records a battery removed without a replacement (DEC-20).
+%% Forecast period has no relationships: process 2 matches it to day plan slots by time.
+%% v0.2: change stamps (DEC-19); fitting bike optional (DEC-20).
+erDiagram
+    BATTERY_TYPE ||--o{ BATTERY : "classifies"
+    BATTERY ||--o{ FITTING : "is fitted by"
+    BIKE |o--o{ FITTING : "receives"
+    BIKE |o--o{ SERVICE_OR_FAULT_ENTRY : "is subject of"
+    BATTERY |o--o{ SERVICE_OR_FAULT_ENTRY : "is subject of"
+
+    FORECAST_PERIOD {
+        string region PK
+        datetime period_start PK
+        int forecast_intensity
+        string index_band
+        datetime retrieved_at
+    }
+    BIKE {
+        string bike_asset_tag PK
+        int librebooking_resource_id "unique"
+        string make
+        string model
+        string frame_size "optional"
+        string bike_serial_number "optional"
+        date bike_purchase_date "optional"
+        string last_updated_by
+        datetime last_updated_at
+    }
+    BATTERY_TYPE {
+        string battery_type PK
+        int capacity_wh "optional"
+    }
+    BATTERY {
+        string battery_asset_tag PK
+        string battery_type FK
+        string bosch_serial "optional"
+        date battery_purchase_date "optional"
+        int cycle_count "optional"
+        string last_updated_by
+        datetime last_updated_at
+    }
+    FITTING {
+        string battery_asset_tag PK "also FK to BATTERY"
+        datetime fitted_from PK
+        string bike_asset_tag FK "optional: blank means removed"
+        string recorded_by
+        datetime recorded_at
+    }
+    SERVICE_OR_FAULT_ENTRY {
+        int entry_id PK
+        string entry_type
+        date entry_date
+        string bike_asset_tag FK "exactly one of bike or battery"
+        string battery_asset_tag FK "exactly one of bike or battery"
+        string description
+        string recorded_by
+        datetime recorded_at
+        date cleared_date "faults only"
+        string cleared_by "faults only"
+    }

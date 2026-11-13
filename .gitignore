@@ -25,3 +25,5 @@ pnpm-debug.log*
 
 # local scratch, not part of the site
 _to_delete/
+
+design/planner.css

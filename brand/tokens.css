@@ -1,0 +1,107 @@
+/*
+ * Greener Miles design tokens
+ * Fictional organisation for an article and demo. Not a real brand.
+ * Source of truth: brand-identity.md. Change values there first.
+ *
+ * Fonts (DEC-51): Lexend, Atkinson Hyperlegible and IBM Plex Mono are loaded
+ * through Astro's Fonts API with Google as the provider, so they're served
+ * from the site, not from Google. Configure them in astro.config with these
+ * CSS variables:
+ *   Lexend                 cssVariable "--font-lexend"      weights 500, 600
+ *   Atkinson Hyperlegible  cssVariable "--font-atkinson"    weights 400, 700; styles normal, italic
+ *   IBM Plex Mono          cssVariable "--font-plex-mono"   weights 400, 500
+ * Don't add a Google Fonts <link> or @import. Outside the planner (article
+ * figures), the named fallbacks below apply.
+ */
+
+:root {
+  /* Core palette */
+  --gm-hedgerow: #1E6B47;      /* primary brand green */
+  --gm-leaf: #7BC043;          /* accent, fills only */
+  --gm-grid-amber: #E8A317;    /* accent, fills only */
+  --gm-ink: #16262B;           /* body text */
+  --gm-slate: #52646A;         /* secondary text */
+  --gm-mist: #DCE6DF;          /* borders, subtle fills */
+  --gm-chalk: #F5F3EC;         /* page background */
+  --gm-white: #FFFFFF;         /* cards, surfaces */
+
+  /* Carbon intensity bands (match the Carbon Intensity API index values).
+     Show the band name with the colour; no meanings or figures (DEC-32). */
+  --gm-band-very-low: #1E6B47;   --gm-band-very-low-text: #FFFFFF;
+  --gm-band-low: #5FA83B;        --gm-band-low-text: #16262B;
+  --gm-band-moderate: #E8A317;   --gm-band-moderate-text: #16262B;
+  --gm-band-high: #E3772A;       --gm-band-high-text: #16262B;
+  --gm-band-very-high: #A8322D;  --gm-band-very-high-text: #FFFFFF;
+
+  /* Semantic roles */
+  --gm-bg: var(--gm-chalk);
+  --gm-surface: var(--gm-white);
+  --gm-text: var(--gm-ink);
+  --gm-text-muted: var(--gm-slate);
+  --gm-border: var(--gm-mist);
+  --gm-link: var(--gm-hedgerow);
+  --gm-action: var(--gm-hedgerow);
+  --gm-action-text: var(--gm-white);
+  --gm-focus: var(--gm-grid-amber);
+  --gm-success: var(--gm-hedgerow);
+  --gm-warning: var(--gm-band-high);
+  --gm-error: var(--gm-band-very-high);
+
+  /* Typography. The --font-* variables come from Astro's Fonts API and
+     include its matched fallback; the named stacks are for use outside Astro. */
+  --gm-font-heading: var(--font-lexend, "Lexend", "Atkinson Hyperlegible", Arial, sans-serif);
+  --gm-font-body: var(--font-atkinson, "Atkinson Hyperlegible", Arial, sans-serif);
+  --gm-font-data: var(--font-plex-mono, "IBM Plex Mono", ui-monospace, Menlo, monospace);
+
+  --gm-text-xs: 0.8125rem;   /* 13px  captions, tags */
+  --gm-text-sm: 0.875rem;    /* 14px  table cells, helper text */
+  --gm-text-base: 1rem;      /* 16px  body */
+  --gm-text-lg: 1.25rem;     /* 20px  lead text, H4 */
+  --gm-text-xl: 1.5rem;      /* 24px  H3 */
+  --gm-text-2xl: 2rem;       /* 32px  H2 */
+  --gm-text-3xl: 2.5rem;     /* 40px  H1 */
+  --gm-leading-tight: 1.2;
+  --gm-leading-body: 1.55;
+
+  /* Spacing (4px base) */
+  --gm-space-1: 0.25rem;
+  --gm-space-2: 0.5rem;
+  --gm-space-3: 0.75rem;
+  --gm-space-4: 1rem;
+  --gm-space-6: 1.5rem;
+  --gm-space-8: 2rem;
+  --gm-space-12: 3rem;
+
+  /* Shape and depth */
+  --gm-radius-sm: 4px;
+  --gm-radius-md: 8px;
+  --gm-radius-lg: 16px;
+  --gm-radius-pill: 999px;
+  --gm-shadow-card: 0 1px 2px rgb(22 38 43 / 0.06), 0 4px 12px rgb(22 38 43 / 0.06);
+  --gm-focus-ring: 0 0 0 3px var(--gm-focus);
+}
+
+/* Dark theme: follows each device's dark mode setting (DEC-34).
+   There's no theme switch in the planner; data-theme is for testing only. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --gm-bg: #0F1A1D;
+    --gm-surface: #18282C;
+    --gm-text: #F5F3EC;
+    --gm-text-muted: #DCE6DF;
+    --gm-border: #2C3F44;
+    --gm-link: #8FD65A;
+    --gm-action: #8FD65A;
+    --gm-action-text: #0F1A1D;
+  }
+}
+:root[data-theme="dark"] {
+  --gm-bg: #0F1A1D;
+  --gm-surface: #18282C;
+  --gm-text: #F5F3EC;
+  --gm-text-muted: #DCE6DF;
+  --gm-border: #2C3F44;
+  --gm-link: #8FD65A;
+  --gm-action: #8FD65A;
+  --gm-action-text: #0F1A1D;
+}
