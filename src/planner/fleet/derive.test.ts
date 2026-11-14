@@ -107,3 +107,18 @@ describe('history and the last service', () => {
 		expect(m07.filter(isOpenFault).map((e) => e.entryId)).toEqual([1043]);
 	});
 });
+
+import { bikeTagHint, nextFreeTag } from './asset-forms.ts';
+
+describe('REQ-18 next free asset tag', () => {
+	it('AC-18.1 B-01 to B-26 in use: B-27', () => {
+		expect(nextFreeTag(Array.from({ length: 26 }, (_, i) => `B-${String(i + 1).padStart(2, '0')}`), 'B-')).toBe('B-27');
+	});
+
+	it('AC-18.2 the next number after the highest in the family, gaps left alone', () => {
+		expect(nextFreeTag(['M01', 'M02', 'M12', 'G01'], 'M')).toBe('M13');
+		expect(nextFreeTag(['M01', 'M12'], 'D')).toBe('D01');
+		expect(nextFreeTag(['M99'], 'M')).toBeNull();
+		expect(bikeTagHint(['G06', 'M12', 'G01'])).toBe('Next free: M13 for a Motus, G07 for a GSD');
+	});
+});

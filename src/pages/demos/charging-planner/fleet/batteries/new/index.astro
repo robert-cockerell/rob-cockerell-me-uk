@@ -2,7 +2,7 @@
 // SCR-07 Add a battery (REQ-06, REQ-10). Checked on the server; on a failed
 // check or save, everything typed comes back (NFR-19). No status, no delete (AC-06.5).
 export const prerender = false;
-import { BATTERY_FIELDS, batterySave, batteryValues } from '../../../../../../planner/fleet/asset-forms.ts';
+import { BATTERY_FIELDS, batterySave, batteryValues, nextFreeTag } from '../../../../../../planner/fleet/asset-forms.ts';
 import { formValues, type Values } from '../../../../../../planner/forms/validate.ts';
 import { londonDate } from '../../../../../../planner/plan/calendar.ts';
 import { fleet } from '../../../../../../planner/server.ts';
@@ -21,7 +21,9 @@ const existing = editing ? await repo.getBattery(editing) : null;
 const types = (await repo.listBatteryTypes()).map((t) => t.batteryType);
 if (editing && !existing) return new Response(null, { status: 404 });
 
-let values: Values = existing ? batteryValues(existing) : {};
+// REQ-18 AC-18.1: the next free tag is filled in, and can be changed.
+const suggested = nextFreeTag((await repo.listBatteries()).map((b) => b.batteryAssetTag), 'B-');
+let values: Values = existing ? batteryValues(existing) : { batteryAssetTag: suggested ?? '' };
 let errors: Record<string, string> = {};
 let outcome: SaveOutcome | null = null;
 if (Astro.request.method === 'POST') {

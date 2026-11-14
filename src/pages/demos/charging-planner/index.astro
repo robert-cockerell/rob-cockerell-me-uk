@@ -4,7 +4,7 @@
 // request: it depends on "now" and on live bookings (technical note §6.1).
 export const prerender = false;
 
-import { BOOKINGS_DOWN, CHARGING_RULES, planDateHeading } from '../../../planner/plan/wording.ts';
+import { BOOKINGS_DOWN, CHARGING_RULES, localTime, planDateHeading } from '../../../planner/plan/wording.ts';
 import { dayPlan, settings } from '../../../planner/server.ts';
 import PlanGrid from '../../../planner/ui/day-plan/PlanGrid.astro';
 import Timeline from '../../../planner/ui/day-plan/Timeline.astro';
@@ -22,6 +22,11 @@ const plan = await dayPlan(clockFor(Astro.cookies));
 			<div><p class="gm-notice__title">{BOOKINGS_DOWN.title}</p><p>{BOOKINGS_DOWN.body} <a href={routes.dayPlan}>{BOOKINGS_DOWN.retry}</a></p></div>
 		</div>
 	)}
+	<!-- REQ-17: shown only when the service worker serves this page offline (UI spec §7). -->
+	<div class="gm-notice gm-notice--offline" role="status" data-offline-notice style="display:none">
+		<svg class="gm-icon" aria-hidden="true"><use href="#i-wifi-off"/></svg>
+		<div><p class="gm-notice__title">You're offline</p><p>This is the plan your phone loaded at <span class="gm-time">{localTime(plan.now)}</span>. It may be out of date.</p></div>
+	</div>
 	<div class="gm-page-head">
 		<h1>Day plan</h1>
 		<span class="gm-page-head__sub">{planDateHeading(plan.planDate)}</span>
@@ -45,5 +50,24 @@ const plan = await dayPlan(clockFor(Astro.cookies));
 	for (const button of document.querySelectorAll<HTMLButtonElement>('[data-print]')) {
 		button.style.display = '';
 		button.addEventListener('click', () => window.print());
+	}
+
+	// REQ-17: keep this plan on the phone for when the network drops (technical note §6.4).
+	// Service workers need HTTPS or localhost (NFR-15).
+	if ('serviceWorker' in navigator) {
+		// Loaded through the worker? Then it kept this plan already.
+		const keptOnLoad = !!navigator.serviceWorker.controller;
+		navigator.serviceWorker
+			.register('/demos/charging-planner/sw.js', { scope: '/demos/charging-planner/' })
+			.then(() => navigator.serviceWorker.ready)
+			.then((registration) => {
+				if (keptOnLoad) return;
+				const assets = performance
+					.getEntriesByType('resource')
+					.map((entry) => entry.name)
+					.filter((url) => new URL(url).origin === location.origin);
+				registration.active?.postMessage({ type: 'keep-plan', assets });
+			})
+			.catch(() => undefined);
 	}
 </script>

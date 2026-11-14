@@ -2,7 +2,7 @@
 // SCR-07 Add a bike (REQ-06, REQ-10). Checked on the server; on a failed
 // check or save, everything typed comes back (NFR-19). No status, no delete (AC-06.5).
 export const prerender = false;
-import { BIKE_FIELDS, bikeSave, bikeValues } from '../../../../../../planner/fleet/asset-forms.ts';
+import { BIKE_FIELDS, bikeSave, bikeTagHint, bikeValues } from '../../../../../../planner/fleet/asset-forms.ts';
 import { formValues, type Values } from '../../../../../../planner/forms/validate.ts';
 import { londonDate } from '../../../../../../planner/plan/calendar.ts';
 import { fleet } from '../../../../../../planner/server.ts';
@@ -20,6 +20,8 @@ const editing: string | null = null;
 const existing = editing ? await repo.getBike(editing) : null;
 if (editing && !existing) return new Response(null, { status: 404 });
 
+// REQ-18 AC-18.2: the next free tag in each family, in the tag field's hint.
+const tagHint = bikeTagHint((await repo.listBikes()).map((b) => b.bikeAssetTag));
 let values: Values = existing ? bikeValues(existing) : {};
 let errors: Record<string, string> = {};
 let outcome: SaveOutcome | null = null;
@@ -34,6 +36,6 @@ const back = editing ? { href: routes.bike(editing), label: editing } : { href: 
 ---
 <PlannerLayout page={heading} hasErrors={Object.keys(errors).length > 0 || (outcome?.kind === 'needs-name' && !!outcome.nameError)}>
 	<FormShell heading={heading} back={back} action={Astro.url.pathname} values={values} errors={errors} order={BIKE_FIELDS} outcome={outcome} submitLabel="Save bike" name={pickedName(Astro.cookies)} nameLabel="Saved as">
-		<BikeFields values={values} errors={errors} editing={!!editing} today={today} />
+		<BikeFields values={values} errors={errors} editing={!!editing} today={today} tagHint={tagHint} />
 	</FormShell>
 </PlannerLayout>
