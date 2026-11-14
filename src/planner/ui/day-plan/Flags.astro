@@ -1,0 +1,14 @@
+---
+// C05 Flags and warnings (design/reference.html #c05). Beside the state; they
+// never change it (DEC-02).
+import type { DayPlanBike } from '../../plan/types.ts';
+import { localTime, OPEN_FAULT_LABEL, RESOURCE_MISMATCH_LABEL } from '../../plan/wording.ts';
+
+interface Props {
+	bike: DayPlanBike;
+}
+const { bike } = Astro.props;
+---
+{bike.openFault && <span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>{OPEN_FAULT_LABEL}</span>}
+{bike.bookedAgainAt && <span class="gm-flag gm-flag--rebooked"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-calendar-clock"/></svg>Booked again at <span class="gm-time">{localTime(bike.bookedAgainAt)}</span></span>}
+{bike.resourceMismatch && <span class="gm-flag gm-flag--mismatch"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-link-2-off"/></svg>{RESOURCE_MISMATCH_LABEL}</span>}

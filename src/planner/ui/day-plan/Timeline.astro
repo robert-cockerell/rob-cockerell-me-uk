@@ -1,0 +1,46 @@
+---
+// C06 Phone timeline (design/reference.html #c06, REQ-04). 19 slots; 07:00
+// lists every bike (DEC-40), later slots only bikes that change, or "No
+// changes". The current slot is marked "now". Each bike row links to its record.
+import { timeline } from '../../plan/timeline.ts';
+import type { DayPlan, DayPlanBike } from '../../plan/types.ts';
+import { NO_CHANGES } from '../../plan/wording.ts';
+import { routes } from '../routes.ts';
+import BandTag from './BandTag.astro';
+import Flags from './Flags.astro';
+import NextBooking from './NextBooking.astro';
+import StateLabel from './StateLabel.astro';
+
+interface Props {
+	plan: DayPlan;
+}
+const { plan } = Astro.props;
+const bikeInfo = new Map<string, DayPlanBike>(plan.bikes.map((b) => [b.bikeAssetTag, b]));
+const slots = timeline(plan);
+const now = plan.now.getTime();
+const hasFlags = (b: DayPlanBike) => b.openFault || b.bookedAgainAt !== null || b.resourceMismatch;
+---
+<ol class="gm-timeline">
+	{slots.map((slot, i) => {
+		const times = plan.slots[i];
+		const isNow = times.start.getTime() <= now && now < times.end.getTime();
+		return (
+			<li class={isNow ? 'gm-slot gm-slot--now' : 'gm-slot'}>
+				<time class="gm-slot__time" datetime={`${plan.planDate}T${slot.time}`}>{slot.time}</time>
+				<span class="gm-slot__band"><BandTag band={slot.band} /></span>
+				{plan.bookingsAvailable && (slot.bikes.length > 0 ? (
+					<ul class="gm-slot__bikes">
+						{slot.bikes.map((state) => {
+							const bike = bikeInfo.get(state.bikeAssetTag) as DayPlanBike;
+							return (
+								<li><a class="gm-bike-row" href={routes.bike(state.bikeAssetTag)}><span class="gm-bike-row__tag">{state.bikeAssetTag}</span><span class="gm-bike-row__body"><StateLabel state={state.state} dueAt={state.dueAt} planDate={plan.planDate} /><NextBooking at={bike.nextBooking} planDate={plan.planDate} /></span>{hasFlags(bike) && <span class="gm-bike-row__flags"><Flags bike={bike} /></span>}</a></li>
+							);
+						})}
+					</ul>
+				) : (
+					<p class="gm-slot__quiet">{NO_CHANGES}</p>
+				))}
+			</li>
+		);
+	})}
+</ol>

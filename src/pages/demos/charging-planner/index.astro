@@ -1,0 +1,31 @@
+---
+// SCR-02 Day plan, phone timeline (REQ-01 to REQ-04). Rendered on request:
+// it depends on "now" and on live bookings (technical note §6.1).
+export const prerender = false;
+
+import { BOOKINGS_DOWN, CHARGING_RULES, planDateHeading } from '../../../planner/plan/wording.ts';
+import { dayPlan, settings } from '../../../planner/server.ts';
+import Timeline from '../../../planner/ui/day-plan/Timeline.astro';
+import PlannerLayout from '../../../planner/ui/PlannerLayout.astro';
+import { routes } from '../../../planner/ui/routes.ts';
+
+const plan = await dayPlan();
+---
+<PlannerLayout page="Day plan" current="day-plan">
+	{!plan.bookingsAvailable && (
+		<div class="gm-notice gm-notice--problem" role="alert">
+			<svg class="gm-icon" aria-hidden="true"><use href="#i-circle-alert"/></svg>
+			<div><p class="gm-notice__title">{BOOKINGS_DOWN.title}</p><p>{BOOKINGS_DOWN.body} <a href={routes.dayPlan}>{BOOKINGS_DOWN.retry}</a></p></div>
+		</div>
+	)}
+	<div class="gm-page-head">
+		<h1>Day plan</h1>
+		<span class="gm-page-head__sub">{planDateHeading(plan.planDate)}</span>
+	</div>
+	{settings.handbookUrl && (
+		<div class="d-flex flex-wrap gap-2 mb-3 gm-noprint">
+			<a class="gm-linkout" href={settings.handbookUrl}><svg class="gm-icon" aria-hidden="true"><use href="#i-book-open"/></svg>{CHARGING_RULES}<span class="visually-hidden"> (opens the volunteer handbook)</span></a>
+		</div>
+	)}
+	<Timeline plan={plan} />
+</PlannerLayout>

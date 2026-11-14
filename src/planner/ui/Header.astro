@@ -1,0 +1,24 @@
+---
+// C01 App shell header with the name chip (design/reference.html #c01).
+import { routes } from './routes.ts';
+
+interface Props {
+	current: 'day-plan' | 'fleet';
+	name: string | null;
+}
+const { current, name } = Astro.props;
+---
+<header class="gm-header">
+	<a class="gm-header__brand" href={routes.dayPlan}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="32" height="32" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="28" fill="#1E6B47"/><path d="M17 47 C17 27 27 17 47 17 C47 37 37 47 17 47 Z" fill="#7BC043"/><path d="M20 44 C27 36 31 33 34 29 C37 25 40 22 44 20" fill="none" stroke="#1E6B47" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="4.5 3.5"/></svg>Charging planner</a>
+	<nav class="gm-header__nav" aria-label="Main">
+		<a class="gm-tab" href={routes.dayPlan} aria-current={current === 'day-plan' ? 'page' : undefined}><svg class="gm-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg>Day plan</a>
+		<a class="gm-tab" href={routes.fleet} aria-current={current === 'fleet' ? 'page' : undefined}><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Fleet</a>
+	</nav>
+	<div class="gm-header__end">
+		{name ? (
+			<a class="gm-name-chip" href={routes.namePicker}><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-user-round"/></svg>{name}<span class="visually-hidden">. Change name</span></a>
+		) : (
+			<a class="gm-name-chip gm-name-chip--empty" href={routes.namePicker}><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-user-round"/></svg>Add your name</a>
+		)}
+	</div>
+</header>

@@ -1,0 +1,13 @@
+---
+// C02 Band tag (design/reference.html #c02). Name in text on the band fill;
+// a leaf on "very low" only; "No forecast" when D1 has nothing (BR-10).
+import type { IndexBand } from '../../plan/types.ts';
+import { bandLabel } from '../../plan/wording.ts';
+
+interface Props {
+	band: IndexBand | null;
+}
+const { band } = Astro.props;
+const modifier = band ? band.replace(' ', '-') : 'none';
+---
+<span class={`gm-band gm-band--${modifier}`}>{band === 'very low' && <svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-leaf"/></svg>}{bandLabel(band)}</span>

@@ -41,16 +41,41 @@ export function bandLabel(band: IndexBand | null): string {
 	return band ?? NO_FORECAST;
 }
 
+/** "14:00" on the plan date, "Wed 13:00" on another day. */
+export function whenFromPlanDate(at: Date, planDate: string): string {
+	return londonDate(at) === planDate ? localTime(at) : dayAndTime(at);
+}
+
 /** DI-030 with an overdue state: "due 11:00" today, "due Mon 16:30" on an earlier day (DEC-24). */
 export function dueLabel(dueAt: Date, planDate: string): string {
-	return `due ${londonDate(dueAt) === planDate ? localTime(dueAt) : dayAndTime(dueAt)}`;
+	return `due ${whenFromPlanDate(dueAt, planDate)}`;
 }
+
+/** C04: the words before the time. */
+export const NEXT_OUT = 'next out:';
 
 /** C04, BR-03: "next out: 14:00", "next out: Wed 13:00" or "No booking". */
 export function nextBookingLabel(nextBooking: Date | null, planDate: string): string {
 	if (!nextBooking) return NO_BOOKING;
-	return `next out: ${londonDate(nextBooking) === planDate ? localTime(nextBooking) : dayAndTime(nextBooking)}`;
+	return `${NEXT_OUT} ${whenFromPlanDate(nextBooking, planDate)}`;
 }
+
+/** Page heading date, UI spec §8.2: "Tue 16 Jun". */
+export function planDateHeading(planDate: string): string {
+	const [y, m, d] = planDate.split('-').map(Number);
+	return format(new TZDate(y, m - 1, d, 12, 0, LONDON), 'EEE d MMM');
+}
+
+/** Timeline slot with no bike changing (C06). */
+export const NO_CHANGES = 'No changes';
+/** C17 link out (REQ-16). */
+export const CHARGING_RULES = 'Charging rules';
+/** C16 problem notice when LibreBooking can't be reached (PRD §7.3). */
+export const BOOKINGS_DOWN = {
+	title: "Bookings can't be loaded",
+	body: "LibreBooking isn't answering, so bike states aren't shown. Fleet records still work.",
+	retry: 'Try again',
+};
 
 /** C05, BR-05: "Booked again at 14:00". */
 export function bookedAgainLabel(at: Date): string {

@@ -1,0 +1,11 @@
+---
+// C04 Next booking label (design/reference.html #c04), BR-03.
+import { NEXT_OUT, NO_BOOKING, whenFromPlanDate } from '../../plan/wording.ts';
+
+interface Props {
+	at: Date | null;
+	planDate: string;
+}
+const { at, planDate } = Astro.props;
+---
+{at ? <span class="gm-next">{NEXT_OUT} <strong>{whenFromPlanDate(at, planDate)}</strong></span> : <span class="gm-next">{NO_BOOKING}</span>}

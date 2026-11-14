@@ -31,3 +31,7 @@ design/planner.css
 supabase/.temp/
 
 .vercel/
+
+# Playwright output (charging planner browser tests)
+test-results/
+playwright-report/

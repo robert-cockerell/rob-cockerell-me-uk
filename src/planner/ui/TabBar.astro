@@ -1,0 +1,13 @@
+---
+// C01 bottom tab bar for phones (design/reference.html #c01). Hidden from 992 px.
+import { routes } from './routes.ts';
+
+interface Props {
+	current: 'day-plan' | 'fleet';
+}
+const { current } = Astro.props;
+---
+<nav class="gm-tabbar" aria-label="Main">
+	<a class="gm-tab" href={routes.dayPlan} aria-current={current === 'day-plan' ? 'page' : undefined}><svg class="gm-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg>Day plan</a>
+	<a class="gm-tab" href={routes.fleet} aria-current={current === 'fleet' ? 'page' : undefined}><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Fleet</a>
+</nav>

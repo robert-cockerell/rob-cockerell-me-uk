@@ -2,7 +2,7 @@
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import { defineConfig, fontProviders } from 'astro/config';
+import { defineConfig, envField, fontProviders } from 'astro/config';
 import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
@@ -33,5 +33,50 @@ export default defineConfig({
 				],
 			},
 		},
+		// Charging planner (brand/tokens.css, DEC-51). Downloaded at build time and
+		// served from the site. Atkinson Hyperlegible can't share --font-atkinson
+		// with the blog's font above, so the planner layout points --font-atkinson
+		// at --font-atkinson-hyperlegible on planner pages only.
+		{
+			provider: fontProviders.google(),
+			name: 'Lexend',
+			cssVariable: '--font-lexend',
+			weights: [500, 600],
+			styles: ['normal'],
+			subsets: ['latin'],
+			fallbacks: ['Atkinson Hyperlegible', 'Arial', 'sans-serif'],
+		},
+		{
+			provider: fontProviders.google(),
+			name: 'Atkinson Hyperlegible',
+			cssVariable: '--font-atkinson-hyperlegible',
+			weights: [400, 700],
+			styles: ['normal', 'italic'],
+			subsets: ['latin'],
+			fallbacks: ['Arial', 'sans-serif'],
+		},
+		{
+			provider: fontProviders.google(),
+			name: 'IBM Plex Mono',
+			cssVariable: '--font-plex-mono',
+			weights: [400, 500],
+			styles: ['normal'],
+			subsets: ['latin'],
+			fallbacks: ['ui-monospace', 'Menlo', 'monospace'],
+		},
 	],
+	// Charging planner settings (technical note §7.1, DEC-60). Server only.
+	// All optional, so the blog builds without them.
+	env: {
+		schema: {
+			GM_SUPABASE_URL: envField.string({ context: 'server', access: 'public', optional: true }),
+			GM_SUPABASE_SERVICE_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+			GM_LIBREBOOKING_URL: envField.string({ context: 'server', access: 'public', optional: true }),
+			GM_FORECAST_JOB_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
+			GM_STANDIN_CONSOLE_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+			GM_DEMO_MODE: envField.boolean({ context: 'server', access: 'public', default: false }),
+			GM_PUBLIC_DEMO: envField.boolean({ context: 'server', access: 'public', default: false }),
+			GM_HANDBOOK_URL: envField.string({ context: 'server', access: 'public', optional: true }),
+		},
+	},
 });

@@ -1,0 +1,25 @@
+---
+// C03 Bike state label (design/reference.html #c03). Icon plus text, no fill.
+import type { BikeState } from '../../plan/types.ts';
+import { dueLabel, STATE_LABELS } from '../../plan/wording.ts';
+
+interface Props {
+	state: BikeState;
+	dueAt: Date | null;
+	planDate: string;
+}
+const { state, dueAt, planDate } = Astro.props;
+
+const look: Record<BikeState, { modifier: string; icon: string }> = {
+	'out on loan': { modifier: 'loan', icon: 'bike' },
+	'in the workshop': { modifier: 'workshop', icon: 'warehouse' },
+	overdue: { modifier: 'overdue', icon: 'clock-alert' },
+	'out of service': { modifier: 'service', icon: 'ban' },
+};
+const { modifier, icon } = look[state];
+---
+{state === 'overdue' && dueAt ? (
+	<span class={`gm-state gm-state--${modifier}`}><svg class="gm-icon" aria-hidden="true"><use href={`#i-${icon}`}/></svg><span>{STATE_LABELS[state]} <span class="gm-due">{dueLabel(dueAt, planDate)}</span></span></span>
+) : (
+	<span class={`gm-state gm-state--${modifier}`}><svg class="gm-icon" aria-hidden="true"><use href={`#i-${icon}`}/></svg>{STATE_LABELS[state]}</span>
+)}

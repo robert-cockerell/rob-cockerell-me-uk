@@ -1,0 +1,46 @@
+---
+// The planner's own layout (technical note §3). Loads brand/tokens.css, then
+// the compiled theme, and nothing from the blog. Fonts come from Astro's Fonts
+// API (DEC-51).
+import { Font } from 'astro:assets';
+import '../../../brand/tokens.css';
+import '../../../design/planner-theme.scss';
+import Header from './Header.astro';
+import Icons from './Icons.astro';
+import TabBar from './TabBar.astro';
+import { NAME_COOKIE, routes } from './routes.ts';
+
+interface Props {
+	/** Page name; the title becomes "<page> – Charging planner" (UI spec §8.3). */
+	page: string;
+	current: 'day-plan' | 'fleet';
+}
+
+const { page, current } = Astro.props;
+const name = Astro.cookies.get(NAME_COOKIE)?.value?.trim() || null;
+---
+<!doctype html>
+<html lang="en-GB">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{page} – Charging planner</title>
+		<link rel="icon" type="image/svg+xml" href={routes.favicon} />
+		<Font cssVariable="--font-lexend" preload />
+		<Font cssVariable="--font-atkinson-hyperlegible" preload />
+		<Font cssVariable="--font-plex-mono" />
+		<style is:global>
+			/* tokens.css reads --font-atkinson; on planner pages that's Atkinson Hyperlegible. */
+			:root { --font-atkinson: var(--font-atkinson-hyperlegible); }
+		</style>
+	</head>
+	<body class="gm-planner">
+		<a class="gm-skip" href="#main">Skip to main content</a>
+		<Icons />
+		<Header current={current} name={name} />
+		<main class="gm-main" id="main">
+			<slot />
+		</main>
+		<TabBar current={current} />
+	</body>
+</html>
