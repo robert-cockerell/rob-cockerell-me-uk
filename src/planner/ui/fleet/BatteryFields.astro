@@ -1,0 +1,24 @@
+---
+// SCR-07 battery fields (C12). DI-014 to DI-018. No status, no delete (AC-06.5).
+import type { Values } from '../../forms/validate.ts';
+import Field from '../forms/Field.astro';
+
+interface Props {
+	values: Values;
+	errors: Record<string, string>;
+	editing: boolean;
+	types: string[];
+	today: string;
+}
+const { values: v, errors: e, editing, types, today } = Astro.props;
+const options = [{ value: '', label: 'Choose a battery type' }, ...types.map((t) => ({ value: t, label: t }))];
+---
+{editing ? (
+	<div class="gm-field"><span class="form-label">Asset tag</span><p class="m-0 gm-mono">{v.batteryAssetTag}</p></div>
+) : (
+	<Field name="batteryAssetTag" label="Asset tag" hint="For example, B-27" value={v.batteryAssetTag} error={e.batteryAssetTag} width="tag" tag />
+)}
+<Field name="batteryType" label="Battery type" kind="select" options={options} value={v.batteryType ?? ''} error={e.batteryType} width="datetime" />
+<Field name="boschSerial" label="Bosch serial" optional hint="On the battery's Bosch label" value={v.boschSerial} error={e.boschSerial} mono />
+<Field name="batteryPurchaseDate" label="Purchase date" optional kind="date" value={v.batteryPurchaseDate} error={e.batteryPurchaseDate} width="date" max={today} />
+<Field name="cycleCount" label="Cycle count" optional hint="From the dealer's job sheet. A whole number from 0 to 9,999" kind="number-text" value={v.cycleCount} error={e.cycleCount} width="short" mono />

@@ -1,0 +1,26 @@
+---
+// The bike picker for fitting a battery (C11 with bikes, SCR-08), used on the
+// battery record itself, so a fit from the battery's end is two taps: the bike,
+// then Fit battery (NFR-01). Also used on the fit page after a failed check.
+import type { PickerOption } from '../../fleet/fitting.ts';
+import FittedFrom from './FittedFrom.astro';
+import Picker from './Picker.astro';
+
+interface Props {
+	battery: string;
+	options: PickerOption[];
+	selected: string | null;
+	fittedFrom: string;
+	max: string;
+	errors: Record<string, string>;
+	headingLevel: 1 | 2;
+}
+const { battery, options, selected, fittedFrom, max, errors, headingLevel } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+---
+<fieldset>
+	<legend><Heading class="h4 m-0">Fit <span class="gm-mono">{battery}</span> to a bike</Heading></legend>
+	<p class="gm-muted">Choose the bike. The battery it has now goes on the shelf.</p>
+	<Picker name="bike" options={options} selected={selected} error={errors.bike} />
+</fieldset>
+<FittedFrom value={fittedFrom} max={max} error={errors.fittedFrom} />

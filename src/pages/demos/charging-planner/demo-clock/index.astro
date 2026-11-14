@@ -1,0 +1,58 @@
+---
+// Public demo only (DEC-49, DEC-61): a reader picks their own demo date and
+// time from the scenario dates. It's kept in a cookie and read by the clock
+// module's now(); it never moves the stand-in's shared demo clock. Built from
+// existing components only (C12, C15, C16), as Rob agreed.
+export const prerender = false;
+import { PUBLIC_DEMO_START } from '../../../../planner/clock/clock.ts';
+import { formValues, type Values } from '../../../../planner/forms/validate.ts';
+import { planDateHeading } from '../../../../planner/plan/wording.ts';
+import { settings } from '../../../../planner/server.ts';
+import Field from '../../../../planner/ui/forms/Field.astro';
+import ErrorSummary from '../../../../planner/ui/forms/ErrorSummary.astro';
+import PlannerLayout from '../../../../planner/ui/PlannerLayout.astro';
+import { BASE, routes } from '../../../../planner/ui/routes.ts';
+import { READER_CLOCK_COOKIE, setNotice } from '../../../../planner/web/request.ts';
+
+if (!settings.publicDemo) return new Response(null, { status: 404 });
+
+/** PRD A.1 and the S5 Wednesday. */
+const DATES = [
+	{ value: '2026-06-16', note: 'main demo day' },
+	{ value: '2026-06-17', note: 'the Wednesday after' },
+	{ value: '2026-06-19', note: 'a Friday' },
+	{ value: '2026-03-30', note: 'after the clocks go forward' },
+	{ value: '2026-10-26', note: 'after the clocks go back' },
+	{ value: '2026-12-08', note: 'a December day' },
+];
+const options = DATES.map((d) => ({ value: d.value, label: `${planDateHeading(d.value)} 2026, ${d.note}` }));
+
+const current = Astro.cookies.get(READER_CLOCK_COOKIE)?.value ?? PUBLIC_DEMO_START;
+let values: Values = { date: current.slice(0, 10), time: current.slice(11, 16) };
+let errors: Record<string, string> = {};
+
+if (Astro.request.method === 'POST') {
+	values = formValues(await Astro.request.formData());
+	if (!DATES.some((d) => d.value === values.date)) errors.date = 'Choose a demo date';
+	if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(values.time ?? '')) errors.time = 'Enter the time as hours and minutes, like 07:00';
+	if (!Object.keys(errors).length) {
+		Astro.cookies.set(READER_CLOCK_COOKIE, `${values.date} ${values.time}`, { path: BASE, httpOnly: true, sameSite: 'lax', secure: import.meta.env.PROD, maxAge: 60 * 60 * 24 * 30 });
+		setNotice(Astro.cookies, { kind: 'success', title: 'Demo time set', body: `The planner now reads ${planDateHeading(values.date)} 2026, ${values.time}, for you only.` });
+		return Astro.redirect(routes.dayPlan, 303);
+	}
+}
+---
+<PlannerLayout page="Demo date and time" current="day-plan" hasErrors={Object.keys(errors).length > 0}>
+	<a class="gm-back" href={routes.dayPlan}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Day plan</a>
+	<ErrorSummary errors={errors} order={['date', 'time']} />
+	<form class="gm-form" method="post" action={Astro.url.pathname} novalidate>
+		<h1 class="h3 m-0">Demo date and time</h1>
+		<p class="m-0">The demo runs on fixed dates, so its bookings and forecasts line up. Changing the time here changes it for you only.</p>
+		<Field name="date" label="Demo date" kind="select" options={options} value={values.date} error={errors.date} />
+		<Field name="time" label="Time" hint="The planner's staffed day runs from 07:00 to 16:30" kind="time" value={values.time} error={errors.time} width="short" />
+		<div class="gm-actionbar">
+			<button class="btn btn-primary" type="submit">Set the demo time</button>
+			<a class="btn btn-link" href={routes.dayPlan}>Cancel</a>
+		</div>
+	</form>
+</PlannerLayout>

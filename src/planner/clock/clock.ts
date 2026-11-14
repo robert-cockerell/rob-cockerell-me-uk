@@ -3,9 +3,21 @@
 // system clock otherwise. Recorded at, Last updated at and Fitted from all
 // use it. Nothing else reads the system clock for business time.
 //
-// Public demo readers' own clocks (DEC-61) are Stage 5.
+// On the public demo (GM_PUBLIC_DEMO), now() is the reader's own demo date and
+// time from a cookie, held, starting at Tue 16 June 2026 07:00. Nothing a
+// reader does moves the stand-in's shared demo clock (DEC-61).
 
+import { parseLondonLocal } from '../time/london.ts';
 import { systemNow } from './system-now.ts';
+
+/** DEC-61: where a public demo reader starts. */
+export const PUBLIC_DEMO_START = '2026-06-16 07:00';
+
+/** The reader's clock on the public demo: their chosen local time, held. */
+export function createReaderClock(readerLocal: string | null | undefined): Clock {
+	const at = (readerLocal && parseLondonLocal(readerLocal)) || (parseLondonLocal(PUBLIC_DEMO_START) as Date);
+	return { now: async () => at };
+}
 
 export interface Clock {
 	now(): Promise<Date>;

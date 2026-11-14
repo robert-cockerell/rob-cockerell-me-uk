@@ -1,0 +1,31 @@
+---
+// C14 Confirm warning (design/reference.html #c14, REQ-11, BR-06). Its own
+// page, shown before anything is saved. "Go back" is the safe, primary choice;
+// "Fit anyway" saves. It never blocks.
+import { dateLabel } from '../../fleet/wording.ts';
+import type { Entry } from '../../fleet/types.ts';
+
+interface Props {
+	battery: string;
+	bike: string;
+	fault: Entry;
+	action: string;
+	/** The fields to post again with "Fit anyway". */
+	carry: Record<string, string>;
+	back: string;
+}
+const { battery, bike, fault, action, carry, back } = Astro.props;
+---
+<section class="gm-confirm" aria-labelledby="cw-h">
+	<h1 class="gm-confirm__title h4" id="cw-h"><svg class="gm-icon" aria-hidden="true"><use href="#i-battery-warning"/></svg><span><span class="gm-mono">{battery}</span> is quarantined</span></h1>
+	<p class="gm-confirm__fault">Open fault from <span class="gm-time">{dateLabel(fault.entryDate)}</span>:<br /><strong>{fault.description}</strong></p>
+	<p class="m-0">Fit it to <span class="gm-mono">{bike}</span> anyway? Only do this to test it.</p>
+	<form method="post" action={action} novalidate>
+		{Object.entries(carry).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+		<input type="hidden" name="confirm" value="fit-anyway" />
+		<div class="gm-confirm__actions">
+			<a class="btn btn-primary" href={back}>Go back</a>
+			<button class="btn btn-outline-primary" type="submit">Fit anyway</button>
+		</div>
+	</form>
+</section>

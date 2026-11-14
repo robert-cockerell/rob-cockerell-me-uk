@@ -1,0 +1,20 @@
+---
+// C16 Notices (design/reference.html #c16): inline at the top, never toasts.
+import type { Notice } from '../web/request.ts';
+
+interface Props {
+	notice: Notice | null;
+}
+const { notice } = Astro.props;
+const look = {
+	success: { cls: 'gm-notice--success', icon: 'circle-check', role: 'status' },
+	problem: { cls: 'gm-notice--problem', icon: 'circle-alert', role: 'alert' },
+	demo: { cls: 'gm-notice--demo', icon: 'info', role: 'note' },
+} as const;
+---
+{notice && (
+	<div class={`gm-notice ${look[notice.kind].cls}`} role={look[notice.kind].role}>
+		<svg class="gm-icon" aria-hidden="true"><use href={`#i-${look[notice.kind].icon}`}/></svg>
+		<div><p class="gm-notice__title">{notice.title}</p><p>{notice.body}<slot /></p></div>
+	</div>
+)}

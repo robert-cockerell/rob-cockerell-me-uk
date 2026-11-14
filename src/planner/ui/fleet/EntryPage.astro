@@ -1,0 +1,44 @@
+---
+// SCR-09 to SCR-11 Fault report, service check and dealer service (REQ-09).
+// Render only; the page runs handleEntry. Entry date defaults to today
+// (AC-09.6). A dealer service lists the bike's open faults to mark as fixed.
+import { dateLabel } from '../../fleet/wording.ts';
+import { ENTRY_PAGE, type EntryView } from '../../web/entries.ts';
+import { pickedName } from '../../web/request.ts';
+import Field from '../forms/Field.astro';
+import FormShell from '../forms/FormShell.astro';
+import PlannerLayout from '../PlannerLayout.astro';
+import { routes } from '../routes.ts';
+
+interface Props {
+	view: EntryView;
+	action: string;
+}
+const { view: v, action } = Astro.props;
+const page = ENTRY_PAGE[v.kind];
+const heading = page.heading(v.tag);
+const back = { href: v.asset === 'bikes' ? routes.bike(v.tag) : routes.battery(v.tag), label: v.tag };
+const cleared = (v.values.clears ?? '').split(',');
+const nameError = v.outcome?.kind === 'needs-name' && !!v.outcome.nameError;
+---
+<PlannerLayout page={heading} hasErrors={Object.keys(v.errors).length > 0 || nameError}>
+	<FormShell heading={heading} back={back} action={action} values={v.values} errors={v.errors} order={['description', 'entryDate', 'clears']} outcome={v.outcome} submitLabel={page.submit} name={pickedName(Astro.cookies)}>
+		<Field name="description" label={page.describe} kind="textarea" value={v.values.description} error={v.errors.description} hint={v.kind === 'dealer-service' ? 'Start with the service type, for example "Interim: new chain"' : undefined} />
+		<Field name="entryDate" label="Entry date" hint={page.dateHint} kind="date" value={v.values.entryDate} error={v.errors.entryDate} width="date" max={v.today} />
+		{v.kind === 'dealer-service' && v.openFaults.length > 0 && (
+			<fieldset class={v.errors.clears ? 'gm-field gm-field--error' : 'gm-field'}>
+				<legend class="form-label">Faults this service fixed <span class="gm-optional">(optional)</span></legend>
+				<div class="form-text" id="f-clears-hint">Each one you tick is closed, with this service's date and your name.</div>
+				{v.errors.clears && <p class="invalid-feedback" id="f-clears-error"><span class="visually-hidden">Error: </span>{v.errors.clears}</p>}
+				<ul class="gm-picker" id="f-clears">
+					{v.openFaults.map((f) => (
+						<li class="gm-picker__option">
+							<input class="gm-picker__input" type="checkbox" name="clears" id={`clear-${f.entryId}`} value={String(f.entryId)} checked={cleared.includes(String(f.entryId))} aria-describedby="f-clears-hint" />
+							<label class="gm-picker__label" for={`clear-${f.entryId}`}><span class="gm-picker__tag">{f.entryId}</span><span class="gm-picker__detail"><span>{f.description}</span><span class="gm-muted">Reported {dateLabel(f.entryDate)}</span></span></label>
+						</li>
+					))}
+				</ul>
+			</fieldset>
+		)}
+	</FormShell>
+</PlannerLayout>

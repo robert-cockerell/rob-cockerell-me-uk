@@ -1,0 +1,33 @@
+---
+// SCR-01 Name picker, from the name chip (REQ-10, AC-10.3). The name is
+// stored on the device in a cookie; it's not a login (technical note §6.3).
+export const prerender = false;
+
+import { SAVED } from '../../../../planner/fleet/wording.ts';
+import { checkName, formValues } from '../../../../planner/forms/validate.ts';
+import NamePicker from '../../../../planner/ui/forms/NamePicker.astro';
+import PlannerLayout from '../../../../planner/ui/PlannerLayout.astro';
+import { safeReturn } from '../../../../planner/ui/routes.ts';
+import { pickedName, rememberName, setNotice } from '../../../../planner/web/request.ts';
+import { NAME_FIELD } from '../../../../planner/web/save.ts';
+
+const back = safeReturn(Astro.url.searchParams.get('return'));
+let value = pickedName(Astro.cookies) ?? '';
+let error: string | null = null;
+
+if (Astro.request.method === 'POST') {
+	const values = formValues(await Astro.request.formData());
+	value = values[NAME_FIELD] ?? '';
+	const checked = checkName(value);
+	if (checked.ok) {
+		rememberName(Astro.cookies, checked.value);
+		setNotice(Astro.cookies, { kind: 'success', ...SAVED.name(checked.value) });
+		return Astro.redirect(back, 303);
+	}
+	error = checked.errors.name;
+}
+---
+<PlannerLayout page="Your name" hasErrors={!!error}>
+	<a class="gm-back" href={back}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back</a>
+	<NamePicker action={`${Astro.url.pathname}${Astro.url.search}`} value={value} error={error} />
+</PlannerLayout>

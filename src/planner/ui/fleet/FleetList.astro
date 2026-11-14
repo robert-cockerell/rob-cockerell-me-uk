@@ -1,0 +1,62 @@
+---
+// C08 Fleet list (design/reference.html #c08): one page, three views switched
+// with the segmented control. Rows link to the record. Sorted by asset tag.
+import { capacityLabel, locationLabel } from '../../fleet/wording.ts';
+import type { Battery, BatteryLocation, BatteryType, Bike } from '../../fleet/types.ts';
+import { routes } from '../routes.ts';
+
+type View =
+	| { kind: 'bikes'; bikes: Bike[] }
+	| { kind: 'batteries'; batteries: { battery: Battery; location: BatteryLocation }[] }
+	| { kind: 'types'; types: BatteryType[] };
+
+interface Props {
+	view: View;
+}
+const { view } = Astro.props;
+const locationLook = {
+	fitted: { cls: 'gm-location--fitted', icon: 'battery' },
+	shelf: { cls: 'gm-location--shelf', icon: 'package' },
+	quarantined: { cls: 'gm-location--quarantined', icon: 'battery-warning' },
+} as const;
+const current = (kind: View['kind']) => (view.kind === kind ? 'page' : undefined);
+---
+<div class="gm-page-head"><h1>Fleet</h1></div>
+<nav class="gm-segment" aria-label="Fleet view">
+	<a href={routes.fleet} aria-current={current('bikes')}>Bikes</a>
+	<a href={routes.fleetBatteries} aria-current={current('batteries')}>Batteries</a>
+	<a href={routes.fleetBatteryTypes} aria-current={current('types')}>Battery types</a>
+</nav>
+
+{view.kind === 'bikes' && (
+	<>
+		<ul class="gm-list">
+			{view.bikes.map((b) => (
+				<li><a class="gm-list__row" href={routes.bike(b.bikeAssetTag)}><span class="gm-list__tag">{b.bikeAssetTag}</span><span>{b.make} {b.model}</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+			))}
+		</ul>
+		<div class="d-grid mt-3"><a class="btn btn-outline-primary" href={routes.newBike}><svg class="gm-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add a bike</a></div>
+	</>
+)}
+
+{view.kind === 'batteries' && (
+	<>
+		<ul class="gm-list">
+			{view.batteries.map(({ battery, location }) => (
+				<li><a class="gm-list__row" href={routes.battery(battery.batteryAssetTag)}><span class="gm-list__tag">{battery.batteryAssetTag}</span><span class={`gm-location ${locationLook[location.kind].cls}`} style="font-size:1rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href={`#i-${locationLook[location.kind].icon}`}/></svg>{locationLabel(location)}</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+			))}
+		</ul>
+		<div class="d-grid mt-3"><a class="btn btn-outline-primary" href={routes.newBattery}><svg class="gm-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add a battery</a></div>
+	</>
+)}
+
+{view.kind === 'types' && (
+	<>
+		<ul class="gm-list">
+			{view.types.map((t) => (
+				<li><a class="gm-list__row" href={routes.batteryType(t.batteryType)}><span>{t.batteryType}</span><span class={t.capacity === null ? 'gm-empty' : 'gm-mono'}>{capacityLabel(t.capacity)}</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+			))}
+		</ul>
+		<div class="d-grid mt-3"><a class="btn btn-outline-primary" href={routes.newBatteryType}><svg class="gm-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add a battery type</a></div>
+	</>
+)}

@@ -1,0 +1,19 @@
+---
+// Fitted from (DI-020), hidden behind "Change the time" so a swap stays at two
+// taps (UI spec §5.2, design/reference.html #c11). Defaults to now; max is now.
+interface Props {
+	value: string;
+	max: string;
+	error?: string;
+}
+const { value, max, error } = Astro.props;
+---
+<details open={!!error}>
+	<summary class="fw-bold" style="min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--gm-link)">Change the time</summary>
+	<div class={error ? 'gm-field gm-field--error mt-2' : 'gm-field mt-2'}>
+		<label class="form-label" for="f-fittedFrom">Fitted from</label>
+		<div class="form-text" id="f-fittedFrom-hint">Now, unless you're recording an earlier swap. It can't be in the future.</div>
+		{error && <p class="invalid-feedback" id="f-fittedFrom-error"><span class="visually-hidden">Error: </span>{error}</p>}
+		<input class={error ? 'form-control gm-w-datetime is-invalid' : 'form-control gm-w-datetime'} id="f-fittedFrom" name="fittedFrom" type="datetime-local" value={value} max={max} aria-describedby={error ? 'f-fittedFrom-hint f-fittedFrom-error' : 'f-fittedFrom-hint'} aria-invalid={error ? 'true' : undefined} />
+	</div>
+</details>

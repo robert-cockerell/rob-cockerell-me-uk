@@ -1,0 +1,29 @@
+---
+// SCR-08 Remove a battery (REQ-08). Render only; the page runs handleRemove.
+import type { RemoveView } from '../../web/remove.ts';
+import { pickedName } from '../../web/request.ts';
+import FormShell from '../forms/FormShell.astro';
+import PlannerLayout from '../PlannerLayout.astro';
+import FittedFrom from './FittedFrom.astro';
+
+interface Props {
+	view: RemoveView;
+	action: string;
+}
+const { view: v, action } = Astro.props;
+const heading = v.battery && v.bike ? `Remove ${v.battery} from ${v.bike}` : 'Remove battery';
+---
+<PlannerLayout page={heading} hasErrors={Object.keys(v.errors).length > 0}>
+	{v.battery && v.bike ? (
+		<FormShell heading={heading} back={v.back} action={action} values={v.values} errors={v.errors} order={['fittedFrom']} outcome={v.outcome} submitLabel="Remove battery" name={pickedName(Astro.cookies)}>
+			<p class="gm-muted m-0">{v.bike} will have no battery fitted. {v.quarantined ? `${v.battery} stays quarantined.` : `${v.battery} goes on the shelf.`}</p>
+			<FittedFrom value={v.values.fittedFrom ?? v.max} max={v.max} error={v.errors.fittedFrom} />
+		</FormShell>
+	) : (
+		<>
+			<a class="gm-back" href={v.back.href}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>{v.back.label}</a>
+			<h1 class="h3">Remove battery</h1>
+			<p>{v.from === 'bike' ? `${v.tag} has no battery fitted.` : `${v.tag} isn't fitted to a bike.`}</p>
+		</>
+	)}
+</PlannerLayout>

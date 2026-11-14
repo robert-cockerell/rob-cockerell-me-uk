@@ -8,10 +8,12 @@ import { dayPlan, settings } from '../../../planner/server.ts';
 import Timeline from '../../../planner/ui/day-plan/Timeline.astro';
 import PlannerLayout from '../../../planner/ui/PlannerLayout.astro';
 import { routes } from '../../../planner/ui/routes.ts';
+import { clockFor, takeNotice } from '../../../planner/web/request.ts';
 
-const plan = await dayPlan();
+const notice = takeNotice(Astro.cookies);
+const plan = await dayPlan(clockFor(Astro.cookies));
 ---
-<PlannerLayout page="Day plan" current="day-plan">
+<PlannerLayout page="Day plan" current="day-plan" notice={notice}>
 	{!plan.bookingsAvailable && (
 		<div class="gm-notice gm-notice--problem" role="alert">
 			<svg class="gm-icon" aria-hidden="true"><use href="#i-circle-alert"/></svg>

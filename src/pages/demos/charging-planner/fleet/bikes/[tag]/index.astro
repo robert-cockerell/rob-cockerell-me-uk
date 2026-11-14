@@ -1,0 +1,37 @@
+---
+// SCR-05 Bike record (REQ-05): last service and fitted battery first, then
+// actions, then history newest first.
+export const prerender = false;
+import { loadBikeRecord } from '../../../../../../planner/fleet/records.ts';
+import { fleet } from '../../../../../../planner/server.ts';
+import BikeSummary from '../../../../../../planner/ui/fleet/BikeSummary.astro';
+import History from '../../../../../../planner/ui/fleet/History.astro';
+import PlannerLayout from '../../../../../../planner/ui/PlannerLayout.astro';
+import { routes } from '../../../../../../planner/ui/routes.ts';
+import { takeNotice } from '../../../../../../planner/web/request.ts';
+
+const tag = Astro.params.tag ?? '';
+const notice = takeNotice(Astro.cookies);
+const record = await loadBikeRecord(fleet(), tag);
+if (!record) Astro.response.status = 404;
+---
+<PlannerLayout page={record ? tag : 'Bike not found'} notice={notice}>
+	<a class="gm-back" href={routes.fleet}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Fleet</a>
+	{record ? (
+		<>
+			<BikeSummary record={record} />
+			<div class="gm-actions">
+				<a class="btn btn-primary" href={routes.swap(tag)}><svg class="gm-icon" aria-hidden="true"><use href="#i-battery-charging"/></svg>Swap battery</a>
+				{record.battery && <a class="btn btn-outline-primary" href={routes.removeFromBike(tag)}>Remove battery</a>}
+				<a class="btn btn-outline-primary" href={routes.entry('bikes', tag, 'fault')}>Report fault</a>
+				<a class="btn btn-outline-primary" href={routes.entry('bikes', tag, 'check')}>Service check</a>
+				<a class="btn btn-outline-primary" href={routes.entry('bikes', tag, 'dealer-service')}>Dealer service</a>
+			</div>
+			<a class="btn btn-link px-0" href={routes.editBike(tag)}><svg class="gm-icon" aria-hidden="true"><use href="#i-pencil"/></svg>Edit bike details</a>
+			<History entries={record.history} />
+		</>
+	) : (
+		<h1>Bike not found</h1>
+		<p>There's no bike with the asset tag <span class="gm-mono">{tag}</span>.</p>
+	)}
+</PlannerLayout>

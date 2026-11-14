@@ -1,0 +1,45 @@
+---
+// SCR-06 Battery record (REQ-05, REQ-07, REQ-08): location first, then the
+// bike picker so a fit is two taps (NFR-01), then actions and history.
+export const prerender = false;
+import { bikeOptions } from '../../../../../../planner/fleet/fitting.ts';
+import { loadBatteryRecord } from '../../../../../../planner/fleet/records.ts';
+import { localInputValue } from '../../../../../../planner/fleet/wording.ts';
+import { fleet } from '../../../../../../planner/server.ts';
+import BatterySummary from '../../../../../../planner/ui/fleet/BatterySummary.astro';
+import FitFields from '../../../../../../planner/ui/fleet/FitFields.astro';
+import History from '../../../../../../planner/ui/fleet/History.astro';
+import PlannerLayout from '../../../../../../planner/ui/PlannerLayout.astro';
+import { routes } from '../../../../../../planner/ui/routes.ts';
+import { clockFor, takeNotice } from '../../../../../../planner/web/request.ts';
+
+const tag = Astro.params.tag ?? '';
+const notice = takeNotice(Astro.cookies);
+const repo = fleet();
+const [record, bikes, fittings, now] = await Promise.all([
+	loadBatteryRecord(repo, tag), repo.listBikes(), repo.listFittings(), clockFor(Astro.cookies).now(),
+]);
+if (!record) Astro.response.status = 404;
+---
+<PlannerLayout page={record ? tag : 'Battery not found'} notice={notice}>
+	<a class="gm-back" href={routes.fleetBatteries}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Batteries</a>
+	{record ? (
+		<>
+			<BatterySummary record={record} />
+			<form class="gm-form mt-3" id="fit-form" method="post" action={routes.fitBattery(tag)} novalidate>
+				<FitFields battery={tag} options={bikeOptions(bikes, fittings, tag)} selected={null} fittedFrom={localInputValue(now)} max={localInputValue(now)} errors={{}} headingLevel={2} />
+			</form>
+			<div class="gm-actions">
+				<button class="btn btn-primary" type="submit" form="fit-form"><svg class="gm-icon" aria-hidden="true"><use href="#i-battery-charging"/></svg>Fit battery</button>
+				{record.fittedTo && <a class="btn btn-outline-primary" href={routes.removeBattery(tag)}>Remove from {record.fittedTo}</a>}
+				<a class="btn btn-outline-primary" href={routes.entry('batteries', tag, 'fault')}>Report fault</a>
+				<a class="btn btn-outline-primary" href={routes.entry('batteries', tag, 'check')}>Service check</a>
+			</div>
+			<a class="btn btn-link px-0" href={routes.editBattery(tag)}><svg class="gm-icon" aria-hidden="true"><use href="#i-pencil"/></svg>Edit battery details</a>
+			<History entries={record.history} />
+		</>
+	) : (
+		<h1>Battery not found</h1>
+		<p>There's no battery with the asset tag <span class="gm-mono">{tag}</span>.</p>
+	)}
+</PlannerLayout>

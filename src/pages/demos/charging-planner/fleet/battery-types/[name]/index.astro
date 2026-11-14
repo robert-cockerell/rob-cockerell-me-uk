@@ -1,0 +1,33 @@
+---
+// A battery type's record (REQ-06, AC-06.3): its capacity, or "Not recorded".
+export const prerender = false;
+import { capacityLabel, EMPTY } from '../../../../../../planner/fleet/wording.ts';
+import { fleet } from '../../../../../../planner/server.ts';
+import PlannerLayout from '../../../../../../planner/ui/PlannerLayout.astro';
+import { routes } from '../../../../../../planner/ui/routes.ts';
+import { takeNotice } from '../../../../../../planner/web/request.ts';
+
+const name = Astro.params.name ?? '';
+const notice = takeNotice(Astro.cookies);
+const repo = fleet();
+const [type, batteries] = await Promise.all([repo.getBatteryType(name), repo.listBatteries()]);
+const ofType = batteries.filter((b) => b.batteryType === name).map((b) => b.batteryAssetTag);
+if (!type) Astro.response.status = 404;
+---
+<PlannerLayout page={type ? name : 'Battery type not found'} notice={notice}>
+	<a class="gm-back" href={routes.fleetBatteryTypes}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Battery types</a>
+	{type ? (
+		<>
+			<section class="gm-summary" aria-labelledby="type-h">
+				<div class="gm-summary__head"><h1 class="m-0 h3" id="type-h">{type.batteryType}</h1></div>
+				<dl class="gm-summary__facts">
+					<div class="gm-summary__fact"><dt>Capacity</dt><dd>{type.capacity === null ? <span class="gm-empty">{EMPTY.notRecorded}</span> : capacityLabel(type.capacity)}</dd></div>
+					<div class="gm-summary__fact"><dt>Batteries of this type</dt><dd>{ofType.length ? <span class="gm-mono">{ofType.join(', ')}</span> : <span class="gm-empty">None yet</span>}</dd></div>
+				</dl>
+			</section>
+			<a class="btn btn-link px-0" href={routes.editBatteryType(name)}><svg class="gm-icon" aria-hidden="true"><use href="#i-pencil"/></svg>Edit battery type</a>
+		</>
+	) : (
+		<h1>Battery type not found</h1>
+	)}
+</PlannerLayout>

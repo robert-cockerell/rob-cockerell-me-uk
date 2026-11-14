@@ -6,8 +6,11 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { test } from '@playwright/test';
+import { setStartingState } from './stand-in.ts';
 
 const OUT = join('test-results', 'screenshots');
+
+test.beforeAll(async () => setStartingState('R0', '2026-06-16 07:00'));
 
 for (const scheme of ['light', 'dark'] as const) {
 	test(`UI spec §13.1 day plan screenshot, ${scheme}`, async ({ page }, info) => {

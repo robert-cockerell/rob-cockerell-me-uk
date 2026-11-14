@@ -1,0 +1,10 @@
+---
+// SCR-09 Clear a fault (REQ-09 AC-09.3).
+export const prerender = false;
+import ClearPage from '../../../../../../../planner/ui/fleet/ClearPage.astro';
+import { handleClear } from '../../../../../../../planner/web/entries.ts';
+
+const result = await handleClear(Astro, Number(Astro.params.id));
+if ('response' in result) return result.response;
+---
+<ClearPage view={result.view} action={Astro.url.pathname} />

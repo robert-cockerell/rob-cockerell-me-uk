@@ -1,0 +1,25 @@
+---
+// C11 Asset picker (design/reference.html #c11): native radio buttons styled as
+// cards, so it works without JavaScript. A quarantined battery carries its
+// warning; choosing it leads to C14 before anything is saved.
+import type { PickerOption } from '../../fleet/fitting.ts';
+
+interface Props {
+	name: string;
+	options: PickerOption[];
+	selected: string | null;
+	error?: string;
+}
+const { name, options, selected, error } = Astro.props;
+---
+{error && <p class="invalid-feedback d-block" id={`f-${name}-error`}><span class="visually-hidden">Error: </span>{error}</p>}
+<ul class="gm-picker" id={`f-${name}`}>
+	{options.map((o) => (
+		<li class={o.quarantined ? 'gm-picker__option gm-picker__option--quarantined' : 'gm-picker__option'}>
+			<input class="gm-picker__input" type="radio" name={name} id={`pick-${o.value}`} value={o.value} checked={o.value === selected} aria-describedby={error ? `f-${name}-error` : undefined} />
+			<label class="gm-picker__label" for={`pick-${o.value}`}><span class="gm-picker__tag">{o.tag}</span><span class="gm-picker__detail"><span>{o.detail}</span>{o.quarantined ? (
+				<span class="gm-state gm-state--overdue" style="font-size:.875rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-battery-warning"/></svg>Quarantined</span>
+			) : <span class="gm-muted">{o.note}</span>}</span></label>
+		</li>
+	))}
+</ul>

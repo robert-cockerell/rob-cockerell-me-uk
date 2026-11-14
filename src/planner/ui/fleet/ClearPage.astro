@@ -1,0 +1,33 @@
+---
+// SCR-09 Clear a fault (REQ-09 AC-09.3, BR-07). Whoever fixes it clears it
+// (DEC-03). Render only; the page runs handleClear.
+import { dateLabel } from '../../fleet/wording.ts';
+import type { ClearView } from '../../web/entries.ts';
+import { pickedName } from '../../web/request.ts';
+import Field from '../forms/Field.astro';
+import FormShell from '../forms/FormShell.astro';
+import PlannerLayout from '../PlannerLayout.astro';
+import { routes } from '../routes.ts';
+
+interface Props {
+	view: ClearView;
+	action: string;
+}
+const { view: v, action } = Astro.props;
+const back = { href: v.asset.kind === 'bikes' ? routes.bike(v.asset.tag) : routes.battery(v.asset.tag), label: v.asset.tag };
+const heading = `Clear a fault on ${v.asset.tag}`;
+---
+<PlannerLayout page={heading} hasErrors={Object.keys(v.errors).length > 0}>
+	{v.alreadyClosed ? (
+		<>
+			<a class="gm-back" href={back.href}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>{back.label}</a>
+			<h1 class="h3">This fault is closed</h1>
+			<p>It was cleared{v.fault.clearedDate && <> on <span class="gm-time">{dateLabel(v.fault.clearedDate)}</span></>}{v.fault.clearedBy && <> by {v.fault.clearedBy}</>}.</p>
+		</>
+	) : (
+		<FormShell heading={heading} back={back} action={action} values={v.values} errors={v.errors} order={['clearedDate']} outcome={v.outcome} submitLabel="Clear fault" name={pickedName(Astro.cookies)} nameLabel="Cleared by">
+			<p class="m-0">Fault from <span class="gm-time">{dateLabel(v.fault.entryDate)}</span>:<br /><strong>{v.fault.description}</strong></p>
+			<Field name="clearedDate" label="Cleared date" hint="The day it was fixed" kind="date" value={v.values.clearedDate} error={v.errors.clearedDate} width="date" max={v.today} />
+		</FormShell>
+	)}
+</PlannerLayout>

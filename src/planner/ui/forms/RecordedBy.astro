@@ -1,0 +1,18 @@
+---
+// The picked name on a form (design/reference.html #c12, "Recorded by").
+// With no name yet, saving asks for one first (AC-10.1).
+import { routes } from '../routes.ts';
+
+interface Props {
+	name: string | null;
+	label?: string;
+	returnTo: string;
+}
+const { name, label = 'Recorded by', returnTo } = Astro.props;
+---
+{name && (
+	<div class="gm-field">
+		<span class="form-label">{label}</span>
+		<p class="m-0">{name} <a class="ms-2" href={routes.namePickerFrom(returnTo)}>Not you?</a></p>
+	</div>
+)}

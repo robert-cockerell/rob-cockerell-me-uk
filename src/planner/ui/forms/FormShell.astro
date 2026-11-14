@@ -1,0 +1,49 @@
+---
+// The frame every planner form shares (UI spec §5, §6): back link, error
+// summary (C13), save-failed notice (NFR-19), the form with `novalidate`, the
+// picked name, and the action bar (C15). With no name picked yet, the name
+// picker takes the form's place and carries what was typed (AC-10.1).
+import { SAVE_FAILED } from '../../forms/messages.ts';
+import type { Values } from '../../forms/validate.ts';
+import type { SaveOutcome } from '../../web/save.ts';
+import Notice from '../Notice.astro';
+import ErrorSummary from './ErrorSummary.astro';
+import NamePicker from './NamePicker.astro';
+import RecordedBy from './RecordedBy.astro';
+
+interface Props {
+	/** The h1. Leave out when the slot has its own (a fieldset legend). */
+	heading?: string;
+	back: { href: string; label: string };
+	action: string;
+	values: Values;
+	errors: Record<string, string>;
+	/** Field order, for the error summary. */
+	order: string[];
+	outcome: SaveOutcome | null;
+	submitLabel: string;
+	name: string | null;
+	nameLabel?: string;
+	/** Hide the picked name line (the confirm step carries it already). */
+	hideName?: boolean;
+}
+const { heading, back, action, values, errors, order, outcome, submitLabel, name, nameLabel, hideName } = Astro.props;
+---
+<a class="gm-back" href={back.href}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>{back.label}</a>
+{outcome?.kind === 'needs-name' ? (
+	<NamePicker action={action} carry={values} error={outcome.nameError} />
+) : (
+	<>
+		<ErrorSummary errors={errors} order={order} />
+		{outcome?.kind === 'failed' && <Notice notice={{ kind: 'problem', ...SAVE_FAILED }} />}
+		<form class="gm-form" method="post" action={action} novalidate>
+			{heading && <h1 class="h3 m-0">{heading}</h1>}
+			<slot />
+			{!hideName && <RecordedBy name={name} label={nameLabel} returnTo={action} />}
+			<div class="gm-actionbar">
+				<button class="btn btn-primary" type="submit">{submitLabel}</button>
+				<a class="btn btn-link" href={back.href}>Cancel</a>
+			</div>
+		</form>
+	</>
+)}

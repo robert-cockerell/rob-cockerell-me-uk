@@ -1,0 +1,32 @@
+---
+// SCR-01 Name picker (design/reference.html #c01). Shown before the first save
+// on a device (AC-10.1), carrying the unsaved change as hidden fields so it's
+// saved with the name; or on its own from the name chip. Not a login (NFR-05).
+import { NAME_FIELD } from '../../web/save.ts';
+import ErrorSummary from './ErrorSummary.astro';
+
+interface Props {
+	action: string;
+	/** The unsaved change to carry; empty on the name page itself. */
+	carry?: Record<string, string>;
+	value?: string;
+	error?: string | null;
+}
+const { action, carry = {}, value = '', error = null } = Astro.props;
+const id = `f-${NAME_FIELD}`;
+const hidden = Object.entries(carry).filter(([k]) => k !== NAME_FIELD);
+---
+<ErrorSummary errors={error ? { [NAME_FIELD]: error } : {}} order={[NAME_FIELD]} />
+<div class="card"><div class="card-body">
+	<form class="gm-form" method="post" action={action} novalidate>
+		{hidden.map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+		<h1 class="h4 m-0">Who's using this device?</h1>
+		<div class={error ? 'gm-field gm-field--error' : 'gm-field'}>
+			<label class="form-label" for={id}>Your name</label>
+			<div class="form-text" id={`${id}-hint`}>We add it to the changes you make on this device, so others know who to ask. You only need to do this once.</div>
+			{error && <p class="invalid-feedback" id={`${id}-error`}><span class="visually-hidden">Error: </span>{error}</p>}
+			<input class={error ? 'form-control is-invalid' : 'form-control'} id={id} name={NAME_FIELD} type="text" autocomplete="name" aria-describedby={error ? `${id}-hint ${id}-error` : `${id}-hint`} aria-invalid={error ? 'true' : undefined} value={value} />
+		</div>
+		<div><button class="btn btn-primary" type="submit">Save name and continue</button></div>
+	</form>
+</div></div>

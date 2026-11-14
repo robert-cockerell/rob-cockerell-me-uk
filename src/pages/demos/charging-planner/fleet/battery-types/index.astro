@@ -1,0 +1,14 @@
+---
+// SCR-04 Fleet list, battery types (REQ-06, AC-06.3).
+export const prerender = false;
+import { fleet } from '../../../../../planner/server.ts';
+import FleetList from '../../../../../planner/ui/fleet/FleetList.astro';
+import PlannerLayout from '../../../../../planner/ui/PlannerLayout.astro';
+import { takeNotice } from '../../../../../planner/web/request.ts';
+
+const notice = takeNotice(Astro.cookies);
+const types = await fleet().listBatteryTypes();
+---
+<PlannerLayout page="Battery types" notice={notice}>
+	<FleetList view={{ kind: 'types', types }} />
+</PlannerLayout>

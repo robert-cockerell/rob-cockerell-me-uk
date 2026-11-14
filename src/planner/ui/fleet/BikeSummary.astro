@@ -1,0 +1,32 @@
+---
+// C09 Asset summary card for a bike (design/reference.html #c09, AC-05.1):
+// the last service and the fitted battery first, then the bike's details and
+// the change stamp (BR-11).
+import type { BikeRecord } from '../../fleet/records.ts';
+import { capacityLabel, dateLabel, EMPTY, ENTRY_TYPE_LABEL, stampLabel } from '../../fleet/wording.ts';
+import { routes } from '../routes.ts';
+
+interface Props {
+	record: BikeRecord;
+}
+const { bike, lastService, battery, openFaults } = Astro.props.record;
+const headingId = `${bike.bikeAssetTag}-h`;
+---
+<section class="gm-summary" aria-labelledby={headingId}>
+	<div class="gm-summary__head">
+		<h1 class="gm-summary__tag m-0" id={headingId}>{bike.bikeAssetTag}</h1>
+		<span class="gm-summary__model">{bike.make} {bike.model}</span>
+		{openFaults.length > 0 && <span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span>}
+	</div>
+	<dl class="gm-summary__facts">
+		<div class="gm-summary__fact"><dt>Last service</dt><dd>{lastService ? <>{ENTRY_TYPE_LABEL[lastService.entryType]}, <span class="gm-time">{dateLabel(lastService.entryDate)}</span></> : <span class="gm-empty">{EMPTY.notRecorded}</span>}</dd></div>
+		<div class="gm-summary__fact"><dt>Battery fitted</dt><dd>{battery ? (
+			<><a href={routes.battery(battery.batteryAssetTag)} class="gm-mono">{battery.batteryAssetTag}</a> · {battery.batteryType}<br /><span class="gm-muted small">{battery.batteryPurchaseDate ? `Bought ${dateLabel(battery.batteryPurchaseDate)}` : `Bought: ${EMPTY.notRecorded}`} · {battery.cycleCount === null ? `Cycles: ${EMPTY.cycleCount}` : `${battery.cycleCount} cycles`} · {capacityLabel(battery.capacity)}</span></>
+		) : <span class="gm-empty">{EMPTY.noBattery}</span>}</dd></div>
+		<div class="gm-summary__fact"><dt>LibreBooking resource ID</dt><dd class="gm-mono">{bike.librebookingResourceId}</dd></div>
+		<div class="gm-summary__fact"><dt>Frame size</dt><dd>{bike.frameSize ?? <span class="gm-empty">{EMPTY.frameSize}</span>}</dd></div>
+		<div class="gm-summary__fact"><dt>Serial number</dt><dd>{bike.bikeSerialNumber ? <span class="gm-mono">{bike.bikeSerialNumber}</span> : <span class="gm-empty">{EMPTY.notRecorded}</span>}</dd></div>
+		<div class="gm-summary__fact"><dt>Bought</dt><dd>{bike.bikePurchaseDate ? <span class="gm-time">{dateLabel(bike.bikePurchaseDate)}</span> : <span class="gm-empty">{EMPTY.notRecorded}</span>}</dd></div>
+	</dl>
+	<p class="gm-summary__stamp m-0">Last updated by {bike.lastUpdatedBy}, <span class="gm-time">{stampLabel(bike.lastUpdatedAt)}</span></p>
+</section>

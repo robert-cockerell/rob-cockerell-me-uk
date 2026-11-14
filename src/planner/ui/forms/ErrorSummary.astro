@@ -1,0 +1,19 @@
+---
+// C13 Error summary (design/reference.html #c13, UI spec §5.4). One link per
+// error, in field order; focused when the page loads.
+interface Props {
+	errors: Record<string, string>;
+	/** Field names in the order they appear on the form. */
+	order: string[];
+}
+const { errors, order } = Astro.props;
+const listed = [...order.filter((f) => f in errors), ...Object.keys(errors).filter((f) => !order.includes(f))];
+---
+{listed.length > 0 && (
+	<div class="gm-error-summary" role="alert" tabindex="-1" aria-labelledby="es-h" autofocus>
+		<h2 id="es-h">There's a problem</h2>
+		<ul>
+			{listed.map((field) => <li><a href={`#f-${field}`}>{errors[field]}</a></li>)}
+		</ul>
+	</div>
+)}

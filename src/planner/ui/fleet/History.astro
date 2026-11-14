@@ -1,0 +1,33 @@
+---
+// C10 History list (design/reference.html #c10): newest first by Entry date,
+// then Entry ID (AC-05.2). Faults read "open" or "closed" (BR-07); an open
+// fault offers "Clear this fault". Each entry shows its Entry date and who
+// recorded it when (AC-10.5).
+import { isOpenFault } from '../../fleet/derive.ts';
+import type { Entry } from '../../fleet/types.ts';
+import { dateLabel, ENTRY_TYPE_LABEL, stampLabel } from '../../fleet/wording.ts';
+import { routes } from '../routes.ts';
+
+interface Props {
+	entries: Entry[];
+}
+const { entries } = Astro.props;
+const icon = { 'service check': 'clipboard-check', fault: 'triangle-alert', 'dealer service': 'wrench' } as const;
+---
+<h2 class="h4">History</h2>
+{entries.length === 0 ? (
+	<p class="gm-empty">Nothing recorded yet</p>
+) : (
+	<ol class="gm-history">
+		{entries.map((e) => (
+			<li class="gm-history__item" id={`entry-${e.entryId}`}>
+				<span class="gm-history__type"><svg class="gm-icon" aria-hidden="true"><use href={`#i-${icon[e.entryType]}`}/></svg>{ENTRY_TYPE_LABEL[e.entryType]}{e.entryType === 'fault' && <> <span class={isOpenFault(e) ? 'gm-status gm-status--open' : 'gm-status gm-status--closed'}>{isOpenFault(e) ? 'open' : 'closed'}</span></>}</span>
+				<time class="gm-history__date" datetime={e.entryDate}>{dateLabel(e.entryDate)}</time>
+				<p class="gm-history__desc">{e.description}</p>
+				<span class="gm-history__meta">Recorded by {e.recordedBy}, <span class="gm-time">{stampLabel(e.recordedAt)}</span></span>
+				{e.clearedDate && <span class="gm-history__meta">Cleared <span class="gm-time">{dateLabel(e.clearedDate)}</span> by {e.clearedBy}</span>}
+				{isOpenFault(e) && <span class="gm-history__meta"><a class="btn btn-outline-primary btn-sm mt-1" href={routes.clearFault(e.entryId)}>Clear this fault<span class="visually-hidden">: {e.description}</span></a></span>}
+			</li>
+		))}
+	</ol>
+)}

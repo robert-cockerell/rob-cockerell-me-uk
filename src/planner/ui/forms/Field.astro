@@ -1,0 +1,46 @@
+---
+// C12 Form field (design/reference.html #c12, UI spec §5.1): label, hint,
+// error, then the input, linked with aria-describedby. Native controls only.
+interface Option {
+	value: string;
+	label: string;
+}
+interface Props {
+	name: string;
+	label: string;
+	kind?: 'text' | 'number-text' | 'textarea' | 'select' | 'date' | 'datetime' | 'time';
+	value?: string | null;
+	hint?: string;
+	error?: string;
+	optional?: boolean;
+	width?: 'tag' | 'short' | 'date' | 'datetime';
+	mono?: boolean;
+	tag?: boolean;
+	options?: Option[];
+	max?: string;
+	autocomplete?: string;
+}
+const { name, label, kind = 'text', value = '', hint, error, optional, width, mono, tag, options = [], max, autocomplete } = Astro.props;
+const id = `f-${name}`;
+const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+const classes = [kind === 'select' ? 'form-select' : 'form-control', width && `gm-w-${width}`, (mono || tag) && 'gm-mono', error && 'is-invalid']
+	.filter(Boolean)
+	.join(' ');
+const common = { id, name, class: classes, 'aria-describedby': describedBy, 'aria-invalid': error ? 'true' : undefined };
+---
+<div class={error ? 'gm-field gm-field--error' : 'gm-field'}>
+	<label class="form-label" for={id}>{label}{optional && <> <span class="gm-optional">(optional)</span></>}</label>
+	{hint && <div class="form-text" id={`${id}-hint`}>{hint}</div>}
+	{error && <p class="invalid-feedback" id={`${id}-error`}><span class="visually-hidden">Error: </span>{error}</p>}
+	{kind === 'textarea' && <textarea {...common} rows="3">{value ?? ''}</textarea>}
+	{kind === 'select' && (
+		<select {...common}>
+			{options.map((o) => <option value={o.value} selected={o.value === value}>{o.label}</option>)}
+		</select>
+	)}
+	{kind === 'text' && <input {...common} type="text" value={value ?? ''} autocomplete={autocomplete} autocapitalize={tag ? 'characters' : undefined} spellcheck={tag ? 'false' : undefined} />}
+	{kind === 'number-text' && <input {...common} type="text" inputmode="numeric" pattern="[0-9]*" value={value ?? ''} />}
+	{kind === 'date' && <input {...common} type="date" value={value ?? ''} max={max} />}
+	{kind === 'datetime' && <input {...common} type="datetime-local" value={value ?? ''} max={max} />}
+	{kind === 'time' && <input {...common} type="time" value={value ?? ''} />}
+</div>

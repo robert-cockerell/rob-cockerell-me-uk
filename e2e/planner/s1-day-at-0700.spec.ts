@@ -4,6 +4,7 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { setStartingState } from './stand-in.ts';
 
 const DAY_PLAN = '/demos/charging-planner/';
 const TIMES = ['07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00'];
@@ -35,6 +36,9 @@ async function readTimeline(page: Page): Promise<Slot[]> {
 }
 
 let timeline: Slot[];
+
+// Starting state: R0, clock Tue 16 June 2026 07:00 (SU.05, SU.06).
+test.beforeAll(async () => setStartingState('R0', '2026-06-16 07:00'));
 
 test.beforeEach(async ({ page }) => {
 	await page.goto(DAY_PLAN);
@@ -183,7 +187,10 @@ test('C01 the header has the product name and the name chip; no name reads "Add 
 	await context.addCookies([{ name: 'gm_name', value: 'Dave Morgan', url: page.url() }]);
 	await page.reload();
 	await expect(page.locator('.gm-name-chip')).toContainText('Dave Morgan');
-	await expect(page.locator('nav.gm-tabbar')).toBeVisible();
+	// UI spec §3.1: a bottom tab bar on phones; from 992 px the tabs move into the header.
+	const wide = (page.viewportSize()?.width ?? 0) >= 992;
+	await expect(page.locator('nav.gm-tabbar')).toBeVisible({ visible: !wide });
+	await expect(page.locator('nav.gm-header__nav')).toBeVisible({ visible: wide });
 });
 
 test('NFR-03 axe finds no WCAG 2.1 AA failures on the day plan', async ({ page }) => {

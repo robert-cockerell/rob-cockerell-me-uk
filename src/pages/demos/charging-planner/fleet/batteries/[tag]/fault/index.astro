@@ -1,0 +1,10 @@
+---
+// SCR-09 to SCR-11: fault on one of the batteries (REQ-09, REQ-10).
+export const prerender = false;
+import EntryPage from '../../../../../../../planner/ui/fleet/EntryPage.astro';
+import { handleEntry } from '../../../../../../../planner/web/entries.ts';
+
+const result = await handleEntry(Astro, 'batteries', Astro.params.tag ?? '', 'fault');
+if ('response' in result) return result.response;
+---
+<EntryPage view={result.view} action={Astro.url.pathname} />

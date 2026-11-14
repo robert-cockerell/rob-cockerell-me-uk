@@ -1,0 +1,35 @@
+---
+// C09 Asset summary card for a battery (design/reference.html #c09, AC-05.3):
+// location first (BR-02); if quarantined, a red edge and the open fault.
+import type { BatteryRecord } from '../../fleet/records.ts';
+import { capacityLabel, dateLabel, EMPTY, locationLabel, stampLabel } from '../../fleet/wording.ts';
+import { routes } from '../routes.ts';
+
+interface Props {
+	record: BatteryRecord;
+}
+const { battery, type, location, fittedTo, openFaults } = Astro.props.record;
+const headingId = `${battery.batteryAssetTag}-h`;
+const look = {
+	fitted: { cls: 'gm-location--fitted', icon: 'battery' },
+	shelf: { cls: 'gm-location--shelf', icon: 'package' },
+	quarantined: { cls: 'gm-location--quarantined', icon: 'battery-warning' },
+}[location.kind];
+const fault = openFaults[0];
+---
+<section class={location.kind === 'quarantined' ? 'gm-summary gm-summary--quarantined' : 'gm-summary'} aria-labelledby={headingId}>
+	<div class="gm-summary__head">
+		<h1 class="gm-summary__tag m-0" id={headingId}>{battery.batteryAssetTag}</h1>
+		<span class="gm-summary__model">{battery.batteryType}</span>
+	</div>
+	<p class={`gm-location ${look.cls} m-0`}><svg class="gm-icon" aria-hidden="true"><use href={`#i-${look.icon}`}/></svg>{location.kind === 'fitted' ? <>Fitted to <a href={routes.bike(location.bikeAssetTag)} class="gm-mono">{location.bikeAssetTag}</a></> : locationLabel(location)}</p>
+	{location.kind === 'quarantined' && fault && <p class="m-0 small">Open fault from <span class="gm-time">{dateLabel(fault.entryDate)}</span>: {fault.description}</p>}
+	<dl class="gm-summary__facts">
+		{location.kind === 'quarantined' && <div class="gm-summary__fact"><dt>Fitted to</dt><dd>{fittedTo ? <a href={routes.bike(fittedTo)} class="gm-mono">{fittedTo}</a> : <span class="gm-empty">Not fitted</span>}</dd></div>}
+		<div class="gm-summary__fact"><dt>Bosch serial</dt><dd>{battery.boschSerial ? <span class="gm-mono">{battery.boschSerial}</span> : <span class="gm-empty">{EMPTY.notRecorded}</span>}</dd></div>
+		<div class="gm-summary__fact"><dt>Cycle count</dt><dd>{battery.cycleCount === null ? <span class="gm-empty">{EMPTY.cycleCount}</span> : battery.cycleCount}</dd></div>
+		<div class="gm-summary__fact"><dt>Capacity</dt><dd>{type?.capacity == null ? <span class="gm-empty">{EMPTY.notRecorded}</span> : capacityLabel(type.capacity)}</dd></div>
+		<div class="gm-summary__fact"><dt>Bought</dt><dd>{battery.batteryPurchaseDate ? <span class="gm-time">{dateLabel(battery.batteryPurchaseDate)}</span> : <span class="gm-empty">{EMPTY.notRecorded}</span>}</dd></div>
+	</dl>
+	<p class="gm-summary__stamp m-0">Last updated by {battery.lastUpdatedBy}, <span class="gm-time">{stampLabel(battery.lastUpdatedAt)}</span></p>
+</section>

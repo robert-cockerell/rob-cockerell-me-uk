@@ -1,0 +1,10 @@
+---
+// SCR-08 Remove a battery, started from the bike (REQ-08).
+export const prerender = false;
+import RemovePage from '../../../../../../../planner/ui/fleet/RemovePage.astro';
+import { handleRemove } from '../../../../../../../planner/web/remove.ts';
+
+const result = await handleRemove(Astro, 'bike', Astro.params.tag ?? '');
+if ('response' in result) return result.response;
+---
+<RemovePage view={result.view} action={Astro.url.pathname} />

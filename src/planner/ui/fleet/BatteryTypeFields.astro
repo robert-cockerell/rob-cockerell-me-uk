@@ -1,0 +1,13 @@
+---
+// SCR-07 battery type fields (C12). DI-016, DI-019. No charge times (DEC-08).
+import type { Values } from '../../forms/validate.ts';
+import Field from '../forms/Field.astro';
+
+interface Props {
+	values: Values;
+	errors: Record<string, string>;
+}
+const { values: v, errors: e } = Astro.props;
+---
+<Field name="batteryType" label="Battery type" hint="The model on the battery's label, for example Bosch PowerPack 500" value={v.batteryType} error={e.batteryType} />
+<Field name="capacity" label="Capacity in Wh" optional hint="A whole number from 1 to 2,000" kind="number-text" value={v.capacity} error={e.capacity} width="short" mono />

@@ -1,0 +1,40 @@
+---
+// SCR-07 Edit a battery (REQ-06, REQ-10). Checked on the server; on a failed
+// check or save, everything typed comes back (NFR-19). No status, no delete (AC-06.5).
+export const prerender = false;
+import { BATTERY_FIELDS, batterySave, batteryValues } from '../../../../../../../planner/fleet/asset-forms.ts';
+import { formValues, type Values } from '../../../../../../../planner/forms/validate.ts';
+import { londonDate } from '../../../../../../../planner/plan/calendar.ts';
+import { fleet } from '../../../../../../../planner/server.ts';
+import BatteryFields from '../../../../../../../planner/ui/fleet/BatteryFields.astro';
+import FormShell from '../../../../../../../planner/ui/forms/FormShell.astro';
+import PlannerLayout from '../../../../../../../planner/ui/PlannerLayout.astro';
+import { routes } from '../../../../../../../planner/ui/routes.ts';
+import { clockFor, pickedName } from '../../../../../../../planner/web/request.ts';
+import { save, type SaveOutcome } from '../../../../../../../planner/web/save.ts';
+
+const repo = fleet();
+const now = await clockFor(Astro.cookies).now();
+const today = londonDate(now);
+const editing: string | null = Astro.params.tag ?? '';
+const existing = editing ? await repo.getBattery(editing) : null;
+const types = (await repo.listBatteryTypes()).map((t) => t.batteryType);
+if (editing && !existing) return new Response(null, { status: 404 });
+
+let values: Values = existing ? batteryValues(existing) : {};
+let errors: Record<string, string> = {};
+let outcome: SaveOutcome | null = null;
+if (Astro.request.method === 'POST') {
+	values = formValues(await Astro.request.formData());
+	outcome = await save(Astro, values, await batterySave(repo, values, editing, now));
+	if (outcome.kind === 'redirect') return outcome.response;
+	if (outcome.kind === 'invalid') errors = outcome.errors;
+}
+const heading = editing ? `Edit ${editing}` : 'Add a battery';
+const back = editing ? { href: routes.battery(editing), label: editing } : { href: routes.fleetBatteries, label: 'Batteries' };
+---
+<PlannerLayout page={heading} hasErrors={Object.keys(errors).length > 0 || (outcome?.kind === 'needs-name' && !!outcome.nameError)}>
+	<FormShell heading={heading} back={back} action={Astro.url.pathname} values={values} errors={errors} order={BATTERY_FIELDS} outcome={outcome} submitLabel="Save battery" name={pickedName(Astro.cookies)} nameLabel="Saved as">
+		<BatteryFields values={values} errors={errors} editing={!!editing} types={types} today={today} />
+	</FormShell>
+</PlannerLayout>
