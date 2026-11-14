@@ -1,10 +1,15 @@
 ---
-// SCR-02 Day plan, phone timeline (REQ-01 to REQ-04). Rendered on request:
-// it depends on "now" and on live bookings (technical note §6.1).
+// SCR-02 and SCR-03 Day plan (REQ-01 to REQ-04, REQ-12): the band chart (C18,
+// DEC-76) above the phone timeline below 992 px, or above the grid from 992 px;
+// the grid alone in print (UI spec §3.3). Rendered on request: it depends on
+// "now" and on live bookings (technical note §6.1).
 export const prerender = false;
 
+import { BAND_CHART_COOKIE } from '../../../planner/plan/band-chart.ts';
 import { BOOKINGS_DOWN, CHARGING_RULES, planDateHeading } from '../../../planner/plan/wording.ts';
 import { dayPlan, settings } from '../../../planner/server.ts';
+import BandChart from '../../../planner/ui/day-plan/BandChart.astro';
+import PlanGrid from '../../../planner/ui/day-plan/PlanGrid.astro';
 import Timeline from '../../../planner/ui/day-plan/Timeline.astro';
 import PlannerLayout from '../../../planner/ui/PlannerLayout.astro';
 import { routes } from '../../../planner/ui/routes.ts';
@@ -12,8 +17,10 @@ import { clockFor, takeNotice } from '../../../planner/web/request.ts';
 
 const notice = takeNotice(Astro.cookies);
 const plan = await dayPlan(clockFor(Astro.cookies));
+// DEC-76: open unless this device chose to close it.
+const chartOpen = Astro.cookies.get(BAND_CHART_COOKIE)?.value !== 'closed';
 ---
-<PlannerLayout page="Day plan" current="day-plan" notice={notice}>
+<PlannerLayout page="Day plan" current="day-plan" notice={notice} wide>
 	{!plan.bookingsAvailable && (
 		<div class="gm-notice gm-notice--problem" role="alert">
 			<svg class="gm-icon" aria-hidden="true"><use href="#i-circle-alert"/></svg>
@@ -24,10 +31,32 @@ const plan = await dayPlan(clockFor(Astro.cookies));
 		<h1>Day plan</h1>
 		<span class="gm-page-head__sub">{planDateHeading(plan.planDate)}</span>
 	</div>
-	{settings.handbookUrl && (
-		<div class="d-flex flex-wrap gap-2 mb-3 gm-noprint">
+	<div class="d-flex flex-wrap gap-2 mb-3 gm-noprint">
+		{settings.handbookUrl && (
 			<a class="gm-linkout" href={settings.handbookUrl}><svg class="gm-icon" aria-hidden="true"><use href="#i-book-open"/></svg>{CHARGING_RULES}<span class="visually-hidden"> (opens the volunteer handbook)</span></a>
-		</div>
-	)}
-	<Timeline plan={plan} />
+		)}
+		<!-- REQ-12: needs JavaScript (technical note §6.5), so it's shown only when there is some. -->
+		<button class="btn btn-outline-primary" type="button" data-print style="display:none"><svg class="gm-icon" aria-hidden="true"><use href="#i-printer"/></svg>Print day plan</button>
+	</div>
+	<BandChart plan={plan} open={chartOpen} />
+	<div class="d-lg-none">
+		<Timeline plan={plan} />
+	</div>
+	<div class="gm-print-grid d-none d-lg-block">
+		<PlanGrid plan={plan} />
+	</div>
 </PlannerLayout>
+
+<script>
+	for (const button of document.querySelectorAll<HTMLButtonElement>('[data-print]')) {
+		button.style.display = '';
+		button.addEventListener('click', () => window.print());
+	}
+
+	// DEC-76: remember whether the band chart is open, for the server to read next time.
+	const chart = document.querySelector<HTMLDetailsElement>('details[data-bandchart]');
+	chart?.addEventListener('toggle', () => {
+		const value = chart.open ? 'open' : 'closed';
+		document.cookie = 'gm_bandchart=' + value + '; max-age=31536000; path=/demos/charging-planner/; samesite=lax';
+	});
+</script>

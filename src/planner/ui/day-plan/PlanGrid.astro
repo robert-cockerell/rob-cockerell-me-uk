@@ -1,0 +1,56 @@
+---
+// C07 Plan grid (design/reference.html #c07, REQ-12): from 992 px wide, and
+// always in print. A real table: caption, column headers (time and band), row
+// headers (bike, next booking, flags). A cell the same as the one before shows
+// a muted "–", with the state in visually hidden text. State names are the
+// PRD's in full (BR-01). The scrolling box takes keyboard focus and has a
+// name, so keyboard users can scroll it (WCAG 2.1.1; axe scrollable-region-focusable).
+import type { BikeState, DayPlan, DayPlanBike, SlotBikeState } from '../../plan/types.ts';
+import { dueLabel, planDateHeading, STATE_LABELS } from '../../plan/wording.ts';
+import { gridAnchor } from '../../plan/band-chart.ts';
+import BandTag from './BandTag.astro';
+import Flags from './Flags.astro';
+import NextBooking from './NextBooking.astro';
+
+interface Props {
+	plan: DayPlan;
+}
+const { plan } = Astro.props;
+const [y] = plan.planDate.split('-');
+const caption = `Day plan for ${planDateHeading(plan.planDate)} ${y}, bikes by half hour`;
+const cellClass: Record<BikeState, string> = {
+	'out on loan': 'gm-grid__cell',
+	'in the workshop': 'gm-grid__cell gm-grid__cell--workshop',
+	overdue: 'gm-grid__cell gm-grid__cell--overdue',
+	'out of service': 'gm-grid__cell gm-grid__cell--service',
+};
+const same = (a: SlotBikeState, b: SlotBikeState) => a.state === b.state && a.dueAt?.getTime() === b.dueAt?.getTime();
+const spoken = (s: SlotBikeState) => (s.dueAt ? `${STATE_LABELS[s.state]}, ${dueLabel(s.dueAt, plan.planDate)}` : STATE_LABELS[s.state]);
+const hasFlags = (b: DayPlanBike) => b.openFault || b.bookedAgainAt !== null || b.resourceMismatch;
+---
+<div class="gm-grid-wrap" tabindex="0" role="region" aria-label={caption}>
+	<table class="gm-grid">
+		<caption class="visually-hidden">{caption}</caption>
+		<thead>
+			<tr>
+				<th scope="col">Bike</th>
+				{plan.slots.map((slot) => <th scope="col" id={gridAnchor(slot.time)}><span class="gm-grid__time">{slot.time}</span><BandTag band={slot.band} /></th>)}
+			</tr>
+		</thead>
+		<tbody>
+			{plan.bikes.map((bike, row) => (
+				<tr>
+					<th scope="row"><span class="gm-mono">{bike.bikeAssetTag}</span><br /><NextBooking at={bike.nextBooking} planDate={plan.planDate} />{hasFlags(bike) && <><br /><span class="mt-1"><Flags bike={bike} /></span></>}</th>
+					{plan.slots.map((slot, i) => {
+						const s = slot.bikes[row];
+						return i > 0 && same(s, plan.slots[i - 1].bikes[row]) ? (
+							<td><span class="gm-grid__same" aria-hidden="true">–</span><span class="visually-hidden">{spoken(s)}</span></td>
+						) : (
+							<td><span class={cellClass[s.state]}>{STATE_LABELS[s.state]}{s.dueAt && <> <span class="gm-due">{dueLabel(s.dueAt, plan.planDate)}</span></>}</span></td>
+						);
+					})}
+				</tr>
+			))}
+		</tbody>
+	</table>
+</div>

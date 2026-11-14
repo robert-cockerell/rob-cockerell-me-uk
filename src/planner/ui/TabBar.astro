@@ -1,9 +1,10 @@
 ---
-// C01 bottom tab bar for phones (design/reference.html #c01). Hidden from 992 px.
+// C01 bottom tab bar (design/reference.html #c01) at every width; from 992 px
+// the styles make it a dock: centred, the width of the content (DEC-77).
 import { routes } from './routes.ts';
 
 interface Props {
-	current: 'day-plan' | 'fleet';
+	current: 'day-plan' | 'fleet' | null;
 }
 const { current } = Astro.props;
 ---

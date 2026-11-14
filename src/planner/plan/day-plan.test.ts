@@ -123,13 +123,33 @@ describe('REQ-01 Half-hourly day plan with carbon bands', () => {
 			...Array(12).fill('moderate'), // 09:00–14:30
 			...Array(3).fill('very high'), // 15:00–16:00
 		]);
-		for (const slot of p.slots) expect(Object.keys(slot).sort()).toEqual(['bikes', 'band', 'end', 'start', 'time'].sort());
+		// No highlight or "least bad" field; `level` only scales the band chart's bars (DEC-76).
+		for (const slot of p.slots) expect(Object.keys(slot).sort()).toEqual(['bikes', 'band', 'end', 'level', 'start', 'time'].sort());
 	});
 
 	it('AC-01.5 bands only: the plan carries no gCO₂/kWh figure and no advice', () => {
 		const p = plan({ now: '2026-06-16 07:00' });
 		const json = JSON.stringify(p);
 		expect(json).not.toMatch(/intensity|gCO|least|charge|recommend/i);
+	});
+
+	it('DEC-76 each slot\'s level is relative to the day: 0 at the lowest, 1 at the highest; no raw figure in the plan', () => {
+		const p = plan({ now: '2026-06-16 07:00' });
+		const levels = p.slots.map((s) => s.level as number);
+		expect(Math.min(...levels)).toBe(0);
+		expect(Math.max(...levels)).toBe(1);
+		// Fractions of the day's range, never a gCO₂/kWh figure.
+		for (const l of levels) {
+			expect(l).toBeGreaterThanOrEqual(0);
+			expect(l).toBeLessThanOrEqual(1);
+		}
+		// The lowest level is in the very low stretch.
+		expect(p.slots[levels.indexOf(0)].band).toBe('very low');
+	});
+
+	it('DEC-76 a slot with no forecast has no level', () => {
+		const p = plan({ now: '2026-06-16 07:00', withoutPeriods: ['2026-06-16T14:30:00Z'] });
+		expect(p.slots[17].level).toBeNull();
 	});
 });
 

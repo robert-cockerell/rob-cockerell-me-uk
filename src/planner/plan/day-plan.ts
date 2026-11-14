@@ -81,13 +81,26 @@ export function buildDayPlan(input: DayPlanInput): DayPlan {
 	const bandByStart = new Map(input.forecasts.map((f) => [t(f.periodStart), f.indexBand]));
 	const times = slotTimes(planDate);
 
+	// DEC-76: each slot's place between the day's lowest and highest forecast.
+	const intensityByStart = new Map(
+		input.forecasts.filter((f) => typeof f.forecastIntensity === 'number').map((f) => [t(f.periodStart), f.forecastIntensity as number]),
+	);
+	const dayValues = times.map((s) => intensityByStart.get(t(s.start))).filter((v): v is number => v !== undefined);
+	const low = Math.min(...dayValues);
+	const high = Math.max(...dayValues);
+	const levelAt = (start: Date): number | null => {
+		const v = intensityByStart.get(t(start));
+		if (v === undefined || !bandByStart.has(t(start))) return null;
+		return high === low ? 0.5 : Math.round(((v - low) / (high - low)) * 100) / 100;
+	};
+
 	if (!input.bookings) {
 		return {
 			planDate,
 			nextStaffedDate: nextDate,
 			now,
 			bookingsAvailable: false,
-			slots: times.map((s) => ({ ...s, band: bandByStart.get(t(s.start)) ?? null, bikes: [] })),
+			slots: times.map((s) => ({ ...s, band: bandByStart.get(t(s.start)) ?? null, level: levelAt(s.start), bikes: [] })),
 			bikes: [],
 		};
 	}
@@ -116,6 +129,7 @@ export function buildDayPlan(input: DayPlanInput): DayPlan {
 	const slots = times.map((s) => ({
 		...s,
 		band: bandByStart.get(t(s.start)) ?? null,
+		level: levelAt(s.start),
 		bikes: input.bikes.map((bike): SlotBikeState => ({
 			bikeAssetTag: bike.bikeAssetTag,
 			...bikeStateInSlot(bookingsFor.get(bike.bikeAssetTag) as BikeBookings, s.start, s.end, now),

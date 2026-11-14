@@ -6,6 +6,7 @@ import { timeline } from '../../plan/timeline.ts';
 import type { DayPlan, DayPlanBike } from '../../plan/types.ts';
 import { NO_CHANGES } from '../../plan/wording.ts';
 import { routes } from '../routes.ts';
+import { slotAnchor } from '../../plan/band-chart.ts';
 import BandTag from './BandTag.astro';
 import Flags from './Flags.astro';
 import NextBooking from './NextBooking.astro';
@@ -25,8 +26,8 @@ const hasFlags = (b: DayPlanBike) => b.openFault || b.bookedAgainAt !== null || 
 		const times = plan.slots[i];
 		const isNow = times.start.getTime() <= now && now < times.end.getTime();
 		return (
-			<li class={isNow ? 'gm-slot gm-slot--now' : 'gm-slot'}>
-				<time class="gm-slot__time" datetime={`${plan.planDate}T${slot.time}`}>{slot.time}</time>
+			<li class={isNow ? 'gm-slot gm-slot--now' : 'gm-slot'} id={slotAnchor(slot.time)}>
+				<time class="gm-slot__time" datetime={`${plan.planDate}T${slot.time}`} aria-current={isNow ? 'time' : undefined}>{slot.time}</time>
 				<span class="gm-slot__band"><BandTag band={slot.band} /></span>
 				{plan.bookingsAvailable && (slot.bikes.length > 0 ? (
 					<ul class="gm-slot__bikes">

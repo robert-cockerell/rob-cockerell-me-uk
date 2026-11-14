@@ -23,6 +23,8 @@ export default defineConfig({
 		env: {
 			GM_LIBREBOOKING_URL: `${ORIGIN}/demos/charging-planner/stand-in/api`,
 			GM_DEMO_MODE: 'true',
+			// AC-16.1: the proof of concept's handbook address (invented).
+			GM_HANDBOOK_URL: 'https://docs.google.com/document/d/1RPkcPU35zs2kVmVeexJCgjuZUeO2-jFecB7i5H7U6nf/edit',
 			GM_PUBLIC_DEMO: 'true',
 		},
 	},

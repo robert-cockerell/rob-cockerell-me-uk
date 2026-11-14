@@ -54,10 +54,11 @@ test('S1.01 AC-01.1 19 slots, 07:00 to 16:00, and no others', async ({ page }) =
 	await expect(page.getByRole('heading', { level: 1, name: 'Day plan' })).toBeVisible();
 	await expect(page.locator('.gm-page-head__sub')).toHaveText('Tue 16 Jun');
 	expect(timeline.map((s) => s.time)).toEqual(TIMES);
-	// C06: the current slot is marked "now", with the reference page's highlight.
+	// C06, UI-A-01: the current slot is marked "now", on a solid surface background.
 	expect(timeline.filter((s) => s.now).map((s) => s.time)).toEqual(['07:00']);
 	const nowSlot = page.locator('li.gm-slot--now');
-	expect(await nowSlot.evaluate((el) => getComputedStyle(el).backgroundImage)).toMatch(/linear-gradient/);
+	expect(await nowSlot.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe('none');
+	await expect(nowSlot.locator('time')).toHaveAttribute('aria-current', 'time');
 	expect(await nowSlot.locator('time').evaluate((el) => getComputedStyle(el, '::after').content)).toBe('"now"');
 });
 
@@ -77,6 +78,8 @@ test('S1.02 AC-01.2 AC-04.5 every slot shows its band as a coloured fill and its
 });
 
 test('S1.03 AC-04.1 slots run top to bottom and the page doesn\'t scroll sideways', async ({ page }) => {
+	// From 992 px the day plan is the grid (UI spec §3.3), tested in S8.02.
+	test.skip((page.viewportSize()?.width ?? 0) >= 992, 'Tablet sizes show the grid; see S8.02');
 	const tops = await page.$$eval('ol.gm-timeline > li.gm-slot', (els) => els.map((e) => e.getBoundingClientRect().top));
 	for (let i = 1; i < tops.length; i++) expect(tops[i]).toBeGreaterThan(tops[i - 1]);
 	const { scrollWidth, clientWidth } = await page.evaluate(() => ({
@@ -172,11 +175,11 @@ test('S1.10 AC-01.5 bands only: no gCO₂/kWh figures and no advice on what to c
 	const text = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
 	expect(text).not.toMatch(/gCO|kWh|intensity/i);
 	expect(text).not.toMatch(/least bad|best time|greenest|recommend|you should|charge (now|at|this|it)/i);
-	// The only numbers are asset tags, times and the heading's date: no figures.
+	// The only numbers are asset tags, times and dates (the heading, the grid's caption): no figures.
 	const rest = text
 		.replace(/\b[A-Z]\d{2}\b/g, '') // asset tags, M01
 		.replace(/\b\d{2}:\d{2}\b/g, '') // times, 07:30
-		.replace('Tue 16 Jun', '');
+		.replace(/\b[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}( \d{4})?\b/g, ''); // dates, Tue 16 Jun 2026
 	expect(rest).not.toMatch(/\d/);
 });
 
@@ -187,10 +190,9 @@ test('C01 the header has the product name and the name chip; no name reads "Add 
 	await context.addCookies([{ name: 'gm_name', value: 'Dave Morgan', url: page.url() }]);
 	await page.reload();
 	await expect(page.locator('.gm-name-chip')).toContainText('Dave Morgan');
-	// UI spec §3.1: a bottom tab bar on phones; from 992 px the tabs move into the header.
-	const wide = (page.viewportSize()?.width ?? 0) >= 992;
-	await expect(page.locator('nav.gm-tabbar')).toBeVisible({ visible: !wide });
-	await expect(page.locator('nav.gm-header__nav')).toBeVisible({ visible: wide });
+	// UI spec §3.1, DEC-77: the bottom tab bar at every width; no tabs in the header.
+	await expect(page.locator('nav.gm-tabbar')).toBeVisible();
+	await expect(page.locator('header.gm-header nav')).toHaveCount(0);
 });
 
 test('NFR-03 axe finds no WCAG 2.1 AA failures on the day plan', async ({ page }) => {

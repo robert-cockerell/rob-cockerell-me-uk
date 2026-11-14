@@ -9,7 +9,13 @@ test.beforeAll(async () => setStartingState('R0', '2026-06-16 09:15'));
 
 test('S7.01 AC-05.7 from the day plan, M07\'s last service is two taps away', async ({ page }) => {
 	await page.goto(url.dayPlan);
-	await page.locator('a.gm-bike-row', { hasText: 'M07' }).first().click();
+	if ((page.viewportSize()?.width ?? 0) >= 992) {
+		// The grid has no row links (C07): Fleet, then M07.
+		await page.locator('nav.gm-tabbar').getByRole('link', { name: 'Fleet' }).click();
+		await page.locator('.gm-list__row', { hasText: 'M07' }).click();
+	} else {
+		await page.locator('a.gm-bike-row', { hasText: 'M07' }).first().click();
+	}
 	await expect(page.locator('main h1')).toHaveText('M07');
 	expect(await fact(page, 'Last service')).toBe('Service check, 11 Jun 2026');
 });

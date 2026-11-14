@@ -27,7 +27,7 @@ if (Astro.request.method === 'POST') {
 	error = checked.errors.name;
 }
 ---
-<PlannerLayout page="Your name" hasErrors={!!error}>
+<PlannerLayout page="Your name" current={null} hasErrors={!!error}>
 	<a class="gm-back" href={back}><svg class="gm-icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back</a>
 	<NamePicker action={`${Astro.url.pathname}${Astro.url.search}`} value={value} error={error} />
 </PlannerLayout>
