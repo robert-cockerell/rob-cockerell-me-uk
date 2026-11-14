@@ -45,6 +45,8 @@ export async function history(page: Page) {
 
 /** The error summary's messages (C13). */
 export async function errorMessages(page: Page): Promise<string[]> {
+	// Wait for the posted form to come back; every caller starts from a fresh form.
+	await page.locator('.gm-error-summary').waitFor({ state: 'visible' });
 	return (await page.locator('.gm-error-summary li').allInnerTexts()).map((t) => t.trim());
 }
 
@@ -80,16 +82,31 @@ export async function slotRows(page: Page, time: string): Promise<Record<string,
 	return Object.fromEntries(rows);
 }
 
-/** A bike's state in every slot, worked out from the timeline's change lists. */
+/** True when the day plan shows the grid (992 px and wider, UI spec §3.3). */
+export async function showsGrid(page: Page): Promise<boolean> {
+	return page.locator('.gm-print-grid').isVisible();
+}
+
+/** A bike's state in every slot: from the grid when it's shown, else from the timeline's change lists. */
 export async function statesOf(page: Page, bike: string): Promise<Record<string, string>> {
+	if (await showsGrid(page)) {
+		return page.locator('table.gm-grid').evaluate((table, tag) => {
+			const times = [...table.querySelectorAll('thead th .gm-grid__time')].map((t) => t.textContent?.trim() ?? '');
+			const row = [...table.querySelectorAll('tbody tr')].find((r) => r.querySelector('th .gm-mono')?.textContent?.trim() === tag);
+			const out: Record<string, string> = {};
+			[...(row?.querySelectorAll('td') ?? [])].forEach((td, i) => {
+				const shown = td.querySelector('.gm-grid__cell') ?? td.querySelector('.visually-hidden');
+				out[times[i]] = (shown?.textContent ?? '').replace(/\s+/g, ' ').replace(', due', ' due').trim();
+			});
+			return out;
+		}, bike);
+	}
 	const slots = await page.$$eval('ol.gm-timeline > li.gm-slot', (els) =>
 		els.map((s) => ({
 			time: s.querySelector('time')?.textContent?.trim() ?? '',
 			rows: [...s.querySelectorAll('a.gm-bike-row')].map((r) => ({
 				tag: r.querySelector('.gm-bike-row__tag')?.textContent?.trim() ?? '',
 				state: (r.querySelector('.gm-state')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
-				next: (r.querySelector('.gm-next')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
-				flags: [...r.querySelectorAll('.gm-flag')].map((f) => (f.textContent ?? '').replace(/\s+/g, ' ').trim()),
 			})),
 		})),
 	);
@@ -103,11 +120,20 @@ export async function statesOf(page: Page, bike: string): Promise<Record<string,
 	return out;
 }
 
-/** A bike's row (next booking, flags) wherever it's first listed. */
+/** A bike's next booking and flags, from the grid's row header or the timeline. */
 export async function bikeRow(page: Page, bike: string) {
-	const row = page.locator('a.gm-bike-row', { has: page.locator('.gm-bike-row__tag', { hasText: new RegExp(`^${bike}$`) }) }).first();
-	return {
-		next: await text(row.locator('.gm-next')),
-		flags: (await row.locator('.gm-flag').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim()),
-	};
+	const grid = await showsGrid(page);
+	return page.evaluate(
+		({ bike, grid }) => {
+			const clean = (t: string | null | undefined) => (t ?? '').replace(/\s+/g, ' ').trim();
+			const el = grid
+				? [...document.querySelectorAll('table.gm-grid tbody th')].find((th) => clean(th.querySelector('.gm-mono')?.textContent) === bike)
+				: [...document.querySelectorAll('a.gm-bike-row')].find((r) => clean(r.querySelector('.gm-bike-row__tag')?.textContent) === bike);
+			return {
+				next: clean(el?.querySelector('.gm-next')?.textContent),
+				flags: [...(el?.querySelectorAll('.gm-flag') ?? [])].map((f) => clean(f.textContent)),
+			};
+		},
+		{ bike, grid },
+	);
 }

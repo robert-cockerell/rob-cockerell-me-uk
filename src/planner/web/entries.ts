@@ -6,7 +6,7 @@
 
 import type { AstroCookies } from 'astro';
 import { toMinute } from '../fleet/asset-forms.ts';
-import { historyOrder, isOpenFault } from '../fleet/derive.ts';
+import { currentBattery, historyOrder, isOpenFault } from '../fleet/derive.ts';
 import type { Entry, EntryType } from '../fleet/types.ts';
 import { dateLabel, SAVED } from '../fleet/wording.ts';
 import { MSG } from '../forms/messages.ts';
@@ -39,7 +39,13 @@ export interface EntryView {
 	today: string;
 	/** Dealer service: the bike's open faults it can clear. */
 	openFaults: Entry[];
+	/** Dealer service: the battery fitted now, and every battery, for cycle counts (REQ-14). */
+	fittedBattery: string | null;
+	batteries: string[];
 }
+
+/** REQ-14: the fitted battery's row, then two rows to choose a battery. */
+export const COUNT_ROWS = [1, 2, 3] as const;
 
 export async function handleEntry(astro: Astro, asset: AssetKind, tag: string, kind: EntryPageKind): Promise<{ response: Response } | { view: EntryView }> {
 	const repo = fleet();
@@ -49,6 +55,9 @@ export async function handleEntry(astro: Astro, asset: AssetKind, tag: string, k
 	if (!exists || (kind === 'dealer-service' && asset !== 'bikes')) return { response: new Response(null, { status: 404 }) };
 	const ref = asset === 'bikes' ? { bike: tag } : { battery: tag };
 	const openFaults = kind === 'dealer-service' ? historyOrder((await repo.listEntries(ref)).filter(isOpenFault)) : [];
+	const [fittings, allBatteries] = kind === 'dealer-service' ? await Promise.all([repo.listFittings(), repo.listBatteries()]) : [[], []];
+	const fittedBattery = kind === 'dealer-service' ? currentBattery(tag, fittings) : null;
+	const batteries = allBatteries.map((b) => b.batteryAssetTag);
 
 	let values: Values = { entryDate: today };
 	let errors: Record<string, string> = {};
@@ -57,7 +66,7 @@ export async function handleEntry(astro: Astro, asset: AssetKind, tag: string, k
 		values = formValues(await astro.request.formData());
 		const entryType = ENTRY_TYPE[kind];
 		outcome = await save(astro, values, {
-			check: () => checkEntryForm(values, entryType, now, openFaults),
+			check: () => checkEntryForm(values, entryType, now, openFaults, kind === 'dealer-service' ? { fittedBattery, batteries } : null),
 			write: async (v, name) => {
 				await repo.insertEntry({
 					entryType,
@@ -70,6 +79,8 @@ export async function handleEntry(astro: Astro, asset: AssetKind, tag: string, k
 				});
 				// BR-07, OI-04: the dealer service's Entry date and Recorded by.
 				for (const id of v.clears) await repo.clearFault(id, v.entryDate, name);
+				// DEC-07, AC-14.1: the latest reading, with the change stamp. Blank leaves it (AC-14.2).
+				for (const c of v.counts) await repo.setCycleCount(c.battery, c.cycleCount, name, toMinute(now));
 			},
 			saved: (v) =>
 				kind === 'fault' ? SAVED.fault(tag) : kind === 'check' ? SAVED.check(tag) : SAVED.dealer(tag, v.clears.length),
@@ -78,7 +89,7 @@ export async function handleEntry(astro: Astro, asset: AssetKind, tag: string, k
 		if (outcome.kind === 'redirect') return { response: outcome.response };
 		if (outcome.kind === 'invalid') errors = outcome.errors;
 	}
-	return { view: { asset, tag, kind, values, errors, outcome, today, openFaults } };
+	return { view: { asset, tag, kind, values, errors, outcome, today, openFaults, fittedBattery, batteries } };
 }
 
 function checkEntryForm(
@@ -86,16 +97,39 @@ function checkEntryForm(
 	entryType: EntryType,
 	now: Date,
 	openFaults: Entry[],
-): Checked<{ entryDate: string; description: string; clears: number[] }> {
+	cycleCounts: { fittedBattery: string | null; batteries: string[] } | null,
+): Checked<{ entryDate: string; description: string; clears: number[]; counts: { battery: string; cycleCount: number }[] }> {
 	const checked = checkEntry(values, entryType, now);
+	const counts = cycleCounts ? checkCycleCounts(values, cycleCounts) : { counts: [], errors: {} };
 	const ids = (values.clears ?? '').split(',').filter(Boolean).map(Number);
 	const clears = openFaults.filter((f) => ids.includes(f.entryId));
-	const errors = checked.ok ? {} : { ...checked.errors };
+	const errors: Record<string, string> = { ...(checked.ok ? {} : checked.errors), ...counts.errors };
 	// A fault can't be cleared before it was reported (DI-027).
 	const early = checked.ok ? clears.find((f) => checked.value.entryDate < f.entryDate) : undefined;
 	if (early) errors.clears = MSG.clearedDateBeforeEntry(dateLabel(early.entryDate));
-	if (!checked.ok || early) return { ok: false, errors };
-	return { ok: true, value: { ...checked.value, clears: clears.map((f) => f.entryId) } };
+	if (!checked.ok || early || Object.keys(counts.errors).length) return { ok: false, errors };
+	return { ok: true, value: { ...checked.value, clears: clears.map((f) => f.entryId), counts: counts.counts } };
+}
+
+/** REQ-14, DI-018: a whole number from 0 to 9,999, for a battery that exists. Blank rows are skipped. */
+function checkCycleCounts(values: Values, ctx: { fittedBattery: string | null; batteries: string[] }) {
+	const counts = new Map<string, number>();
+	const errors: Record<string, string> = {};
+	for (const row of COUNT_ROWS) {
+		const raw = (values[`count${row}`] ?? '').trim();
+		const battery = row === 1 ? ctx.fittedBattery : (values[`countBattery${row}`] ?? '').trim();
+		if (raw === '') continue;
+		if (!/^\d+$/.test(raw) || Number(raw) > 9999) {
+			errors[`count${row}`] = MSG.cycleCountRange;
+			continue;
+		}
+		if (!battery || !ctx.batteries.includes(battery)) {
+			errors[`countBattery${row}`] = MSG.cycleCountBattery;
+			continue;
+		}
+		counts.set(battery, Number(raw));
+	}
+	return { counts: [...counts].map(([battery, cycleCount]) => ({ battery, cycleCount })), errors };
 }
 
 // ------------------------------------------------------------- clearing a fault

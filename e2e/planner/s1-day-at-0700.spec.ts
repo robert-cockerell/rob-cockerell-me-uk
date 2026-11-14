@@ -77,6 +77,8 @@ test('S1.02 AC-01.2 AC-04.5 every slot shows its band as a coloured fill and its
 });
 
 test('S1.03 AC-04.1 slots run top to bottom and the page doesn\'t scroll sideways', async ({ page }) => {
+	// From 992 px the day plan is the grid (UI spec §3.3), tested in S8.02.
+	test.skip((page.viewportSize()?.width ?? 0) >= 992, 'Tablet sizes show the grid; see S8.02');
 	const tops = await page.$$eval('ol.gm-timeline > li.gm-slot', (els) => els.map((e) => e.getBoundingClientRect().top));
 	for (let i = 1; i < tops.length; i++) expect(tops[i]).toBeGreaterThan(tops[i - 1]);
 	const { scrollWidth, clientWidth } = await page.evaluate(() => ({
@@ -172,11 +174,11 @@ test('S1.10 AC-01.5 bands only: no gCO₂/kWh figures and no advice on what to c
 	const text = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
 	expect(text).not.toMatch(/gCO|kWh|intensity/i);
 	expect(text).not.toMatch(/least bad|best time|greenest|recommend|you should|charge (now|at|this|it)/i);
-	// The only numbers are asset tags, times and the heading's date: no figures.
+	// The only numbers are asset tags, times and dates (the heading, the grid's caption): no figures.
 	const rest = text
 		.replace(/\b[A-Z]\d{2}\b/g, '') // asset tags, M01
 		.replace(/\b\d{2}:\d{2}\b/g, '') // times, 07:30
-		.replace('Tue 16 Jun', '');
+		.replace(/\b[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}( \d{4})?\b/g, ''); // dates, Tue 16 Jun 2026
 	expect(rest).not.toMatch(/\d/);
 });
 

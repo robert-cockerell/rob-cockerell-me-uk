@@ -2,7 +2,7 @@
 // service (REQ-09, AC-10.5). Starting state: R0, clock 12:00.
 
 import { expect, test, type Page } from '@playwright/test';
-import { errorMessages, history, notice, pickName, statesOf, text, url } from './helpers.ts';
+import { bikeRow, errorMessages, history, notice, pickName, statesOf, text, url } from './helpers.ts';
 import { latestEntry, setClock, setStartingState, standinEvent } from './stand-in.ts';
 
 test.beforeAll(async () => setStartingState('R0', '2026-06-16 12:00'));
@@ -60,6 +60,14 @@ test.describe('Sam', () => {
 	test('S5.04 AC-09.7 G02 with an open fault, still available in LibreBooking, isn\'t "Out of service"', async ({ page }) => {
 		await page.goto(url.dayPlan);
 		expect(Object.values(await statesOf(page, 'G02'))).not.toContain('Out of service');
+	});
+
+	test('S5.05 S5.06 AC-13.1 AC-13.3 G02 and M07 carry the open fault flag with their states unchanged; M04 isn\'t flagged', async ({ page }) => {
+		await page.goto(url.dayPlan);
+		expect((await bikeRow(page, 'G02')).flags).toEqual(['Open fault']);
+		expect((await bikeRow(page, 'M07')).flags).toEqual(['Open fault']);
+		expect(new Set(Object.values(await statesOf(page, 'M07')))).toEqual(new Set(['In the workshop']));
+		expect((await bikeRow(page, 'M04')).flags).toEqual([]);
 	});
 
 	test('S5.07 AC-02.1 after E-04, G02 and G05 read "Out of service" in every slot', async ({ page }) => {
@@ -143,6 +151,46 @@ test('S6.01 AC-09.5 AC-10.5 dealer service on M07 clears 1043 with its Entry dat
 	await expect(page.locator('.gm-summary .gm-flag--fault')).toHaveCount(0);
 	// S6.06: the last service is now the dealer service (DEC-38).
 	expect(await text(page.locator('.gm-summary__fact', { hasText: 'Last service' }).locator('dd'))).toBe('Dealer service, 15 Jun 2026');
+});
+
+test('S6.02 AC-14.2 B-07\'s cycle count left blank on the dealer service stays 301', async ({ page, context, baseURL }) => {
+	await pickName(context, baseURL, 'Priya Shah');
+	await page.goto(url.battery('B-07'));
+	expect(await text(page.locator('.gm-summary__fact', { hasText: 'Cycle count' }).locator('dd'))).toBe('301');
+});
+
+test('S6.03 AC-13.2 once 1043 is cleared, M07\'s fault flag has gone from the day plan', async ({ page }) => {
+	await setClock('2026-06-16 16:12');
+	await page.goto(url.dayPlan);
+	expect((await bikeRow(page, 'M07')).flags).toEqual([]);
+});
+
+test('S6.04 S6.05 AC-14.3 AC-14.1 cycle counts on G01\'s dealer service: V-20 to V-22 refused; B-14 170 and B-17 31 saved with Priya\'s name', async ({ page, context, baseURL }) => {
+	await setClock('2026-06-16 16:12');
+	await pickName(context, baseURL, 'Priya Shah');
+	const before = (await latestEntry({ bike: 'G01' }).catch(() => null))?.entry_id ?? null;
+	await page.goto(`${url.bike('G01')}dealer-service/`);
+	await page.locator('[name="entryDate"]').fill('2026-06-15');
+	await page.locator('[name="description"]').fill('Interim: gears indexed, battery diagnostics');
+	// G01 has B-14 fitted in this run, so B-14 is the fitted row and B-17 is chosen.
+	for (const bad of ['10000', '12.5', '-3']) {
+		await page.locator('[name="count1"]').fill(bad);
+		await page.getByRole('button', { name: 'Save dealer service' }).click();
+		expect(await errorMessages(page)).toEqual(['Enter a cycle count from 0 to 9,999']);
+		await expect(page.locator('[name="description"]')).toHaveValue('Interim: gears indexed, battery diagnostics');
+	}
+	expect((await latestEntry({ bike: 'G01' }).catch(() => null))?.entry_id ?? null).toBe(before);
+	await expect(page.locator('label[for="f-count1"]')).toHaveText('Cycle count for B-14, fitted now');
+	await page.locator('[name="count1"]').fill('170');
+	await page.locator('[name="countBattery2"]').selectOption('B-17');
+	await page.locator('[name="count2"]').fill('31');
+	await page.getByRole('button', { name: 'Save dealer service' }).click();
+	await expect(page).toHaveURL(url.bike('G01'));
+	for (const [battery, count] of [['B-14', '170'], ['B-17', '31']]) {
+		await page.goto(url.battery(battery));
+		expect(await text(page.locator('.gm-summary__fact', { hasText: 'Cycle count' }).locator('dd'))).toBe(count);
+		expect(await text(page.locator('.gm-summary__stamp'))).toBe('Last updated by Priya Shah, 16 Jun 2026 16:12');
+	}
 });
 
 test('NFR-17 a description containing <script> is shown as text', async ({ page, context, baseURL }) => {

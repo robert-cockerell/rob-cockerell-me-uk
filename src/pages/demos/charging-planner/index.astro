@@ -1,10 +1,12 @@
 ---
-// SCR-02 Day plan, phone timeline (REQ-01 to REQ-04). Rendered on request:
-// it depends on "now" and on live bookings (technical note §6.1).
+// SCR-02 and SCR-03 Day plan (REQ-01 to REQ-04, REQ-12): the phone timeline
+// below 992 px, the grid from 992 px and in print (UI spec §3.3). Rendered on
+// request: it depends on "now" and on live bookings (technical note §6.1).
 export const prerender = false;
 
 import { BOOKINGS_DOWN, CHARGING_RULES, planDateHeading } from '../../../planner/plan/wording.ts';
 import { dayPlan, settings } from '../../../planner/server.ts';
+import PlanGrid from '../../../planner/ui/day-plan/PlanGrid.astro';
 import Timeline from '../../../planner/ui/day-plan/Timeline.astro';
 import PlannerLayout from '../../../planner/ui/PlannerLayout.astro';
 import { routes } from '../../../planner/ui/routes.ts';
@@ -24,10 +26,24 @@ const plan = await dayPlan(clockFor(Astro.cookies));
 		<h1>Day plan</h1>
 		<span class="gm-page-head__sub">{planDateHeading(plan.planDate)}</span>
 	</div>
-	{settings.handbookUrl && (
-		<div class="d-flex flex-wrap gap-2 mb-3 gm-noprint">
+	<div class="d-flex flex-wrap gap-2 mb-3 gm-noprint">
+		{settings.handbookUrl && (
 			<a class="gm-linkout" href={settings.handbookUrl}><svg class="gm-icon" aria-hidden="true"><use href="#i-book-open"/></svg>{CHARGING_RULES}<span class="visually-hidden"> (opens the volunteer handbook)</span></a>
-		</div>
-	)}
-	<Timeline plan={plan} />
+		)}
+		<!-- REQ-12: needs JavaScript (technical note §6.5), so it's shown only when there is some. -->
+		<button class="btn btn-outline-primary" type="button" data-print style="display:none"><svg class="gm-icon" aria-hidden="true"><use href="#i-printer"/></svg>Print day plan</button>
+	</div>
+	<div class="d-lg-none">
+		<Timeline plan={plan} />
+	</div>
+	<div class="gm-print-grid d-none d-lg-block">
+		<PlanGrid plan={plan} />
+	</div>
 </PlannerLayout>
+
+<script>
+	for (const button of document.querySelectorAll<HTMLButtonElement>('[data-print]')) {
+		button.style.display = '';
+		button.addEventListener('click', () => window.print());
+	}
+</script>

@@ -3,7 +3,7 @@
 // Render only; the page runs handleEntry. Entry date defaults to today
 // (AC-09.6). A dealer service lists the bike's open faults to mark as fixed.
 import { dateLabel } from '../../fleet/wording.ts';
-import { ENTRY_PAGE, type EntryView } from '../../web/entries.ts';
+import { COUNT_ROWS, ENTRY_PAGE, type EntryView } from '../../web/entries.ts';
 import { pickedName } from '../../web/request.ts';
 import Field from '../forms/Field.astro';
 import FormShell from '../forms/FormShell.astro';
@@ -20,9 +20,12 @@ const heading = page.heading(v.tag);
 const back = { href: v.asset === 'bikes' ? routes.bike(v.tag) : routes.battery(v.tag), label: v.tag };
 const cleared = (v.values.clears ?? '').split(',');
 const nameError = v.outcome?.kind === 'needs-name' && !!v.outcome.nameError;
+// REQ-14: the fitted battery's row, then rows to choose another battery.
+const others = [{ value: '', label: 'Choose a battery' }, ...v.batteries.filter((b) => b !== v.fittedBattery).map((b) => ({ value: b, label: b }))];
+const order = ['description', 'entryDate', 'clears', ...COUNT_ROWS.flatMap((r) => [`countBattery${r}`, `count${r}`])];
 ---
 <PlannerLayout page={heading} hasErrors={Object.keys(v.errors).length > 0 || nameError}>
-	<FormShell heading={heading} back={back} action={action} values={v.values} errors={v.errors} order={['description', 'entryDate', 'clears']} outcome={v.outcome} submitLabel={page.submit} name={pickedName(Astro.cookies)}>
+	<FormShell heading={heading} back={back} action={action} values={v.values} errors={v.errors} order={order} outcome={v.outcome} submitLabel={page.submit} name={pickedName(Astro.cookies)}>
 		<Field name="description" label={page.describe} kind="textarea" value={v.values.description} error={v.errors.description} hint={v.kind === 'dealer-service' ? 'Start with the service type, for example "Interim: new chain"' : undefined} />
 		<Field name="entryDate" label="Entry date" hint={page.dateHint} kind="date" value={v.values.entryDate} error={v.errors.entryDate} width="date" max={v.today} />
 		{v.kind === 'dealer-service' && v.openFaults.length > 0 && (
@@ -38,6 +41,19 @@ const nameError = v.outcome?.kind === 'needs-name' && !!v.outcome.nameError;
 						</li>
 					))}
 				</ul>
+			</fieldset>
+		)}
+		{v.kind === 'dealer-service' && (
+			<fieldset class="gm-field">
+				<legend class="form-label">Battery cycle counts <span class="gm-optional">(optional)</span></legend>
+				<div class="form-text">From the dealer's job sheet. Leave a count blank if it wasn't read; the battery keeps the count it has.</div>
+				{v.fittedBattery && <Field name="count1" label={`Cycle count for ${v.fittedBattery}, fitted now`} kind="number-text" value={v.values.count1} error={v.errors.count1} width="short" mono />}
+				{COUNT_ROWS.filter((r) => r > 1).map((r) => (
+					<>
+						<Field name={`countBattery${r}`} label={r === 2 ? "Another battery" : "One more battery"} optional kind="select" options={others} value={v.values[`countBattery${r}`] ?? ''} error={v.errors[`countBattery${r}`]} width="short" />
+						<Field name={`count${r}`} label="Its cycle count" optional kind="number-text" value={v.values[`count${r}`]} error={v.errors[`count${r}`]} width="short" mono />
+					</>
+				))}
 			</fieldset>
 		)}
 	</FormShell>

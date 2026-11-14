@@ -26,6 +26,8 @@ export interface FleetRepo {
 	updateBatteryType(name: string, type: BatteryType): Promise<void>;
 	insertFitting(fitting: Fitting): Promise<void>;
 	insertEntry(entry: Omit<Entry, 'entryId' | 'clearedDate' | 'clearedBy'>): Promise<number>;
+	/** A dealer's cycle count reading (DEC-07, REQ-14), with the change stamp. */
+	setCycleCount(tag: string, cycleCount: number, by: string, at: Date): Promise<void>;
 	/** Clears an open fault; false if it was already cleared. */
 	clearFault(entryId: number, clearedDate: string, clearedBy: string): Promise<boolean>;
 }
@@ -245,6 +247,13 @@ export function createFleetRepo(db: SupabaseClient): FleetRepo {
 				.single();
 			check('Saving an entry', error);
 			return Number((data as { entry_id: number }).entry_id);
+		},
+		async setCycleCount(tag, cycleCount, by, at) {
+			const { error } = await db
+				.from('batteries')
+				.update({ cycle_count: cycleCount, last_updated_by: by, last_updated_at: at.toISOString() })
+				.eq('battery_asset_tag', tag);
+			check('Saving a cycle count', error);
 		},
 		async clearFault(entryId, clearedDate, clearedBy) {
 			const { data, error } = await db
