@@ -52,11 +52,15 @@ async function main(): Promise<number> {
 	return report.ok ? 0 : 1;
 }
 
+// Set the exit code and let Node exit on its own. Calling process.exit() just
+// after a fetch crashes Node 24 on Windows with a libuv assertion (exit 127).
 main().then(
-	(code) => process.exit(code),
+	(code) => {
+		process.exitCode = code;
+	},
 	(error: unknown) => {
 		console.error(`${id()} failed: ${(error as Error).message}`);
-		process.exit(1);
+		process.exitCode = 1;
 	},
 );
 
