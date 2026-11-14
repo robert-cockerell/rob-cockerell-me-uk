@@ -70,6 +70,8 @@ export async function latestFitting(battery: string) {
 		.select('*')
 		.eq('battery_asset_tag', battery)
 		.order('fitted_from', { ascending: false })
+		.order('recorded_at', { ascending: false })
+		.order('fitting_id', { ascending: false })
 		.limit(1)
 		.single();
 	if (error) throw new Error(error.message);

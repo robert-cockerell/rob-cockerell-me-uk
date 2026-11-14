@@ -53,6 +53,7 @@ interface BatteryRow {
 	last_updated_at: string;
 }
 interface FittingRow {
+	fitting_id: number | string;
 	battery_asset_tag: string;
 	fitted_from: string;
 	bike_asset_tag: string | null;
@@ -111,6 +112,7 @@ const batteryTo = (b: Omit<Battery, 'batteryAssetTag'>) => ({
 	last_updated_at: b.lastUpdatedAt.toISOString(),
 });
 const fittingFrom = (r: FittingRow): Fitting => ({
+	fittingId: Number(r.fitting_id),
 	batteryAssetTag: r.battery_asset_tag,
 	fittedFrom: new Date(r.fitted_from),
 	bikeAssetTag: r.bike_asset_tag,

@@ -29,6 +29,8 @@ export interface Battery {
 }
 
 export interface Fitting {
+	/** Sequential; breaks ties in the same minute. Absent before it's saved. */
+	fittingId?: number;
 	batteryAssetTag: string;
 	fittedFrom: Date;
 	/** Null: the battery was removed (DEC-20). */

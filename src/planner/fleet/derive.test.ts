@@ -71,6 +71,15 @@ describe('BR-02 battery location and current battery', () => {
 		expect(batteryLocation('B-09', base, [cleared])).toEqual({ kind: 'fitted', bikeAssetTag: 'M04' });
 	});
 
+	it('S4.05 DEC-06 the same battery fitted twice in one minute: the later fitting wins', () => {
+		const first = { ...fit('B-17', '2026-06-16 08:05', 'G01'), fittingId: 37 };
+		const second = { ...fit('B-17', '2026-06-16 08:05', 'M04'), fittingId: 38 };
+		const both = [...base, first, second];
+		expect(batteryLocation('B-17', both, [])).toEqual({ kind: 'fitted', bikeAssetTag: 'M04' });
+		expect(currentBattery('G01', both)).toBeNull();
+		expect(currentBattery('M04', both)).toBe('B-17');
+	});
+
 	it('NFR-16 two swaps on one bike within a minute: both kept, the bike shows the later', () => {
 		const both = [...base, fit('B-17', '2026-06-16 08:05', 'G01'), fit('B-19', '2026-06-16 08:05', 'G01', '2026-06-16 08:06')];
 		expect(currentBattery('G01', both)).toBe('B-19');

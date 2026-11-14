@@ -14,11 +14,13 @@ export function isQuarantined(batteryAssetTag: string, entries: Entry[]): boolea
 	return entries.some((e) => e.batteryAssetTag === batteryAssetTag && isOpenFault(e));
 }
 
-/** Later fitted-from wins; on a tie, the one recorded later (NFR-16). */
+/** Later Fitted from wins; then the one recorded later; then the higher fitting ID (NFR-16). */
 function later(a: Fitting, b: Fitting): Fitting {
 	const byFitted = a.fittedFrom.getTime() - b.fittedFrom.getTime();
 	if (byFitted !== 0) return byFitted > 0 ? a : b;
-	return a.recordedAt.getTime() >= b.recordedAt.getTime() ? a : b;
+	const byRecorded = a.recordedAt.getTime() - b.recordedAt.getTime();
+	if (byRecorded !== 0) return byRecorded > 0 ? a : b;
+	return (a.fittingId ?? 0) >= (b.fittingId ?? 0) ? a : b;
 }
 
 function latest(fittings: Fitting[]): Fitting | null {

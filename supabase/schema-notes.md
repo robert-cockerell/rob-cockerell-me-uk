@@ -2,6 +2,13 @@
 
 Migration: `supabase/migrations/20261114000000_planner_d1_d3.sql`. **Approved by Rob as proposed, choices S-1 to S-4 included, and pushed to the development project on 14 November 2026.** Any change from here is a new migration, after asking Rob.
 
+**Changes since:**
+
+| Migration | Change | Why |
+|-----------|--------|-----|
+| `20261116000000_fittings_id.sql` | `fittings` gets its own key, `fitting_id`. Battery and Fitted from are no longer unique. The latest fitting is by Fitted from, then Recorded at, then `fitting_id`. The reset names its columns so the ID is assigned | The CRP script fits the same battery twice in one held minute (S4.03 then S4.05; S12.05 then S12.08), and DEC-06 rules out a duplicate-fitting check. Replaces choice S-3. Approved by Rob and pushed, 14 November 2026 |
+| `supabase/proposed/20261115000000_forecast_job_cron.sql` | pg_cron and pg_net call process 1 every 30 minutes | DEC-48. **Proposed, not pushed**: needs two Vault secrets and the planner on production |
+
 Fixture loading: `src/planner/fixtures/`, plugged into the stand-in's resets through `src/planner/demo-fixtures.ts` (DEC-55).
 
 Sources: normalisation §8 (3NF relations), `diagrams/lds/logical-data-structure.mmd` v0.2, data dictionary v0.6 §2 (formats, mandatory rules) and §3.1 (stored structures). All tables are in `public`; the stand-in keeps `standin` (DEC-58).
@@ -33,8 +40,9 @@ Sources: normalisation §8 (3NF relations), `diagrams/lds/logical-data-structure
 | | | `cycle_count` | DI-018 | integer 0–9,999, optional |
 | | | `last_updated_by` | DI-038 | text, 1–50 chars |
 | | | `last_updated_at` | DI-039 | timestamptz, to the minute |
-| `fittings` | D2 Fitting | `battery_asset_tag` | DI-014 | FK to `batteries`; key part |
-| | | `fitted_from` | DI-020 | timestamptz, to the minute; key part |
+| `fittings` | D2 Fitting | `fitting_id` | – | bigint identity, key (added by `20261116000000_fittings_id.sql`) |
+| | | `battery_asset_tag` | DI-014 | FK to `batteries` |
+| | | `fitted_from` | DI-020 | timestamptz, to the minute |
 | | | `bike_asset_tag` | DI-007 | FK to `bikes`, optional: null means removed (DEC-20) |
 | | | `recorded_by` | DI-025 | text, 1–50 chars |
 | | | `recorded_at` | DI-037 | timestamptz, to the minute |
@@ -77,7 +85,7 @@ Sources: normalisation §8 (3NF relations), `diagrams/lds/logical-data-structure
 |---|--------|----------|-------------|
 | S-1 | Bike asset tag format | Any capital letter and two digits, so a new bike family needs no schema change | Only M, G and D, as DI-007 lists today |
 | S-2 | Changing an asset tag after it's used | Refused once a fitting or entry refers to it, because fittings and entries are append only. Renaming a battery type carries through to its batteries | Allow renames by cascading into fittings and entries. This breaks BR-07's "never updated" |
-| S-3 | Two fittings of one battery in the same minute | Refused, because battery and Fitted from are the key (normalisation §8) | Add seconds to Fitted from. DI-020 says "to the minute" |
+| S-3 | Two fittings of one battery in the same minute | ~~Refused, because battery and Fitted from are the key~~. **Replaced:** allowed, with a `fitting_id` key (see Changes since) | – |
 | S-4 | BR-07 triggers and the reset function | In this migration | Leave both out: the app follows BR-07 on its own, and the reset deletes through the Data API |
 
 ## Pushing
