@@ -7,6 +7,11 @@
 // skipped. This file sits outside src/planner/standin/ so route A can fill it
 // in without changing the test equipment.
 
+import { systemNow } from './clock/system-now.ts';
+import { createPlannerFixtures } from './fixtures/planner-fixtures.ts';
+import { createSupabaseFixtureDb } from './fixtures/supabase-fixture-db.ts';
+import { loadPlannerFixtureTexts } from './fixtures/texts.ts';
+
 /** One row of test-data/forecasts.csv, checked and ready to load into D1. */
 export interface ForecastFixtureRow {
 	/** Carbon Intensity API region name, for example "South England" (DEC-44). */
@@ -31,5 +36,22 @@ export interface PlannerFixtures {
 	reloadForecasts(rows: ForecastFixtureRow[]): Promise<void>;
 }
 
-/** Route A sets this once its schema is approved. Null on the T1 branch. */
-export const plannerFixtures: PlannerFixtures | null = null;
+// Route A's loader (src/planner/fixtures/). The database settings are read when
+// a reset runs, from the same GM_ variables as the stand-in, so this works
+// under Astro and under plain Node (`npm run demo:reset`), where astro:env
+// isn't available.
+
+type EnvSource = Record<string, string | undefined> | undefined;
+const viteEnv: EnvSource = (import.meta as ImportMeta & { env?: EnvSource }).env;
+
+function setting(name: string): string {
+	const value = (process.env[name] ?? viteEnv?.[name])?.trim();
+	if (!value) throw new Error(`${name} must be set to reload D1 to D3`);
+	return value;
+}
+
+export const plannerFixtures: PlannerFixtures | null = createPlannerFixtures({
+	db: () => createSupabaseFixtureDb({ url: setting('GM_SUPABASE_URL'), serviceKey: setting('GM_SUPABASE_SERVICE_KEY') }),
+	loadTexts: loadPlannerFixtureTexts,
+	systemNow,
+});

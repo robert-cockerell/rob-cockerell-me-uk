@@ -1,6 +1,8 @@
 # Schema notes – D1 to D3 (route A, Stage 2)
 
-Migration: `supabase/migrations/20261114000000_planner_d1_d3.sql`. **Proposed, not pushed.** It waits for Rob's approval before `npm run db:push`.
+Migration: `supabase/migrations/20261114000000_planner_d1_d3.sql`. **Approved by Rob as proposed, choices S-1 to S-4 included, and pushed to the development project on 14 November 2026.** Any change from here is a new migration, after asking Rob.
+
+Fixture loading: `src/planner/fixtures/`, plugged into the stand-in's resets through `src/planner/demo-fixtures.ts` (DEC-55).
 
 Sources: normalisation §8 (3NF relations), `diagrams/lds/logical-data-structure.mmd` v0.2, data dictionary v0.6 §2 (formats, mandatory rules) and §3.1 (stored structures). All tables are in `public`; the stand-in keeps `standin` (DEC-58).
 
@@ -80,7 +82,7 @@ Sources: normalisation §8 (3NF relations), `diagrams/lds/logical-data-structure
 
 ## Pushing
 
-`npm run db:push` applies every pending migration. That includes T1's `20261113000000_standin_schema.sql` (blocker B-3), which hasn't been applied yet. Once it's pushed, add `standin` to the exposed schemas (Project settings → Data API).
+`npm run db:push` runs `supabase db push --remote`. Supabase CLI v3 targets a local Docker stack unless told otherwise, and there's no Docker here (TQ-02). The CLI asks before it changes a hosted project; once Rob has approved a push, add `-- --yes`. T1's `standin` migration was already applied when this one was pushed.
 
 ## How it was checked
 
