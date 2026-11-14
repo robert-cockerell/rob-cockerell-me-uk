@@ -239,6 +239,8 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
   .gm-grid__cell--service { color: var(--gm-text-muted); }
   .gm-grid__same { color: var(--gm-text-muted); }
 }
+// Dark theme: the same lighter red as fault flags, for AA contrast (AC-19.1). Added with Rob's agreement.
+@media (prefers-color-scheme: dark) { .gm-grid .gm-grid__cell--overdue { color: #FF9B8F; } }
 
 // ---------------------------------------------------------------------------
 // Asset summary card (REQ-05, REQ-08)
