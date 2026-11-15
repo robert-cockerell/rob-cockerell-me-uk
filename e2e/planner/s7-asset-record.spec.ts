@@ -14,6 +14,8 @@ test('S7.01 AC-05.7 from the day plan, M07\'s last service is two taps away', as
 		await page.locator('nav.gm-tabbar').getByRole('link', { name: 'Fleet' }).click();
 		await page.locator('.gm-list__row', { hasText: 'M07' }).click();
 	} else {
+		// DEC-78: at 09:15 the 07:00 slot, where M07 is listed, is closed: open it, then M07.
+		await page.locator('#slot-0700 summary').click();
 		await page.locator('a.gm-bike-row', { hasText: 'M07' }).first().click();
 	}
 	await expect(page.locator('main h1')).toHaveText('M07');

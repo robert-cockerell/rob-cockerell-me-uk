@@ -274,8 +274,8 @@
 
 <!-- ===================================================================== -->
 <section class="ref-section" id="c06">
-  <h2>Phone timeline <span class="ref-id">C06 · SCR-02 · REQ-04</span></h2>
-  <p class="ref-note">One slot per half hour, 07:00 to 16:00. The 07:00 slot lists every bike (DEC-40); later slots list only bikes that change, or "No changes". Each bike row links to its record. The current slot has a solid surface background with side padding, and its time is marked "now" with <code>aria-current="time"</code> (UI-A-01). The band chart (C18) sits above the slots. Extract below: now is 07:00.</p>
+  <h2>Phone timeline <span class="ref-id">C06 · SCR-02 · REQ-04 · DEC-78</span></h2>
+  <p class="ref-note">One slot per half hour, 07:00 to 16:00. The 07:00 slot lists every bike (DEC-40); later slots list only bikes that change, or "No changes". Each bike row links to its record. The current slot has a solid surface background with side padding, and its time is marked "now" with <code>aria-current="time"</code> (UI-A-01). Each slot with bikes listed is a native <code>&lt;details&gt;</code> (DEC-78): closed, it shows the time, band, how many bikes change and a chevron; open, the bike rows. Only the current slot is open on load, or 07:00 when there's no current slot. A slot with no changes reads "No changes" and doesn't open. Following a band chart bar opens its slot. The band chart (C18) sits above the slots. Extract below: now is 07:00, so 07:00 is open and 07:30 and 12:00 are closed.</p>
   <div class="ref-grid">
     <div class="ref-phone">
       <div class="gm-main">
@@ -299,41 +299,63 @@
         </details>
         <ol class="gm-timeline">
           <li class="gm-slot gm-slot--now" id="slot-0700">
-            <time class="gm-slot__time" datetime="2026-06-16T07:00" aria-current="time">07:00</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
-            <ul class="gm-slot__bikes">
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M07</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span><span class="gm-bike-row__flags"><span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M08</span><span class="gm-bike-row__body"><span class="gm-state gm-state--overdue"><svg class="gm-icon" aria-hidden="true"><use href="#i-clock-alert"/></svg><span>Overdue – not checked in <span class="gm-due">due Mon 16:30</span></span></span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G04</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G05</span><span class="gm-bike-row__body"><span class="gm-state gm-state--service"><svg class="gm-icon" aria-hidden="true"><use href="#i-ban"/></svg>Out of service</span></span></a></li>
-              <li class="gm-muted small ps-1">…and the other 14 bikes</li>
-            </ul>
+            <details class="gm-slot__details" open>
+              <summary class="gm-slot__head">
+                <time class="gm-slot__time" datetime="2026-06-16T07:00" aria-current="time">07:00</time>
+                <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+                <span class="gm-slot__count">All 18 bikes</span>
+                <svg class="gm-icon gm-slot__chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+              </summary>
+              <ul class="gm-slot__bikes">
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M07</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span><span class="gm-bike-row__flags"><span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M08</span><span class="gm-bike-row__body"><span class="gm-state gm-state--overdue"><svg class="gm-icon" aria-hidden="true"><use href="#i-clock-alert"/></svg><span>Overdue – not checked in <span class="gm-due">due Mon 16:30</span></span></span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G04</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G05</span><span class="gm-bike-row__body"><span class="gm-state gm-state--service"><svg class="gm-icon" aria-hidden="true"><use href="#i-ban"/></svg>Out of service</span></span></a></li>
+                <li class="gm-muted small ps-1">…and the other 14 bikes</li>
+              </ul>
+            </details>
           </li>
           <li class="gm-slot" id="slot-0730">
-            <time class="gm-slot__time" datetime="2026-06-16T07:30">07:30</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
-            <ul class="gm-slot__bikes">
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M10</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
-            </ul>
+            <details class="gm-slot__details">
+              <summary class="gm-slot__head">
+                <time class="gm-slot__time" datetime="2026-06-16T07:30">07:30</time>
+                <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+                <span class="gm-slot__count">2 bikes change</span>
+                <svg class="gm-icon gm-slot__chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+              </summary>
+              <ul class="gm-slot__bikes">
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M10</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+              </ul>
+            </details>
           </li>
           <li class="gm-slot" id="slot-0830">
-            <time class="gm-slot__time" datetime="2026-06-16T08:30">08:30</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
-            <p class="gm-slot__quiet">No changes</p>
+            <div class="gm-slot__head">
+              <time class="gm-slot__time" datetime="2026-06-16T08:30">08:30</time>
+              <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+              <p class="gm-slot__quiet">No changes</p>
+            </div>
           </li>
           <li class="gm-slot" id="slot-1200">
-            <time class="gm-slot__time" datetime="2026-06-16T12:00">12:00</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--very-low"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-leaf"/></svg>very low</span></span>
-            <ul class="gm-slot__bikes">
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M01</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">next out: <strong>14:00</strong></span></span></a></li>
-            </ul>
+            <details class="gm-slot__details">
+              <summary class="gm-slot__head">
+                <time class="gm-slot__time" datetime="2026-06-16T12:00">12:00</time>
+                <span class="gm-slot__band"><span class="gm-band gm-band--very-low"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-leaf"/></svg>very low</span></span>
+                <span class="gm-slot__count">2 bikes change</span>
+                <svg class="gm-icon gm-slot__chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+              </summary>
+              <ul class="gm-slot__bikes">
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M01</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">next out: <strong>14:00</strong></span></span></a></li>
+              </ul>
+            </details>
           </li>
           <li class="gm-slot" id="slot-1530">
-            <time class="gm-slot__time" datetime="2026-06-16T15:30">15:30</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--none">No forecast</span></span>
-            <p class="gm-slot__quiet">No changes</p>
+            <div class="gm-slot__head">
+              <time class="gm-slot__time" datetime="2026-06-16T15:30">15:30</time>
+              <span class="gm-slot__band"><span class="gm-band gm-band--none">No forecast</span></span>
+              <p class="gm-slot__quiet">No changes</p>
+            </div>
           </li>
         </ol>
       </div>
@@ -780,7 +802,7 @@
   </div>
 </section>
 
-<p class="ref-note py-4">Reference v0.2, 14 November 2026 (UI review: C06 current slot, C08 battery types, C18 band chart, the dock). v0.1, 12 November 2026. Source: <code>design/reference.html</code>, <code>design/planner-theme.scss</code>, <code>design/planner-components.scss</code>, <code>brand/tokens.css</code>. Icons: Lucide (ISC). Built on AdminLTE 4 (MIT) and Bootstrap 5.3 (MIT).</p>
+<p class="ref-note py-4">Reference v0.3, 15 November 2026 (C06 slots open and close, DEC-78). v0.2, 14 November 2026 (UI review: C06 current slot, C08 battery types, C18 band chart, the dock). v0.1, 12 November 2026. Source: <code>design/reference.html</code>, <code>design/planner-theme.scss</code>, <code>design/planner-components.scss</code>, <code>brand/tokens.css</code>. Icons: Lucide (ISC). Built on AdminLTE 4 (MIT) and Bootstrap 5.3 (MIT).</p>
 </main>
 <nav class="gm-tabbar" aria-label="Main">
   <a class="gm-tab" href="#" aria-current="page"><svg class="gm-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg>Day plan</a>

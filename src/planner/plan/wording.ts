@@ -68,6 +68,10 @@ export function planDateHeading(planDate: string): string {
 
 /** Timeline slot with no bike changing (C06). */
 export const NO_CHANGES = 'No changes';
+/** Count on a closed timeline slot (C06, DEC-78): the 07:00 slot lists every bike. */
+export const allBikes = (n: number): string => (n === 1 ? '1 bike' : `All ${n} bikes`);
+/** Count on a closed timeline slot (C06, DEC-78): later slots list the bikes that change. */
+export const bikesChange = (n: number): string => (n === 1 ? '1 bike changes' : `${n} bikes change`);
 /** C17 link out (REQ-16). */
 export const CHARGING_RULES = 'Charging rules';
 /** C16 problem notice when LibreBooking can't be reached (PRD §7.3). */

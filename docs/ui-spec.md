@@ -2,9 +2,9 @@
 
 **Project:** Community e-bike library – Charging planner (proof of concept)
 **Document:** `docs/ui-spec.md`
-**Status:** Draft v0.3 (14 November 2026, UI review on the `ui-review-fixes` branch: DEC-76 band chart C18, DEC-77 bottom dock, UI-A-01 to UI-A-03)
+**Status:** Draft v0.4 (15 November 2026: collapsible slots on the phone timeline, DEC-78. v0.3, 14 November 2026, UI review on the `ui-review-fixes` branch: DEC-76 band chart C18, DEC-77 bottom dock, UI-A-01 to UI-A-03)
 **Owner:** Rob
-**Related:** `docs/prd.md` v0.8 (§6 screens and components, NFR-01 to NFR-07), `docs/technical-note.md` v0.8, `docs/analysis/decision-log.md` v1.6 (DEC-50, DEC-51, DEC-76, DEC-77), `brand/brand-identity.md` v0.4, `brand/tokens.css`, `design/planner-theme.scss`, `design/planner-components.scss`, `design/reference.html`
+**Related:** `docs/prd.md` v0.8 (§6 screens and components, NFR-01 to NFR-07), `docs/technical-note.md` v0.8, `docs/analysis/decision-log.md` v1.7 (DEC-50, DEC-51, DEC-76 to DEC-78), `brand/brand-identity.md` v0.4, `brand/tokens.css`, `design/planner-theme.scss`, `design/planner-components.scss`, `design/reference.html`
 
 > **Fictional example.** Greener Miles and its data are invented. This spec is real: it's how the planner's interface is built.
 
@@ -89,7 +89,7 @@ The reference page shows each one. This table adds the rules.
 | C03 | Bike state label | Each bike on the day plan | Exactly: "Out on loan", "In the workshop", "Overdue – not checked in" with "due HH:MM" or "due Ddd HH:MM", "Out of service". Icons: `bike`, `warehouse`, `clock-alert`, `ban` |
 | C04 | Next booking label | Beside each bike on the day plan | "next out: 14:00", "next out: Wed 13:00", "No booking" (BR-03). Times in IBM Plex Mono |
 | C05 | Flags and warnings | Beside the state; on the bike record | "Open fault" (`triangle-alert`), "Booked again at 14:00" (`calendar-clock`), "Resource ID doesn't match LibreBooking" (`link-2-off`). They never change the state |
-| C06 | Phone timeline | SCR-02 | An ordered list of 19 slots. 07:00 lists every bike; later slots list only bikes whose state changed, or "No changes" (DEC-40). The current slot is marked "now": its time carries the label underneath and `aria-current="time"`, and the slot has a solid surface background with side padding (UI-A-01). Each bike row links to its record. Each slot has an anchor (`#slot-0700`) for the band chart |
+| C06 | Phone timeline | SCR-02 | An ordered list of 19 slots. 07:00 lists every bike; later slots list only bikes whose state changed, or "No changes" (DEC-40). Each slot with bikes listed is a native `<details>` (DEC-78): its summary shows the time, the band tag, the count ("1 bike changes", "4 bikes change", "All 18 bikes" at 07:00) and a chevron, at least 44 px tall; opened, the bike rows. Only the current slot is open on load, or 07:00 when there's no current slot; a slot with no changes reads "No changes" and doesn't open. Following a band chart bar opens its slot. Not remembered between loads. The current slot is marked "now": its time carries the label underneath and `aria-current="time"`, and the slot has a solid surface background with side padding (UI-A-01). Each bike row links to its record. Each slot has an anchor (`#slot-0700`) for the band chart |
 | C07 | Plan grid | SCR-03 and print | A real `<table>` with a caption, column headers (time and band) and row headers (bike, next booking, flags). A cell the same as the one before shows a muted "–", with the state in visually hidden text |
 | C08 | Fleet list | SCR-04 | Bikes, Batteries and Battery types are three views of one page, switched with the segmented control. Battery rows show the location. Battery type rows show the name and capacity, with `.gm-list__row--name` so long names don't wrap (UI-A-02). Sorted by asset tag, or by name for battery types |
 | C09 | Asset summary card | Top of SCR-05 and SCR-06 | Bike: last service (type and date, DEC-38) and the fitted battery with its type, purchase date and cycle count. Battery: location first; if quarantined, a red edge and the fault. Change stamp at the foot (BR-11) |
@@ -226,7 +226,7 @@ On top of NFR-03 (WCAG 2.1 AA):
 - **Focus:** the 3 px Grid Amber ring with a 2 px dark outline on every interactive element (brand §7). Never remove it.
 - **Input borders** use Slate, not Mist, so they reach 3:1 against the surface. Mist is for card borders and dividers only.
 - **Landmarks:** one `<header>`, `<nav aria-label="Main">`, one `<main>`. Headings in order, one `<h1>` per page.
-- **Day plan:** the timeline is an ordered list and each slot's time is a `<time>`; the grid is a table with a caption and header cells.
+- **Day plan:** the timeline is an ordered list and each slot's time is a `<time>`; a slot that opens is a native `<details>` whose `<summary>` names the time, band and count, so screen readers announce it as expandable (DEC-78); the grid is a table with a caption and header cells.
 - **Asset tags** are read out letter by letter by most screen readers; that's fine.
 - **Visually hidden text** inside a scrolling box needs a positioned parent (`.gm-grid-wrap` has `position: relative`), or the page scrolls sideways.
 - **Motion:** none needed. Respect `prefers-reduced-motion`.
@@ -286,3 +286,4 @@ Part of NFR-18's automated tests, and of the CRP:
 | 0.1 | 12 November 2026 | First draft, with the theme, component styles and reference page v0.1 (DEC-50, DEC-51) |
 | 0.2 | 12 November 2026 | §1: which classes the markup may use. The `.gm-` components plus the Bootstrap and AdminLTE classes on the reference page; anything else is a new component. §3.1 points to it. §5.5's example resource ID corrected to 107, to match the sample data. Related versions updated |
 | 0.3 | 14 November 2026 | UI review (`ui-review-fixes` branch): the current slot (C06, UI-A-01); the Battery types list (C08, UI-A-02); the grid on wide screens (C07, UI-A-03); the band chart, C18, in §3.2, §3.3, §4, §11 and §12 (DEC-76); the bottom dock at every width in §3.1, §3.3 and C01 (DEC-77); §13 item 1's screenshots |
+| 0.4 | 15 November 2026 | C06 and §9: each slot on the phone timeline opens and closes, the current slot open on load (DEC-78) |

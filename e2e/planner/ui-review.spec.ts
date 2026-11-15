@@ -20,11 +20,11 @@ test.describe('UI-A-01 the current slot', () => {
 		await expect(now).toHaveCount(1);
 		await expect(now.locator('time')).toHaveAttribute('aria-current', 'time');
 		await expect(now.locator('time')).toHaveText('12:00');
-		// The band tag and the first bike row sit as close as in any other slot.
+		// The band tag and the line under it (the count, DEC-78) sit as close as in any other slot.
 		const gap = async (slot: string) =>
 			page.locator(slot).first().evaluate((li) => {
 				const band = li.querySelector('.gm-slot__band')!.getBoundingClientRect();
-				const next = (li.querySelector('.gm-slot__bikes') ?? li.querySelector('.gm-slot__quiet'))!.getBoundingClientRect();
+				const next = (li.querySelector('.gm-slot__count') ?? li.querySelector('.gm-slot__quiet'))!.getBoundingClientRect();
 				return next.top - band.bottom;
 			});
 		expect(await gap('li.gm-slot--now')).toBeLessThanOrEqual((await gap('li.gm-slot:not(.gm-slot--now)')) + 1);

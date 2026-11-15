@@ -107,3 +107,49 @@ Things that differ from what the full-page images show, but aren't faults: the f
 | UI spec §12 "Don't" search (§13 item 3) | Planner markup: no `.form-floating`, toast, modal, `.is-valid`, `placeholder=`, named colour classes, "Submit", "OK" or exclamation marks ("toast" appears only in `Notice.astro`'s comment "never toasts"). Built CSS: Bootstrap's default blue in three unused rules (Q-4) |
 
 Not merged; route A's branches unchanged.
+
+---
+
+## Follow-on: collapsible slots on the phone timeline (DEC-78)
+
+**Asked:** 15 November 2026, by Rob: "On the mobile view can each timeslot be expandable/collapsible (current timeslot open)". Same branch, same measurement step (outside route A's totals).
+
+| Question | Rob's answer |
+|----------|--------------|
+| What does a closed slot show? | Time, band and a change count ("1 bike changes", "N bikes change"). Slots with no changes say "No changes" and don't open |
+| Which slots are open on load? | Only the current slot; with no current slot (before 07:00, after 16:30, another day), 07:00. Tapping a band chart bar opens its slot |
+| How is it recorded? | DEC-78, refining REQ-04 and DEC-40. UI spec C06 and the reference page first; S1 tests open slots where a step reads them |
+| Remember open slots between loads? | No. Native `<details>`, so it works without JavaScript |
+
+### What changed
+
+| File | Change |
+|------|--------|
+| `docs/analysis/decision-log.md` | DEC-78 added; status v1.7 |
+| `docs/ui-spec.md` | v0.4. C06 describes the `<details>` slots; §9 says the summary names the time, band and count |
+| `design/reference.html` | v0.3. C06 extract: 07:00 open (now), 07:30 and 12:00 closed, "No changes" slots as plain head rows |
+| `design/planner-components.scss` | `.gm-slot__head` is the grid (time spanning two rows, band, count, chevron); `summary.gm-slot__head` hides the marker, keeps a focus ring and is at least 44 px; the chevron turns when open; bike rows indent under the band |
+| `src/planner/ui/day-plan/Timeline.astro` | A `<details>` per slot with bikes listed; open only for the current slot, else 07:00; "No changes" slots are a plain head row |
+| `src/planner/plan/wording.ts` | `allBikes()` ("All 18 bikes") and `bikesChange()` ("1 bike changes", "4 bikes change") |
+| `src/pages/demos/charging-planner/index.astro` | A `#slot-HHMM` link (band chart bars, or a link from elsewhere) opens that slot, on load, on hash change and on click |
+| `e2e/planner/dec-78-slots.spec.ts` | New: counts, "No changes" doesn't open, only the current slot open at 12:10, tap to open and close, 44 px and keyboard, bar opens its slot, link opens on load, not remembered, no-JS, axe, 07:00 open before 07:00 and after 16:30, grid unchanged on tablets |
+| `e2e/planner/s1-day-at-0700.spec.ts` | On phones, S1.04 to S1.09 tap open the slots they read and check the rows show; S1.10 allows the slot counts as numbers that aren't figures |
+| `e2e/planner/s7-asset-record.spec.ts` | S7.01 on phones opens the 07:00 slot, then taps M07 |
+| `e2e/planner/ui-review.spec.ts` | UI-A-01 compares the band-to-count gap, since other slots' bike rows are now hidden |
+
+### Checks
+
+| Check | Result |
+|-------|--------|
+| `npm run build` | Passes; blog pages static |
+| Unit tests | 118 planner tests pass |
+| Browser tests at the five sizes | 501 pass, 34 skipped by design (the timeline tests on tablets, the grid tests on phones); public demo 6 pass |
+| Accessibility (axe, WCAG 2.1 AA) | No failures on the day plan with one slot open and the rest closed |
+| Screenshots, day plan and reference page, four sizes, light and dark | 24 pass. Checked by eye at 390 × 844: closed slots show time, band, count and chevron; the current slot (12:00) is open on its surface background with "now"; "No changes" slots have no chevron; the reference C06 extract matches. Tablet and desktop sizes show the grid as before |
+
+### Things for Rob to know
+
+- **AC-05.7 (two taps):** at 09:15 the 07:00 slot is closed, so on a phone M07's record is two taps from the day plan: open 07:00, then M07. Before DEC-78 it was one. Still within AC-05.7.
+- **AC-04.3 and AC-04.4 ("without leaving the screen"):** the lunchtime returns and each bike's next booking are one tap away on the same page. I've read that as still meeting both; DEC-78 says so. If the CRP reads "without leaving the screen" as "without a tap", the PRD would need rewording, which is yours to do.
+- **S1.10:** the slot counts ("All 18 bikes", "2 bikes change") are the only new numbers on the day plan. They count bikes, not carbon; no figure or advice is added.
+- **The reference page's 12:00 extract** lists two bikes (M11, M01), so its count reads "2 bikes change"; the real 12:00 slot on the sample day lists four.

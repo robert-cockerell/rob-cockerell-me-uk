@@ -205,15 +205,26 @@ body.gm-planner {
 // Phone timeline (REQ-04)
 // ---------------------------------------------------------------------------
 .gm-timeline { list-style: none; margin: 0; padding: 0; }
+// DEC-78: a slot with bikes listed is a native <details>; its summary is the
+// head row (time, band, count, chevron). A slot with no changes has the same
+// head row as a plain block and doesn't open.
 .gm-slot {
-  display: grid; grid-template-columns: 4rem 1fr; gap: .25rem .75rem;
   padding: .75rem 0; border-top: 1px solid var(--gm-border);
-  &__time { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.125rem; padding-top: .1rem; grid-row: 1 / span 2; }
+  &__head { display: grid; grid-template-columns: 4rem 1fr auto; gap: .25rem .75rem; align-items: center; min-height: 44px; }
+  &__time { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.125rem; padding-top: .1rem; grid-row: 1 / span 2; align-self: start; }
   &__band { grid-column: 2; }
-  &__bikes { grid-column: 2; list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
-  &__quiet { grid-column: 2; color: var(--gm-text-muted); font-size: .875rem; margin: .25rem 0 0; }
+  &__count { grid-column: 2; font-size: .875rem; }
+  &__chevron { grid-column: 3; grid-row: 1 / span 2; color: var(--gm-text-muted); }
+  &__details[open] &__chevron { transform: rotate(90deg); }
+  &__bikes { list-style: none; margin: .5rem 0 0 4.75rem; padding: 0; display: grid; gap: .5rem; }
+  &__quiet { grid-column: 2; color: var(--gm-text-muted); font-size: .875rem; margin: 0; }
   &--now { background: var(--gm-surface); padding-inline: .75rem; margin-inline: -.75rem; border-radius: var(--gm-radius-md); }
   &--now .gm-slot__time::after { content: "now"; display: block; font-family: var(--gm-font-body); font-size: .8125rem; font-weight: 700; color: var(--gm-link); }
+}
+summary.gm-slot__head {
+  list-style: none; cursor: pointer; border-radius: var(--gm-radius-sm);
+  &::-webkit-details-marker { display: none; }
+  &:focus-visible { outline: 2px solid var(--gm-text); box-shadow: var(--gm-focus-ring); }
 }
 .gm-bike-row {
   display: grid; grid-template-columns: 3.25rem 1fr; gap: .125rem .5rem; align-items: start;

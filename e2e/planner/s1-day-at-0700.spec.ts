@@ -46,6 +46,21 @@ test.beforeEach(async ({ page }) => {
 });
 
 const slot = (time: string) => timeline.find((s) => s.time === time) as Slot;
+
+/**
+ * DEC-78: on phones a slot's bike rows show once it's open. Open the slots a
+ * step reads by tapping their summaries, as Dave would, and check the rows show.
+ * Tablets show the grid (S8.02), so there's nothing to open.
+ */
+async function openSlots(page: Page, times: string[]) {
+	if ((page.viewportSize()?.width ?? 0) >= 992) return;
+	for (const time of times) {
+		const details = page.locator(`#slot-${time.replace(':', '')} details.gm-slot__details`);
+		if ((await details.count()) === 0) continue; // "No changes": nothing to open
+		if (!(await details.evaluate((d) => (d as HTMLDetailsElement).open))) await details.locator('summary').click();
+		await expect(details.locator('a.gm-bike-row').first(), time).toBeVisible();
+	}
+}
 const W = 'In the workshop';
 const L = 'Out on loan';
 
@@ -91,7 +106,8 @@ test('S1.03 AC-04.1 slots run top to bottom and the page doesn\'t scroll sideway
 	await expect(page.locator('li.gm-slot').last().locator('time')).toBeInViewport();
 });
 
-test('S1.04 AC-04.2 AC-02.5 AC-02.9 AC-02.10 the 07:00 slot lists all 18 bikes with their 07:00 states', () => {
+test('S1.04 AC-04.2 AC-02.5 AC-02.9 AC-02.10 the 07:00 slot lists all 18 bikes with their 07:00 states', async ({ page }) => {
+	await openSlots(page, ['07:00']);
 	const first = slot('07:00').bikes;
 	expect(first.map((b) => b.tag).sort()).toEqual(
 		['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06'].sort(),
@@ -105,7 +121,8 @@ test('S1.04 AC-04.2 AC-02.5 AC-02.9 AC-02.10 the 07:00 slot lists all 18 bikes w
 	for (const [, s] of others) expect(s).toBe(W);
 });
 
-test('S1.05 AC-04.2 each later slot lists only the bikes whose state changes', () => {
+test('S1.05 AC-04.2 each later slot lists only the bikes whose state changes', async ({ page }) => {
+	await openSlots(page, TIMES.slice(1));
 	const expected: Record<string, string[]> = {
 		'07:30': ['M10 L', 'M11 L'],
 		'08:00': ['G01 L', 'M03 L', 'M05 L'],
@@ -135,6 +152,8 @@ test('S1.05 AC-04.2 each later slot lists only the bikes whose state changes', (
 });
 
 test('S1.06 AC-04.3 AC-02.6 the greenest slots and the bikes back over lunch, without leaving the screen', async ({ page }) => {
+	// DEC-78: the 12:00 and 12:30 slots open in place, one tap each.
+	await openSlots(page, ['12:00', '12:30']);
 	expect(timeline.filter((s) => s.band === 'very low').map((s) => s.time)).toEqual(['12:00', '12:30', '13:00', '13:30']);
 	expect(slot('12:00').bikes.find((b) => b.tag === 'M11')?.state).toBe(W);
 	expect(slot('12:30').bikes.find((b) => b.tag === 'M10')?.state).toBe(W);
@@ -142,13 +161,15 @@ test('S1.06 AC-04.3 AC-02.6 the greenest slots and the bikes back over lunch, wi
 	await expect(page).toHaveURL(/\/demos\/charging-planner\/$/);
 });
 
-test('S1.07 AC-02.2 M01 reads Out on loan from 09:00 to 11:30', () => {
+test('S1.07 AC-02.2 M01 reads Out on loan from 09:00 to 11:30', async ({ page }) => {
+	await openSlots(page, ['09:00', '12:00']);
 	expect(slot('09:00').bikes.find((b) => b.tag === 'M01')?.state).toBe(L);
 	for (const t of ['09:30', '10:00', '10:30', '11:00', '11:30']) expect(slot(t).bikes.find((b) => b.tag === 'M01'), t).toBeUndefined();
 	expect(slot('12:00').bikes.find((b) => b.tag === 'M01')?.state).toBe(W);
 });
 
-test('S1.08 AC-04.4 AC-03.4 every bike shows its next booking on the day plan; M09 "No booking"', () => {
+test('S1.08 AC-04.4 AC-03.4 every bike shows its next booking on the day plan; M09 "No booking"', async ({ page }) => {
+	await openSlots(page, TIMES);
 	const expected: Record<string, string> = {
 		M01: 'next out: 09:00', M02: 'next out: 09:00', M03: 'next out: 08:00', M04: 'next out: 14:00',
 		M05: 'next out: 08:00', M06: 'next out: 12:00', M07: 'next out: Wed 10:00', M08: 'next out: Wed 14:00',
@@ -163,6 +184,7 @@ test('S1.08 AC-04.4 AC-03.4 every bike shows its next booking on the day plan; M
 });
 
 test('S1.09 AC-13.1 M07 carries an open fault flag, icon and text, and its state is unchanged', async ({ page }) => {
+	await openSlots(page, ['07:00']);
 	const m07 = slot('07:00').bikes.find((b) => b.tag === 'M07') as Row;
 	expect(m07.flags).toEqual(['Open fault']);
 	expect(m07.state).toBe(W);
@@ -175,8 +197,10 @@ test('S1.10 AC-01.5 bands only: no gCO₂/kWh figures and no advice on what to c
 	const text = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
 	expect(text).not.toMatch(/gCO|kWh|intensity/i);
 	expect(text).not.toMatch(/least bad|best time|greenest|recommend|you should|charge (now|at|this|it)/i);
-	// The only numbers are asset tags, times and dates (the heading, the grid's caption): no figures.
+	// The only numbers are asset tags, times, dates (the heading, the grid's caption)
+	// and how many bikes a closed slot lists (DEC-78): no figures.
 	const rest = text
+		.replace(/\b(All )?\d+ bikes?( changes?)?\b/g, '') // slot counts, 2 bikes change
 		.replace(/\b[A-Z]\d{2}\b/g, '') // asset tags, M01
 		.replace(/\b\d{2}:\d{2}\b/g, '') // times, 07:30
 		.replace(/\b[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}( \d{4})?\b/g, ''); // dates, Tue 16 Jun 2026

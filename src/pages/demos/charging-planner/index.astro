@@ -59,4 +59,16 @@ const chartOpen = Astro.cookies.get(BAND_CHART_COOKIE)?.value !== 'closed';
 		const value = chart.open ? 'open' : 'closed';
 		document.cookie = 'gm_bandchart=' + value + '; max-age=31536000; path=/demos/charging-planner/; samesite=lax';
 	});
+
+	// DEC-78: following a band chart bar (or any #slot-HHMM link) opens that slot.
+	function openSlot(hash: string) {
+		if (!/^#slot-[0-9]{4}$/.test(hash)) return;
+		const details = document.getElementById(hash.slice(1))?.querySelector<HTMLDetailsElement>('details.gm-slot__details');
+		if (details) details.open = true;
+	}
+	openSlot(location.hash);
+	window.addEventListener('hashchange', () => openSlot(location.hash));
+	for (const link of document.querySelectorAll<HTMLAnchorElement>('a[href^="#slot-"]')) {
+		link.addEventListener('click', () => openSlot(link.getAttribute('href') ?? ''));
+	}
 </script>
