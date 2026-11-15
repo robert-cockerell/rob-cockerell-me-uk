@@ -6,7 +6,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { systemNow } from '../../../../planner/clock/system-now.ts';
 import { runForecastJob } from '../../../../planner/forecast/job.ts';
 import { carbonIntensity, forecastJobDb } from '../../../../planner/forecast/sources.ts';
-import { db, forecastJobSecret } from '../../../../planner/server.ts';
+import { db, forecastJobSecret, settings } from '../../../../planner/server.ts';
 
 export const prerender = false;
 
@@ -17,9 +17,15 @@ function authorised(header: string | null, secret: string): boolean {
 }
 
 const json = (body: unknown, status: number) =>
-	new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+	new Response(JSON.stringify(body), {
+		status,
+		headers: { 'Content-Type': 'application/json', ...(settings.publicDemo ? { 'X-Robots-Tag': 'noindex' } : {}) },
+	});
 
 export const POST: APIRoute = async ({ request }) => {
+	// Public demo: the forecasts are frozen at the recorded scenario data (DEC-26,
+	// DEC-59). Do nothing, so a pg_cron call left running can't write to D1.
+	if (settings.publicDemo) return json({ message: 'Public demo: the forecasts are frozen, so nothing was fetched or saved' }, 200);
 	const secret = forecastJobSecret();
 	if (!secret) return json({ message: 'GM_FORECAST_JOB_SECRET is not set' }, 503);
 	if (!authorised(request.headers.get('authorization'), secret)) return json({ message: 'Not authorised' }, 401);

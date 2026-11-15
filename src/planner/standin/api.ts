@@ -11,6 +11,8 @@ import type { StandinStore } from './types.ts';
 export interface ApiDeps {
 	store: StandinStore;
 	systemNow: () => Date;
+	/** Append each request to the request log (NFR-04). Default true; off on the public demo, so views write nothing. */
+	logRequests?: boolean;
 }
 
 const READ_METHODS = ['GET', 'HEAD'];
@@ -43,7 +45,7 @@ async function logged(
 		response = json(503, { message: 'The stand-in can\'t reach its data store' });
 	}
 	try {
-		await deps.store.appendRequest({
+		if (deps.logRequests !== false) await deps.store.appendRequest({
 			receivedAt,
 			demoAt: demoTime,
 			method: request.method.toUpperCase(),

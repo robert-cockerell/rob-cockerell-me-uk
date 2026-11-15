@@ -149,6 +149,13 @@ describe('SU.05 and SU.06: load the baseline and set the clock', () => {
 		assert.match(report.skipped[0], /route A/i);
 	});
 
+	it('public demo: with logging off, a request is served and nothing is written to the request log', async () => {
+		const { deps, store } = testDeps();
+		const response = await handleApi(get('Resources/'), 'Resources/', { ...deps, logRequests: false });
+		assert.equal(response.status, 200);
+		assert.equal(store.requests.length, 0);
+	});
+
 	it('SU.06: the clock set to Tue 16 June 2026 07:00 is what the clock endpoint serves', async () => {
 		const { deps } = testDeps();
 		await setDemoClock(deps, '2026-06-16 07:00', false);

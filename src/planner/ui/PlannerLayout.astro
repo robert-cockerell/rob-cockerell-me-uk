@@ -30,6 +30,7 @@ const name = pickedName(Astro.cookies);
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		{settings.publicDemo && <meta name="robots" content="noindex" />}
 		<title>{hasErrors ? 'Error: ' : ''}{page} – Charging planner</title>
 		<link rel="icon" type="image/svg+xml" href={routes.favicon} />
 		<Font cssVariable="--font-lexend" preload />
@@ -53,6 +54,32 @@ const name = pickedName(Astro.cookies);
 			<Notice notice={notice} />
 			<slot />
 		</main>
+		{/* Shown in every mode. On phones it clears the fixed tab bar (56 px); the
+		    sticky action bar lives inside <main>, so it never overlaps this. */}
+		<footer class="gm-site-footer">
+			<p>
+				Greener Miles is a fictional e-bike library. This demo is route A of a worked example for
+				{/* TODO: replace "/" with the article's final path once it is published. */}
+				"<a href="/">Effectively gathering business workflows and information for building systems that work</a>"
+				by Robert Cockerell. © 2026 Robert Cockerell.
+			</p>
+		</footer>
 		<TabBar current={current} />
 	</body>
 </html>
+
+<style>
+	.gm-site-footer {
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 1rem 1rem calc(56px + env(safe-area-inset-bottom) + 1.5rem);
+		border-top: 1px solid var(--gm-border);
+		color: var(--gm-text-muted);
+		font-size: var(--gm-text-sm);
+	}
+	.gm-site-footer p { margin: 0; }
+	.gm-site-footer a { color: var(--gm-link); text-decoration: underline; }
+	@media (min-width: 992px) {
+		.gm-site-footer { padding-bottom: 2rem; }
+	}
+</style>
