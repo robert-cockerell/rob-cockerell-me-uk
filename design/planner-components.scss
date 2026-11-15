@@ -205,6 +205,8 @@ body.gm-planner {
 // Phone timeline (REQ-04)
 // ---------------------------------------------------------------------------
 .gm-timeline { list-style: none; margin: 0; padding: 0; }
+// DEC-82: "Rest of day" once the staffed day is over.
+.gm-timeline__end { color: var(--gm-text-muted); padding: .75rem 0; border-top: 1px solid var(--gm-border); margin: 0; }
 // DEC-78: a slot with bikes listed is a native <details>; its summary is the
 // head row (time, band, count, chevron). A slot with no changes has the same
 // head row as a plain block and doesn't open.
@@ -274,7 +276,8 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
   &__bar--moderate  { fill: var(--gm-band-moderate); }
   &__bar--high      { fill: var(--gm-band-high); }
   &__bar--very-high { fill: var(--gm-band-very-high); }
-  &__bar--none      { fill: url(#gm-bandchart-hatch); stroke: var(--gm-slate); stroke-width: .6; stroke-dasharray: 1.5 1; }
+  // The hatch fill is set on the bar (fill="url(#…)"): a page can carry two charts, each with its own pattern id.
+  &__bar--none      { stroke: var(--gm-slate); stroke-width: .6; stroke-dasharray: 1.5 1; }
   &__hatch-bg { fill: var(--gm-mist); }
   &__hatch-line { stroke: var(--gm-slate); stroke-width: 1; }
   // One link per bar, over the drawing: at least 44 px tall, with the focus ring.
@@ -283,8 +286,10 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
     &:focus-visible { outline: 2px solid var(--gm-text); box-shadow: var(--gm-focus-ring); } }
   &__now { display: grid; grid-template-columns: repeat(19, 1fr); margin-top: .25rem; font-size: .8125rem; font-weight: 700; color: var(--gm-link); }
   &__now span { text-align: center; white-space: nowrap; }
-  &__labels { list-style: none; margin: .5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .375rem .75rem; font-size: .8125rem; }
-  &__labels li { display: inline-flex; align-items: center; gap: .375rem; }
+  // DEC-80: the whole hours in small text under their bars; no band labels.
+  // The number of columns follows the bars drawn (set on the element, DEC-82).
+  &__hours { display: grid; grid-template-columns: repeat(19, 1fr); margin-top: .25rem; font-family: var(--gm-font-data); font-size: .6875rem; line-height: 1.2; color: var(--gm-text-muted); }
+  &__hours span { text-align: center; white-space: nowrap; }
 }
 
 // ---------------------------------------------------------------------------
@@ -300,6 +305,9 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
   &__fact dt { font-size: .875rem; font-weight: 700; color: var(--gm-text-muted); margin: 0; }
   &__fact dd { margin: .125rem 0 0; font-size: 1.0625rem; }
   &__stamp { font-size: .875rem; color: var(--gm-text-muted); border-top: 1px solid var(--gm-border); padding-top: .75rem; }
+  // DEC-81: Bikes in and Bikes out side by side on the day plan, at every width.
+  &--counts { margin-bottom: 1rem; }
+  &--counts &__facts { grid-template-columns: 1fr 1fr; }
   &--quarantined { border-left: 6px solid var(--gm-error); }
 }
 @media (min-width: 576px) { .gm-summary__facts { grid-template-columns: 1fr 1fr; } }

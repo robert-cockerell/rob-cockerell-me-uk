@@ -1,55 +1,64 @@
 ---
-// C18 Band chart (DEC-76, UI spec §4): today's bands at a glance, above the
-// slots. One bar per slot in its band's colour; heights relative to the day,
-// with no axis, values, tooltip, highlighted window or advice. A native
-// <details>, open unless this device chose to close it (gm_bandchart cookie);
+// C18 Band chart (DEC-76, DEC-80, UI spec §4): the day's bands at a glance,
+// above the slots. One bar per slot in its band's colour; heights relative to
+// the day, the hours in small text under the bars, "now" marked; no axis
+// values, tooltip, highlighted window or advice. A native <details> ("Carbon
+// forecast"), open unless this device chose to close it (gm_bandchart cookie);
 // without JavaScript it's always open. Each bar links to its slot. Not printed.
+// The day plan draws it twice: for the phone timeline (from `start`, DEC-82)
+// and for the grid (all day), each shown only at its widths.
 import { bandChart, gridAnchor, slotAnchor } from '../../plan/band-chart.ts';
 import type { DayPlan } from '../../plan/types.ts';
-import { bandLabel } from '../../plan/wording.ts';
-import BandTag from './BandTag.astro';
+import { bandLabel, CARBON_FORECAST } from '../../plan/wording.ts';
 
 interface Props {
 	plan: DayPlan;
 	open: boolean;
+	/** Which view's links: the phone timeline's slots, or the grid's columns. */
+	target: 'timeline' | 'grid';
+	/** First slot to draw (DEC-82). */
+	start?: number;
+	class?: string;
 }
-const { plan, open } = Astro.props;
-const chart = bandChart(plan);
+const { plan, open, target, start = 0, class: className } = Astro.props;
+const chart = bandChart(plan, start);
 const HEIGHT = 60;
 const modifier = (band: string | null) => (band ? band.replace(' ', '-') : 'none');
 const nowAt = chart.bars.findIndex((b) => b.now);
+const columns = `grid-template-columns: repeat(${chart.bars.length}, 1fr)`;
+const anchor = target === 'timeline' ? slotAnchor : gridAnchor;
+// Two charts on one page: their SVG ids must differ.
+const id = (name: string) => `bandchart-${target}-${name}`;
 ---
-<details class="gm-bandchart" open={open} data-bandchart>
-	<summary>Today's bands</summary>
+{chart.bars.length > 0 && (
+<details class:list={['gm-bandchart', className]} open={open} data-bandchart>
+	<summary>{CARBON_FORECAST}</summary>
 	<div class="gm-bandchart__body">
 		<div class="gm-bandchart__plot">
-			<svg class="gm-bandchart__svg" viewBox={`0 0 ${chart.bars.length * 10} ${HEIGHT}`} preserveAspectRatio="none" role="img" aria-labelledby="bandchart-title bandchart-desc" focusable="false">
-				<title id="bandchart-title">Today's carbon bands</title>
-				<desc id="bandchart-desc">{chart.description}</desc>
+			<svg class="gm-bandchart__svg" viewBox={`0 0 ${chart.bars.length * 10} ${HEIGHT}`} preserveAspectRatio="none" role="img" aria-labelledby={`${id('title')} ${id('desc')}`} focusable="false">
+				<title id={id('title')}>Today's carbon bands</title>
+				<desc id={id('desc')}>{chart.description}</desc>
 				<defs>
-					<pattern id="gm-bandchart-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+					<pattern id={id('hatch')} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
 						<rect class="gm-bandchart__hatch-bg" width="4" height="4" />
 						<line class="gm-bandchart__hatch-line" x1="0" y1="0" x2="0" y2="4" />
 					</pattern>
 				</defs>
 				{chart.bars.map((b, i) => {
 					const h = Math.round(b.height * HEIGHT * 10) / 10;
-					return <rect class={`gm-bandchart__bar gm-bandchart__bar--${modifier(b.band)}`} x={i * 10 + 1} y={HEIGHT - h} width="8" height={h} />;
+					return <rect class={`gm-bandchart__bar gm-bandchart__bar--${modifier(b.band)}`} x={i * 10 + 1} y={HEIGHT - h} width="8" height={h} fill={b.band === null ? `url(#${id('hatch')})` : undefined} />;
 				})}
 			</svg>
-			<!-- Each bar links to its slot: the timeline below 992 px, the grid from 992 px. -->
-			<ol class="gm-bandchart__links d-lg-none">
-				{chart.bars.map((b) => <li><a class="gm-bandchart__link" href={`#${slotAnchor(b.time)}`}><span class="visually-hidden">{b.time}, {bandLabel(b.band)}</span></a></li>)}
-			</ol>
-			<ol class="gm-bandchart__links d-none d-lg-grid">
-				{chart.bars.map((b) => <li><a class="gm-bandchart__link" href={`#${gridAnchor(b.time)}`}><span class="visually-hidden">{b.time}, {bandLabel(b.band)}</span></a></li>)}
+			<ol class="gm-bandchart__links" style={columns}>
+				{chart.bars.map((b) => <li><a class="gm-bandchart__link" href={`#${anchor(b.time)}`}><span class="visually-hidden">{b.time}, {bandLabel(b.band)}</span></a></li>)}
 			</ol>
 		</div>
+		<div class="gm-bandchart__hours" style={columns} aria-hidden="true">
+			{chart.bars.map((b, i) => b.hour !== null && <span style={`grid-column: ${i + 1}`}>{b.hour}</span>)}
+		</div>
 		{nowAt >= 0 && (
-			<div class="gm-bandchart__now"><span style={`grid-column: ${nowAt + 1}`}>now<span class="visually-hidden">, {chart.bars[nowAt].time}</span></span></div>
+			<div class="gm-bandchart__now" style={columns}><span style={`grid-column: ${nowAt + 1}`}>now<span class="visually-hidden">, {chart.bars[nowAt].time}</span></span></div>
 		)}
-		<ul class="gm-bandchart__labels">
-			{chart.stretches.map((s) => <li><BandTag band={s.band} /><span class="gm-time">{s.times}</span></li>)}
-		</ul>
 	</div>
 </details>
+)}

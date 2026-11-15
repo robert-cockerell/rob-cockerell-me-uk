@@ -197,9 +197,14 @@ test('S1.10 AC-01.5 bands only: no gCO₂/kWh figures and no advice on what to c
 	const text = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
 	expect(text).not.toMatch(/gCO|kWh|intensity/i);
 	expect(text).not.toMatch(/least bad|best time|greenest|recommend|you should|charge (now|at|this|it)/i);
-	// The only numbers are asset tags, times, dates (the heading, the grid's caption)
-	// and how many bikes a closed slot lists (DEC-78): no figures.
+	// The only numbers are asset tags, times, dates (the heading, the grid's caption),
+	// how many bikes a closed slot lists (DEC-78), the chart's hours (DEC-80) and,
+	// on phones, how many bikes are in and out (DEC-81): no figures.
+	const hours = (await page.locator('details.gm-bandchart:visible .gm-bandchart__hours').innerText()).replace(/\s+/g, ' ').trim();
+	expect(hours).toBe('07 08 09 10 11 12 13 14 15 16');
 	const rest = text
+		.replace(hours, '') // the chart's hours
+		.replace(/\bBikes in \d+ Bikes out \d+\b/, '') // DEC-81
 		.replace(/\b(All )?\d+ bikes?( changes?)?\b/g, '') // slot counts, 2 bikes change
 		.replace(/\b[A-Z]\d{2}\b/g, '') // asset tags, M01
 		.replace(/\b\d{2}:\d{2}\b/g, '') // times, 07:30

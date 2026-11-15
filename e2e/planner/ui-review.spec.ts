@@ -64,38 +64,50 @@ test('UI-A-02 battery type names stay on one line and never overlap the capacity
 	await expectNoSidewaysScroll(page);
 });
 
-test.describe('C18 band chart (DEC-76)', () => {
-	test('at the top of the day plan, open by default: 19 bars, a label per stretch, "now" in text, no figures', async ({ page }) => {
-		await page.goto(url.dayPlan);
-		const chart = page.locator('details.gm-bandchart');
+// The page carries two charts, one for the phone timeline and one for the grid,
+// each shown only at its widths (DEC-82): tests use the one on screen.
+const CHART = 'details.gm-bandchart:visible';
+
+test.describe('C18 band chart (DEC-76, DEC-80)', () => {
+	test('at the top of the day plan, open by default: 19 bars, the hours, "now" in text, no band labels, no figures', async ({ page }) => {
+		await page.goto(url.dayPlanAll);
+		const chart = page.locator(CHART);
 		await expect(chart).toHaveAttribute('open', '');
-		await expect(chart.locator('summary')).toHaveText("Today's bands");
+		await expect(chart.locator('summary')).toHaveText('Carbon forecast');
 		// Above the slots or the grid.
 		const slots = wide(page) ? 'table.gm-grid' : 'ol.gm-timeline';
-		expect((await box(page, 'details.gm-bandchart')).y).toBeLessThan((await box(page, slots)).y);
+		expect((await box(page, CHART)).y).toBeLessThan((await box(page, slots)).y);
 		const svg = chart.locator('svg[role="img"]');
 		await expect(svg.locator('title')).toHaveText("Today's carbon bands");
 		await expect(svg.locator('desc')).toHaveText('07:00 to 09:30 moderate, 10:00 to 11:30 low, 12:00 to 13:30 very low, 14:00 to 15:30 low, 16:00 moderate');
 		await expect(svg.locator('rect.gm-bandchart__bar')).toHaveCount(19);
-		await expect(chart.locator('.gm-bandchart__labels li')).toHaveText([/moderate\s*07:00–09:30/, /low\s*10:00–11:30/, /very low\s*12:00–13:30/, /low\s*14:00–15:30/, /moderate\s*16:00/]);
+		// DEC-80: each whole hour in small text under its bar; no band labels under the bars.
+		await expect(chart.locator('.gm-bandchart__hours span')).toHaveText(['07', '08', '09', '10', '11', '12', '13', '14', '15', '16']);
+		const hour = await chart.locator('.gm-bandchart__hours span').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+		expect(hour).toBeLessThanOrEqual(12);
+		await expect(chart.locator('.gm-bandchart__labels, .gm-band')).toHaveCount(0);
 		await expect(chart.locator('.gm-bandchart__now')).toHaveText('now, 12:00');
-		// No figures: once times are taken out, no digit in the chart's text or attributes other than geometry.
-		const text = (await chart.evaluate((d) => d.textContent ?? '')).replace(/\d{2}:\d{2}/g, '');
+		// No figures: once the times and the hours are taken out, no digit in the chart's text.
+		const text = (await chart.evaluate((d) => {
+			const copy = d.cloneNode(true) as HTMLElement;
+			copy.querySelector('.gm-bandchart__hours')?.remove();
+			return copy.textContent ?? '';
+		})).replace(/\d{2}:\d{2}/g, '');
 		expect(text).not.toMatch(/\d/);
 		expect(await svg.locator('text').count()).toBe(0);
 		await expectNoSidewaysScroll(page);
 	});
 
 	test('taller bars for higher bands; the very low stretch is the shortest', async ({ page }) => {
-		await page.goto(url.dayPlan);
-		const heights = await page.locator('rect.gm-bandchart__bar').evaluateAll((rs) => rs.map((r) => Number(r.getAttribute('height'))));
+		await page.goto(url.dayPlanAll);
+		const heights = await page.locator(`${CHART} rect.gm-bandchart__bar`).evaluateAll((rs) => rs.map((r) => Number(r.getAttribute('height'))));
 		const veryLow = heights.slice(10, 14);
 		const moderate = heights.slice(0, 6);
 		expect(Math.max(...veryLow)).toBeLessThan(Math.min(...moderate));
 	});
 
 	test('each bar links to its slot, is at least 44 px tall and shows the focus ring', async ({ page }) => {
-		await page.goto(url.dayPlan);
+		await page.goto(url.dayPlanAll);
 		const links = page.locator('.gm-bandchart__links:visible a');
 		await expect(links).toHaveCount(19);
 		// 19 bars across a phone are narrower than 44 px; the brief asks for 44 px tall.
@@ -111,8 +123,8 @@ test.describe('C18 band chart (DEC-76)', () => {
 
 	test('closing it is remembered by the server; no cookie means open; without JavaScript it\'s open', async ({ page, browser }) => {
 		await page.goto(url.dayPlan);
-		await page.locator('details.gm-bandchart summary').click();
-		await expect(page.locator('details.gm-bandchart')).not.toHaveAttribute('open', '');
+		await page.locator(`${CHART} summary`).click();
+		await expect(page.locator(CHART)).not.toHaveAttribute('open', '');
 		// The toggle event comes just after the click; wait for the script to set the cookie.
 		await expect.poll(async () => (await page.context().cookies()).find((c) => c.name === 'gm_bandchart')?.value).toBe('closed');
 		const cookie = (await page.context().cookies()).find((c) => c.name === 'gm_bandchart');
@@ -123,23 +135,23 @@ test.describe('C18 band chart (DEC-76)', () => {
 		expect(html).toMatch(/<details class="gm-bandchart"[^>]*data-bandchart/);
 		expect(html.match(/<details class="gm-bandchart"[^>]*>/)?.[0]).not.toContain('open');
 		await page.reload();
-		await expect(page.locator('details.gm-bandchart')).not.toHaveAttribute('open', '');
-		await page.locator('details.gm-bandchart summary').click();
+		await expect(page.locator(CHART)).not.toHaveAttribute('open', '');
+		await page.locator(`${CHART} summary`).click();
 		await expect.poll(async () => (await page.context().cookies()).find((c) => c.name === 'gm_bandchart')?.value).toBe('open');
 		await page.reload();
-		await expect(page.locator('details.gm-bandchart')).toHaveAttribute('open', '');
+		await expect(page.locator(CHART)).toHaveAttribute('open', '');
 
 		const noJs = await browser.newContext({ javaScriptEnabled: false, baseURL: test.info().project.use.baseURL });
 		const p = await noJs.newPage();
 		await p.goto(url.dayPlan);
-		await expect(p.locator('details.gm-bandchart')).toHaveAttribute('open', '');
+		await expect(p.locator(CHART)).toHaveAttribute('open', '');
 		await noJs.close();
 	});
 
 	test('not in the print', async ({ page }) => {
 		await page.goto(url.dayPlan);
 		await page.emulateMedia({ media: 'print' });
-		await expect(page.locator('details.gm-bandchart')).toBeHidden();
+		await expect(page.locator(CHART)).toHaveCount(0);
 		await expect(page.locator('nav.gm-tabbar')).toBeHidden();
 	});
 

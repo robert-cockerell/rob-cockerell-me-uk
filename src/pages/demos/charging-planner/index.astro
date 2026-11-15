@@ -1,12 +1,15 @@
 ---
 // SCR-02 and SCR-03 Day plan (REQ-01 to REQ-04, REQ-12): the band chart (C18,
-// DEC-76) above the phone timeline below 992 px, or above the grid from 992 px;
-// the grid alone in print (UI spec §3.3). Rendered on request: it depends on
+// DEC-76, DEC-80) above the phone timeline below 992 px, or above the grid from
+// 992 px; the grid alone in print (UI spec §3.3). Phones also get Bikes in and
+// Bikes out (DEC-81) and the "Rest of day" and "All day" views (DEC-82); the
+// print button is for tablets and desktops. Rendered on request: it depends on
 // "now" and on live bookings (technical note §6.1).
 export const prerender = false;
 
 import { BAND_CHART_COOKIE } from '../../../planner/plan/band-chart.ts';
-import { BOOKINGS_DOWN, CHARGING_RULES, planDateHeading } from '../../../planner/plan/wording.ts';
+import { bikeCounts, dayPlanView, firstRemainingSlot } from '../../../planner/plan/timeline.ts';
+import { BIKES_IN, BIKES_OUT, BOOKINGS_DOWN, CHARGING_RULES, VIEW_ALL_DAY, VIEW_REST_OF_DAY, planDateHeading } from '../../../planner/plan/wording.ts';
 import { dayPlan, settings } from '../../../planner/server.ts';
 import BandChart from '../../../planner/ui/day-plan/BandChart.astro';
 import PlanGrid from '../../../planner/ui/day-plan/PlanGrid.astro';
@@ -19,6 +22,10 @@ const notice = takeNotice(Astro.cookies);
 const plan = await dayPlan(clockFor(Astro.cookies));
 // DEC-76: open unless this device chose to close it.
 const chartOpen = Astro.cookies.get(BAND_CHART_COOKIE)?.value !== 'closed';
+// DEC-82: "Rest of day" unless the address asks for "All day"; not remembered.
+const view = dayPlanView(Astro.url.searchParams.get('view'));
+const start = view === 'all' ? 0 : firstRemainingSlot(plan);
+const counts = plan.bookingsAvailable ? bikeCounts(plan) : null;
 ---
 <PlannerLayout page="Day plan" current="day-plan" notice={notice} wide>
 	{!plan.bookingsAvailable && (
@@ -35,13 +42,26 @@ const chartOpen = Astro.cookies.get(BAND_CHART_COOKIE)?.value !== 'closed';
 		{settings.handbookUrl && (
 			<a class="gm-linkout" href={settings.handbookUrl}><svg class="gm-icon" aria-hidden="true"><use href="#i-book-open"/></svg>{CHARGING_RULES}<span class="visually-hidden"> (opens the volunteer handbook)</span></a>
 		)}
-		<!-- REQ-12: needs JavaScript (technical note §6.5), so it's shown only when there is some. -->
-		<button class="btn btn-outline-primary" type="button" data-print style="display:none"><svg class="gm-icon" aria-hidden="true"><use href="#i-printer"/></svg>Print day plan</button>
+		<!-- REQ-12: needs JavaScript (technical note §6.5), so it's shown only when there is some; not on phones (DEC-82). -->
+		<span class="d-none d-lg-inline"><button class="btn btn-outline-primary" type="button" data-print style="display:none"><svg class="gm-icon" aria-hidden="true"><use href="#i-printer"/></svg>Print day plan</button></span>
 	</div>
-	<BandChart plan={plan} open={chartOpen} />
 	<div class="d-lg-none">
-		<Timeline plan={plan} />
+		{counts && (
+			<section class="gm-summary gm-summary--counts" aria-label={`Bikes at ${counts.slot}`}>
+				<dl class="gm-summary__facts">
+					<div class="gm-summary__fact"><dt>{BIKES_IN}</dt><dd class="gm-mono">{counts.in}</dd></div>
+					<div class="gm-summary__fact"><dt>{BIKES_OUT}</dt><dd class="gm-mono">{counts.out}</dd></div>
+				</dl>
+			</section>
+		)}
+		<nav class="gm-segment" aria-label="Day plan view">
+			<a href={routes.dayPlan} aria-current={view === 'rest' ? 'page' : undefined}>{VIEW_REST_OF_DAY}</a>
+			<a href={`${routes.dayPlan}?view=all`} aria-current={view === 'all' ? 'page' : undefined}>{VIEW_ALL_DAY}</a>
+		</nav>
+		<BandChart plan={plan} open={chartOpen} target="timeline" start={start} />
+		<Timeline plan={plan} start={start} />
 	</div>
+	<BandChart plan={plan} open={chartOpen} target="grid" class="d-none d-lg-block" />
 	<div class="gm-print-grid d-none d-lg-block">
 		<PlanGrid plan={plan} />
 	</div>
@@ -54,11 +74,12 @@ const chartOpen = Astro.cookies.get(BAND_CHART_COOKIE)?.value !== 'closed';
 	}
 
 	// DEC-76: remember whether the band chart is open, for the server to read next time.
-	const chart = document.querySelector<HTMLDetailsElement>('details[data-bandchart]');
-	chart?.addEventListener('toggle', () => {
-		const value = chart.open ? 'open' : 'closed';
-		document.cookie = 'gm_bandchart=' + value + '; max-age=31536000; path=/demos/charging-planner/; samesite=lax';
-	});
+	for (const chart of document.querySelectorAll<HTMLDetailsElement>('details[data-bandchart]')) {
+		chart.addEventListener('toggle', () => {
+			const value = chart.open ? 'open' : 'closed';
+			document.cookie = 'gm_bandchart=' + value + '; max-age=31536000; path=/demos/charging-planner/; samesite=lax';
+		});
+	}
 
 	// DEC-78: following a band chart bar (or any #slot-HHMM link) opens that slot.
 	function openSlot(hash: string) {

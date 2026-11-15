@@ -6,6 +6,8 @@ import { expect, type BrowserContext, type Locator, type Page } from '@playwrigh
 export const BASE = '/demos/charging-planner';
 export const url = {
 	dayPlan: `${BASE}/`,
+	/** DEC-82: the phone day plan's "All day" view (the grid is always all day). */
+	dayPlanAll: `${BASE}/?view=all`,
 	fleet: `${BASE}/fleet/`,
 	batteries: `${BASE}/fleet/batteries/`,
 	types: `${BASE}/fleet/battery-types/`,

@@ -153,3 +153,57 @@ Not merged; route A's branches unchanged.
 - **AC-04.3 and AC-04.4 ("without leaving the screen"):** the lunchtime returns and each bike's next booking are one tap away on the same page. I've read that as still meeting both; DEC-78 says so. If the CRP reads "without leaving the screen" as "without a tap", the PRD would need rewording, which is yours to do.
 - **S1.10:** the slot counts ("All 18 bikes", "2 bikes change") are the only new numbers on the day plan. They count bikes, not carbon; no figure or advice is added.
 - **The reference page's 12:00 extract** lists two bikes (M11, M01), so its count reads "2 bikes change"; the real 12:00 slot on the sample day lists four.
+
+---
+
+## Follow-on: the phone day plan, second round (DEC-79 to DEC-82)
+
+**Asked:** 15 November 2026, by Rob: on the phone day plan, no print button; the chart collapsible with the hours in small text; no band labels under the chart; "Today's bands" renamed "Carbon Forecast"; a panel with the next low or very low time, Bikes in and Bikes out; every slot collapsed by default; and two views, "Rest of day" (default) and "All day". Same branch, same measurement step.
+
+| Question | Rob's answer |
+|----------|--------------|
+| What do "Bikes in" and "Bikes out" count? | The state now. In: "In the workshop" and "Out of service" (at the depot). Out: "Out on loan" and "Overdue – not checked in" |
+| "Next low / very low" singles out a slot, against DEC-32, DEC-76 and AC-01.4. Build it? | Leave it out |
+| In "Rest of day", what does the first slot (the current one) list? | Every bike's state then, as 07:00 does (DEC-40) |
+| Do the chart changes apply on tablets and desktop too? | Yes: one chart everywhere. The panel, the views and hiding the print button are phone only; the grid stays all day |
+
+### What changed
+
+| File | Change |
+|------|--------|
+| `docs/analysis/decision-log.md` | v1.8. DEC-79 (every slot closed on load; amends DEC-78), DEC-80 (chart: "Carbon forecast", hours, no band labels; amends DEC-76), DEC-81 (Bikes in and Bikes out; "next low" left out), DEC-82 ("Rest of day" and "All day"; no print button on phones) |
+| `docs/ui-spec.md` | v0.5. SCR-02, C06, C18, and a §12 exception for DEC-81's two counts |
+| `design/reference.html` | v0.4. C06: the counts, the views, every slot closed. C18 (all four charts): "Carbon forecast", hours, no band labels |
+| `design/planner-components.scss` | `.gm-bandchart__hours`; the band labels' styles removed; the no-forecast hatch is set on the bar, since the page now has two charts; `.gm-summary--counts` puts the two facts side by side; `.gm-timeline__end` for "Nothing more today" |
+| `src/planner/plan/timeline.ts` | `timeline(plan, start)`, `currentSlot`, `firstRemainingSlot`, `dayPlanView`, `bikeCounts` |
+| `src/planner/plan/band-chart.ts` | `bandChart(plan, start)`; each bar's `hour` |
+| `src/planner/plan/wording.ts` | "Carbon forecast", "Rest of day", "All day", "Nothing more today", "Bikes in", "Bikes out" |
+| `src/planner/ui/day-plan/BandChart.astro` | Hours row, no labels, its own SVG ids; drawn twice (phone timeline from `start`, grid all day), each shown only at its widths |
+| `src/planner/ui/day-plan/Timeline.astro` | Every slot closed; starts at `start`; "Nothing more today" |
+| `src/pages/demos/charging-planner/index.astro` | Counts panel and views on phones (`?view=all`); print button from 992 px only |
+| `src/planner/plan/rest-of-day.test.ts` | New unit tests: views, where "Rest of day" starts, the first slot listing every bike, the chart's slots and hours, the counts (16 in and 2 out at 07:00) |
+| `e2e/planner/dec-80-82-phone-day-plan.spec.ts` | New: "Rest of day" by default, "All day", not remembered, 44 px links, before 07:00 and after 16:30, counts, no print button on phones, the chart's title and labels, axe in both views light and dark, the wide layout unchanged |
+| `e2e/planner/dec-78-slots.spec.ts` | Every slot closed on load (DEC-79); morning slots read in "All day" |
+| `e2e/planner/ui-review.spec.ts` | C18 tests use the chart on screen; "Carbon forecast", hours, no labels |
+| `e2e/planner/day-plan-scenarios.spec.ts` | These steps read the whole day, so they use "All day" |
+| `e2e/planner/s1-…`, `s7-…`, `s8-…`, `helpers.ts`, `screenshots.spec.ts` | S1.10 allows the hours and the counts; S7.01 opens the current slot (09:00 lists every bike) then M07; S8.03 expects no print button on phones; `url.dayPlanAll`; an "All day" screenshot |
+
+### Things for Rob to know
+
+- **UI spec §12** says "no stat tiles" and "no figures shown as numbers". Bikes in and Bikes out are two counts of bikes, shown in the asset summary card's facts style, not a tile. DEC-81 and §12 now say so. If you'd rather the counts weren't on the day plan at all, it's one component to remove.
+- **"Carbon forecast"** is in sentence case, as UI spec §12 asks, not "Carbon Forecast".
+- **The counts before opening and after closing** come from the 07:00 and 16:00 slots. The panel's accessible name gives the slot ("Bikes at 12:00").
+- **AC-01.1 (19 slots):** at 07:00, as in S1, "Rest of day" is all 19 slots; later in the day the 19 are in "All day". DEC-82 records this.
+- **S7.01 (AC-05.7):** at 09:15 the current slot, 09:00, lists every bike, so M07 is still two taps away: open 09:00, then M07.
+- **The print button** is gone on phones, but printing from the phone's own browser still gives the grid on one A4 page.
+
+### Checks
+
+| Check | Result |
+|-------|--------|
+| `npm run build` | Passes; blog pages static (the build's "blog collection is empty" warning was there before: this branch has no posts) |
+| Unit tests | 126 planner tests pass (8 new) |
+| Browser tests at the five sizes | 527 pass, 53 skipped by design (phone tests on tablets, tablet tests on phones) |
+| Public demo | 6 pass, after DEC-61's test reads the morning in "All day" |
+| Accessibility (axe, WCAG 2.1 AA) | No failures in "Rest of day" and "All day", light and dark, and with a slot open |
+| Screenshots, day plan and reference page, four sizes, light and dark | 32 pass. Checked by eye: at 390 × 844 the counts sit side by side, the views above the chart, the chart shows 12:00 to 16:00 with hours and "now", and every slot is closed; "All day" shows all 19 bars and slots; at 1024 × 768 the grid and print button are unchanged, and the chart reads "Carbon forecast" with hours and no band labels; the reference page's C06 matches |

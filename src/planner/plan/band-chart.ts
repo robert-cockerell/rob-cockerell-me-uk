@@ -1,6 +1,8 @@
-// C18 Band chart (DEC-76): today's 19 slots as bars filled with the band
-// colour, heights relative to the day's lowest and highest forecast. No
-// figures, axis, tooltip, highlighted window or advice (DEC-32 as refined).
+// C18 Band chart (DEC-76, DEC-80): today's slots as bars filled with the band
+// colour, heights relative to the day's lowest and highest forecast, the
+// hours in small text under the bars. No figures, axis values, tooltip,
+// highlighted window or advice (DEC-32 as refined). DEC-82: on phones,
+// "Rest of day" draws only the slots from the current one.
 
 import type { DayPlan, IndexBand } from './types.ts';
 import { bandLabel } from './wording.ts';
@@ -20,6 +22,8 @@ export interface ChartBar {
 	/** 0 to 1 of the drawing's height. */
 	height: number;
 	now: boolean;
+	/** "07" under the bar for each whole hour (DEC-80); null on the half hours. */
+	hour: string | null;
 }
 
 export interface ChartStretch {
@@ -37,13 +41,15 @@ export interface BandChart {
 	description: string;
 }
 
-export function bandChart(plan: DayPlan): BandChart {
+/** `start`: the first slot to draw, an index into plan.slots (DEC-82). */
+export function bandChart(plan: DayPlan, start = 0): BandChart {
 	const now = plan.now.getTime();
-	const bars = plan.slots.map((s) => ({
+	const bars = plan.slots.slice(start).map((s) => ({
 		time: s.time,
 		band: s.band,
 		height: s.band === null ? NO_FORECAST : s.level === null ? UNKNOWN : LOWEST + (1 - LOWEST) * s.level,
 		now: s.start.getTime() <= now && now < s.end.getTime(),
+		hour: s.time.endsWith(':00') ? s.time.slice(0, 2) : null,
 	}));
 
 	const stretches: ChartStretch[] = [];

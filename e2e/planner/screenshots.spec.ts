@@ -22,6 +22,12 @@ const go = (path: string): Step => async (page) => void (await page.goto(path));
 
 const SCREENS: [string, Step][] = [
 	['day-plan-chart-open', go(url.dayPlan)],
+	// DEC-82: "All day" on phones, with one slot opened; the same as "Rest of day" on wide screens.
+	['day-plan-all-day', async (page) => {
+		await page.goto(url.dayPlanAll);
+		const summary = page.locator('#slot-0730 summary');
+		if (await summary.isVisible()) await summary.click();
+	}],
 	['day-plan-chart-closed', async (page) => {
 		await page.context().addCookies([{ name: 'gm_bandchart', value: 'closed', url: `${test.info().project.use.baseURL}/demos/charging-planner/` }]);
 		await page.goto(url.dayPlan);

@@ -2,9 +2,9 @@
 
 **Project:** Community e-bike library – Charging planner (proof of concept)
 **Document:** `docs/ui-spec.md`
-**Status:** Draft v0.4 (15 November 2026: collapsible slots on the phone timeline, DEC-78. v0.3, 14 November 2026, UI review on the `ui-review-fixes` branch: DEC-76 band chart C18, DEC-77 bottom dock, UI-A-01 to UI-A-03)
+**Status:** Draft v0.5 (15 November 2026: the phone day plan's second round, DEC-79 to DEC-82. v0.4, 15 November 2026: collapsible slots on the phone timeline, DEC-78. v0.3, 14 November 2026, UI review on the `ui-review-fixes` branch: DEC-76 band chart C18, DEC-77 bottom dock, UI-A-01 to UI-A-03)
 **Owner:** Rob
-**Related:** `docs/prd.md` v0.8 (§6 screens and components, NFR-01 to NFR-07), `docs/technical-note.md` v0.8, `docs/analysis/decision-log.md` v1.7 (DEC-50, DEC-51, DEC-76 to DEC-78), `brand/brand-identity.md` v0.4, `brand/tokens.css`, `design/planner-theme.scss`, `design/planner-components.scss`, `design/reference.html`
+**Related:** `docs/prd.md` v0.8 (§6 screens and components, NFR-01 to NFR-07), `docs/technical-note.md` v0.8, `docs/analysis/decision-log.md` v1.8 (DEC-50, DEC-51, DEC-76 to DEC-82), `brand/brand-identity.md` v0.4, `brand/tokens.css`, `design/planner-theme.scss`, `design/planner-components.scss`, `design/reference.html`
 
 > **Fictional example.** Greener Miles and its data are invented. This spec is real: it's how the planner's interface is built.
 
@@ -57,7 +57,7 @@ Where this spec and the PRD disagree, the PRD wins and this spec is corrected.
 | Screen | Layout | Components |
 |--------|--------|------------|
 | SCR-01 Name picker | Card with one field | C01, C12, C15 |
-| SCR-02 Day plan, phone | Page heading with date; charging rules link; band chart (C18); timeline | C02 to C06, C16 to C18 |
+| SCR-02 Day plan, phone | Page heading with date; charging rules link; Bikes in and Bikes out (DEC-81); "Rest of day" and "All day" views (DEC-82); band chart (C18); timeline. No print button | C02 to C06, C08's segmented control, C09's facts, C16 to C18 |
 | SCR-03 Day plan, grid | Page heading; print button; band chart (C18); grid | C02 to C05, C07, C15, C18 |
 | SCR-04 Fleet list | Bikes, Batteries or Battery types switch; list; add button | C08, C15 |
 | SCR-05 Bike record | Back link; summary card; actions; history | C05, C09, C10, C15 |
@@ -89,7 +89,7 @@ The reference page shows each one. This table adds the rules.
 | C03 | Bike state label | Each bike on the day plan | Exactly: "Out on loan", "In the workshop", "Overdue – not checked in" with "due HH:MM" or "due Ddd HH:MM", "Out of service". Icons: `bike`, `warehouse`, `clock-alert`, `ban` |
 | C04 | Next booking label | Beside each bike on the day plan | "next out: 14:00", "next out: Wed 13:00", "No booking" (BR-03). Times in IBM Plex Mono |
 | C05 | Flags and warnings | Beside the state; on the bike record | "Open fault" (`triangle-alert`), "Booked again at 14:00" (`calendar-clock`), "Resource ID doesn't match LibreBooking" (`link-2-off`). They never change the state |
-| C06 | Phone timeline | SCR-02 | An ordered list of 19 slots. 07:00 lists every bike; later slots list only bikes whose state changed, or "No changes" (DEC-40). Each slot with bikes listed is a native `<details>` (DEC-78): its summary shows the time, the band tag, the count ("1 bike changes", "4 bikes change", "All 18 bikes" at 07:00) and a chevron, at least 44 px tall; opened, the bike rows. Only the current slot is open on load, or 07:00 when there's no current slot; a slot with no changes reads "No changes" and doesn't open. Following a band chart bar opens its slot. Not remembered between loads. The current slot is marked "now": its time carries the label underneath and `aria-current="time"`, and the slot has a solid surface background with side padding (UI-A-01). Each bike row links to its record. Each slot has an anchor (`#slot-0700`) for the band chart |
+| C06 | Phone timeline | SCR-02 | An ordered list of slots: in "All day" all 19 from 07:00; in "Rest of day" (the default, DEC-82) from the current slot to 16:00, or "Nothing more today" after 16:30. The first slot shown lists every bike; later slots list only bikes whose state changed, or "No changes" (DEC-40). Each slot with bikes listed is a native `<details>` (DEC-78): its summary shows the time, the band tag, the count ("1 bike changes", "4 bikes change", "All 18 bikes" on the first slot shown) and a chevron, at least 44 px tall; opened, the bike rows. Every slot is closed on load (DEC-79); a slot with no changes reads "No changes" and doesn't open. Following a band chart bar opens its slot. Not remembered between loads. The current slot is marked "now": its time carries the label underneath and `aria-current="time"`, and the slot has a solid surface background with side padding (UI-A-01). Each bike row links to its record. Each slot has an anchor (`#slot-0700`) for the band chart |
 | C07 | Plan grid | SCR-03 and print | A real `<table>` with a caption, column headers (time and band) and row headers (bike, next booking, flags). A cell the same as the one before shows a muted "–", with the state in visually hidden text |
 | C08 | Fleet list | SCR-04 | Bikes, Batteries and Battery types are three views of one page, switched with the segmented control. Battery rows show the location. Battery type rows show the name and capacity, with `.gm-list__row--name` so long names don't wrap (UI-A-02). Sorted by asset tag, or by name for battery types |
 | C09 | Asset summary card | Top of SCR-05 and SCR-06 | Bike: last service (type and date, DEC-38) and the fitted battery with its type, purchase date and cycle count. Battery: location first; if quarantined, a red edge and the fault. Change stamp at the foot (BR-11) |
@@ -101,7 +101,7 @@ The reference page shows each one. This table adds the rules.
 | C15 | Buttons and action bar | Every screen | See section 6 |
 | C16 | Notices | Top of the page | See section 7 |
 | C17 | Empty values, link out | Wherever a value is missing; the charging rules link | Section 8 |
-| C18 | Band chart | Top of SCR-02 and SCR-03, above the slots or grid (DEC-76) | Today's 19 slots from 07:00, one equal-width bar each, filled with the band colour from the band tokens. Bar height is the slot's intensity scaled between the day's lowest and highest: no axis, gridlines, values or tooltip, and no number anywhere in its SVG or HTML. A slot with no forecast is a short hatched bar in the "No forecast" style. Under the bars, one text label per stretch of the same band ("moderate 07:00–09:30"), and "now" in text under the current slot. No highlighted window and no advice. A native `<details>` ("Today's bands"), open by default; the server renders it open or closed from the `gm_bandchart` cookie a small script sets on toggle, and without JavaScript it's always open. The drawing is `role="img"` with a `<title>` and a `<desc>` listing each stretch; each bar is a link to its slot, at least 44 px tall, with the focus ring. Hidden in print |
+| C18 | Band chart | Top of SCR-02 and SCR-03, above the slots or grid (DEC-76) | Today's 19 slots from 07:00 (on phones in "Rest of day", from the current slot, DEC-82), one equal-width bar each, filled with the band colour from the band tokens. Bar height is the slot's intensity scaled between the day's lowest and highest: no axis values, gridlines or tooltip, and no number in its SVG or HTML other than the hours (DEC-80). A slot with no forecast is a short hatched bar in the "No forecast" style. Under the bars, each whole hour in small text ("07" to "16") under its bar, and "now" in text under the current slot. No band labels under the bars (DEC-80): band names are on the slots' band tags. No highlighted window and no advice. A native `<details>` ("Carbon forecast", DEC-80), open by default; the server renders it open or closed from the `gm_bandchart` cookie a small script sets on toggle, and without JavaScript it's always open. The drawing is `role="img"` with a `<title>` and a `<desc>` listing each stretch; each bar is a link to its slot, at least 44 px tall, with the focus ring. Hidden in print |
 
 **Icons.** Lucide only, at 1.75 px stroke, always next to text and hidden from screen readers (`aria-hidden="true"`). An icon on its own needs a visible or visually hidden label.
 
@@ -260,7 +260,7 @@ The things that make an interface look generated. None of these appear in the pl
 - No live validation while typing, green ticks or "Looks good!" messages.
 - No custom dropdowns, date pickers or toggle switches where a native control works.
 - No icon-only buttons, except the print and back icons, which also have text.
-- No dashboard widgets: stat tiles, progress rings or "insights". No figures shown as numbers, no advice and no highlighted window. The band chart (C18) is the only chart.
+- No dashboard widgets: stat tiles, progress rings or "insights". No figures shown as numbers, no advice and no highlighted window. The band chart (C18) is the only chart. The one exception: the day plan's Bikes in and Bikes out on phones, two counts of bikes in the asset summary card's facts style (DEC-81).
 - No hover-only information: tooltips can't be the only way to see something on a phone.
 - No "Submit", "OK", "Click here", "Oops", "Something went wrong" or exclamation marks.
 - No title case, and no all caps except the logo descriptor.
@@ -287,3 +287,4 @@ Part of NFR-18's automated tests, and of the CRP:
 | 0.2 | 12 November 2026 | §1: which classes the markup may use. The `.gm-` components plus the Bootstrap and AdminLTE classes on the reference page; anything else is a new component. §3.1 points to it. §5.5's example resource ID corrected to 107, to match the sample data. Related versions updated |
 | 0.3 | 14 November 2026 | UI review (`ui-review-fixes` branch): the current slot (C06, UI-A-01); the Battery types list (C08, UI-A-02); the grid on wide screens (C07, UI-A-03); the band chart, C18, in §3.2, §3.3, §4, §11 and §12 (DEC-76); the bottom dock at every width in §3.1, §3.3 and C01 (DEC-77); §13 item 1's screenshots |
 | 0.4 | 15 November 2026 | C06 and §9: each slot on the phone timeline opens and closes, the current slot open on load (DEC-78) |
+| 0.5 | 15 November 2026 | SCR-02: Bikes in and Bikes out (DEC-81), "Rest of day" and "All day" (DEC-82), no print button on phones. C06: every slot closed on load (DEC-79), "Rest of day". C18: "Carbon forecast", hours under the bars, no band labels (DEC-80). §12: the exception for DEC-81 |

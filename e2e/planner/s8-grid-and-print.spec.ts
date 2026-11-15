@@ -43,8 +43,13 @@ test('S8.03 AC-12.2 the print button prints; the print is the grid on one A4 lan
 		window.print = () => void ((window as unknown as { printed: number }).printed += 1);
 	});
 	await page.goto(url.dayPlan);
-	await page.getByRole('button', { name: 'Print day plan' }).click();
-	expect(await page.evaluate(() => (window as unknown as { printed: number }).printed)).toBe(1);
+	if ((page.viewportSize()?.width ?? 0) >= 992) {
+		await page.getByRole('button', { name: 'Print day plan' }).click();
+		expect(await page.evaluate(() => (window as unknown as { printed: number }).printed)).toBe(1);
+	} else {
+		// DEC-82: no print button on phones; the browser's own print still gives the grid.
+		await expect(page.getByRole('button', { name: 'Print day plan' })).toBeHidden();
+	}
 
 	await page.emulateMedia({ media: 'print' });
 	await expect(page.locator('table.gm-grid')).toBeVisible();
