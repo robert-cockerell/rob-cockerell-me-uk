@@ -35,3 +35,6 @@ supabase/.temp/
 # Playwright output (charging planner browser tests)
 test-results/
 playwright-report/
+
+# UI review screenshots (npm run test:screenshots)
+ui-review-screenshots/

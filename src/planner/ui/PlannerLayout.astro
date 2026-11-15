@@ -16,13 +16,16 @@ import TabBar from './TabBar.astro';
 interface Props {
 	/** Page name; the title becomes "<page> – Charging planner" (UI spec §8.3). */
 	page: string;
-	current?: 'day-plan' | 'fleet';
+	/** Which tab is current; null on pages that belong to neither (the name picker). */
+	current?: 'day-plan' | 'fleet' | null;
 	/** A failed save: the title starts "Error: " (UI spec §5.4). */
 	hasErrors?: boolean;
 	notice?: NoticeData | null;
+	/** The day plan uses the full width (UI spec §3.1). */
+	wide?: boolean;
 }
 
-const { page, current = 'fleet', hasErrors = false, notice = null } = Astro.props;
+const { page, current = 'fleet', hasErrors = false, notice = null, wide = false } = Astro.props;
 const name = pickedName(Astro.cookies);
 ---
 <!doctype html>
@@ -43,8 +46,8 @@ const name = pickedName(Astro.cookies);
 	<body class="gm-planner">
 		<a class="gm-skip" href="#main">Skip to main content</a>
 		<Icons />
-		<Header current={current} name={name} returnTo={Astro.url.pathname} />
-		<main class="gm-main" id="main">
+		<Header name={name} returnTo={Astro.url.pathname} />
+		<main class={wide ? 'gm-main gm-main--wide' : 'gm-main'} id="main">
 			{settings.publicDemo && (
 				<Notice notice={{ kind: 'demo', title: 'This is a demo', body: "Greener Miles is a made-up e-bike library. You can try everything, but changes aren't saved. " }}>
 					<a href={routes.demoClock}>Change the demo date and time</a>

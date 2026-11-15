@@ -11,9 +11,12 @@ test('S7.01 AC-05.7 from the day plan, M07\'s last service is two taps away', as
 	await page.goto(url.dayPlan);
 	if ((page.viewportSize()?.width ?? 0) >= 992) {
 		// The grid has no row links (C07): Fleet, then M07.
-		await page.locator('nav.gm-header__nav').getByRole('link', { name: 'Fleet' }).click();
+		await page.locator('nav.gm-tabbar').getByRole('link', { name: 'Fleet' }).click();
 		await page.locator('.gm-list__row', { hasText: 'M07' }).click();
 	} else {
+		// DEC-79, DEC-82: "Rest of day" starts at the current slot, 09:00, which
+		// lists every bike and is closed on load: open it, then M07.
+		await page.locator('li.gm-slot--now summary').click();
 		await page.locator('a.gm-bike-row', { hasText: 'M07' }).first().click();
 	}
 	await expect(page.locator('main h1')).toHaveText('M07');

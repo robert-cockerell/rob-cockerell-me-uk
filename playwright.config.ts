@@ -9,7 +9,8 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = 4321;
 const ORIGIN = `http://localhost:${PORT}`;
 
-const PUBLIC_DEMO_SPEC = /public-demo\.spec\.ts/;
+// The public demo and the review screenshots have their own configs.
+const PUBLIC_DEMO_SPEC = [/public-demo\.spec\.ts/, /screenshots\.spec\.ts/];
 
 export default defineConfig({
 	testDir: 'e2e/planner',

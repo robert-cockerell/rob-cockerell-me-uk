@@ -23,8 +23,8 @@
 .ref-phone { width: 100%; max-width: 390px; border: 1px solid var(--gm-border); border-radius: 16px; overflow: hidden; background: var(--gm-bg); }
 .ref-phone .gm-header, .ref-phone .gm-tabbar, .ref-phone .gm-actionbar { position: static; }
 .ref-phone .gm-main { padding-bottom: 1rem; }
-.ref-phone .gm-header__nav { display: none; }
-.ref-phone .gm-tabbar { display: grid; }
+.ref-phone .gm-tabbar { display: grid; transform: none; width: auto; border-radius: 0; box-shadow: none; border-width: 1px 0 0; }
+.ref-wide { max-width: 1100px; }
 .ref-focus { box-shadow: var(--gm-focus-ring) !important; border-color: var(--gm-text) !important; outline: none; }
 .ref-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .5rem; }
 .ref-swatch { border: 1px solid var(--gm-border); border-radius: 8px; overflow: hidden; font-size: .8125rem; background: var(--gm-surface); }
@@ -154,6 +154,7 @@
     <li><a href="#c15">Buttons and action bar</a></li>
     <li><a href="#c16">Notices</a></li>
     <li><a href="#c17">Empty values and link out</a></li>
+    <li><a href="#c18">Band chart</a></li>
   </ol>
 </header>
 
@@ -181,7 +182,7 @@
 <!-- ===================================================================== -->
 <section class="ref-section" id="c01">
   <h2>App shell and name chip <span class="ref-id">C01 · SCR-01 · REQ-10</span></h2>
-  <p class="ref-note">Phones: header with logo mark, product name and name chip; bottom tab bar with Day plan and Fleet. Tablets and desktops (992 px and wider): the tabs move into the header and the tab bar goes. No AdminLTE sidebar.</p>
+  <p class="ref-note">Header with logo mark, product name and name chip. A bottom tab bar with Day plan and Fleet at every width; from 992 px it's a dock: fixed to the bottom, centred, the width of the content (DEC-77). The tab bar at the bottom of this page is the live one: widen the window past 992 px to see the dock. No tabs in the header and no AdminLTE sidebar.</p>
   <div class="ref-grid">
     <div>
       <span class="ref-label">Phone, name picked</span>
@@ -189,10 +190,6 @@
         <a class="gm-skip" href="#main-1">Skip to main content</a>
         <header class="gm-header">
           <a class="gm-header__brand" href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="32" height="32" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="28" fill="#1E6B47"/><path d="M17 47 C17 27 27 17 47 17 C47 37 37 47 17 47 Z" fill="#7BC043"/><path d="M20 44 C27 36 31 33 34 29 C37 25 40 22 44 20" fill="none" stroke="#1E6B47" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="4.5 3.5"/></svg>Charging planner</a>
-          <nav class="gm-header__nav" aria-label="Main">
-            <a class="gm-tab" href="#" aria-current="page"><svg class="gm-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg>Day plan</a>
-            <a class="gm-tab" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Fleet</a>
-          </nav>
           <div class="gm-header__end">
             <a class="gm-name-chip" href="#"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-user-round"/></svg>Dave Morgan<span class="visually-hidden">. Change name</span></a>
           </div>
@@ -277,8 +274,8 @@
 
 <!-- ===================================================================== -->
 <section class="ref-section" id="c06">
-  <h2>Phone timeline <span class="ref-id">C06 · SCR-02 · REQ-04</span></h2>
-  <p class="ref-note">One slot per half hour, 07:00 to 16:00. The 07:00 slot lists every bike (DEC-40); later slots list only bikes that change, or "No changes". Each bike row links to its record. Extract below: now is 07:00.</p>
+  <h2>Phone timeline <span class="ref-id">C06 · SCR-02 · REQ-04 · DEC-78 to DEC-82</span></h2>
+  <p class="ref-note">One slot per half hour, 07:00 to 16:00. The 07:00 slot lists every bike (DEC-40); later slots list only bikes that change, or "No changes". Each bike row links to its record. The current slot has a solid surface background with side padding, and its time is marked "now" with <code>aria-current="time"</code> (UI-A-01). Each slot with bikes listed is a native <code>&lt;details&gt;</code> (DEC-78): closed, it shows the time, band, how many bikes change and a chevron; open, the bike rows. Every slot is closed on load (DEC-79). A slot with no changes reads "No changes" and doesn't open. Following a band chart bar opens its slot. Above the band chart (C18): Bikes in and Bikes out now, in the asset summary card's facts (DEC-81), and the "Rest of day" and "All day" views in C08's segmented control (DEC-82). "Rest of day", the default, starts at the current slot, which lists every bike; after 16:30 it reads "Nothing more today". No print button on phones. Extract below: now is 07:00, so "Rest of day" is the whole day.</p>
   <div class="ref-grid">
     <div class="ref-phone">
       <div class="gm-main">
@@ -289,47 +286,143 @@
         <div class="d-flex flex-wrap gap-2 mb-3 gm-noprint">
           <a class="gm-linkout" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-book-open"/></svg>Charging rules<span class="visually-hidden"> (opens the volunteer handbook)</span></a>
         </div>
+        <section class="gm-summary gm-summary--counts" aria-label="Bikes at 07:00">
+          <dl class="gm-summary__facts">
+            <div class="gm-summary__fact"><dt>Bikes in</dt><dd class="gm-mono">16</dd></div>
+            <div class="gm-summary__fact"><dt>Bikes out</dt><dd class="gm-mono">2</dd></div>
+          </dl>
+        </section>
+        <nav class="gm-segment" aria-label="Day plan view">
+          <a href="#" aria-current="page">Rest of day</a>
+          <a href="#">All day</a>
+        </nav>
+        <details class="gm-bandchart" open>
+          <summary>Carbon forecast</summary>
+          <div class="gm-bandchart__body">
+            <div class="gm-bandchart__plot">
+              <svg class="gm-bandchart__svg" viewBox="0 0 190 60" preserveAspectRatio="none" role="img" aria-labelledby="ref-bc-c06-title ref-bc-c06-desc" focusable="false"><title id="ref-bc-c06-title">Today's carbon bands</title><desc id="ref-bc-c06-desc">07:00 to 09:30 moderate, 10:00 to 11:30 low, 12:00 to 13:30 very low, 14:00 to 15:30 low, 16:00 moderate</desc><defs><pattern id="gm-bandchart-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="gm-bandchart__hatch-bg" width="4" height="4"/><line class="gm-bandchart__hatch-line" x1="0" y1="0" x2="0" y2="4"/></pattern></defs><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="1" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="11" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="21" y="3.1" width="8" height="56.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="31" y="0" width="8" height="60"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="41" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="51" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="61" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="71" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="81" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="91" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="101" y="42.7" width="8" height="17.3"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="111" y="41.8" width="8" height="18.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="121" y="45" width="8" height="15"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="131" y="44.1" width="8" height="15.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="141" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="151" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="161" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="171" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="181" y="3.1" width="8" height="56.9"/></svg>
+              <ol class="gm-bandchart__links"><li><a class="gm-bandchart__link" href="#slot-0700"><span class="visually-hidden">07:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#slot-0730"><span class="visually-hidden">07:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#slot-0800"><span class="visually-hidden">08:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#slot-0830"><span class="visually-hidden">08:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#slot-0900"><span class="visually-hidden">09:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#slot-0930"><span class="visually-hidden">09:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#slot-1000"><span class="visually-hidden">10:00, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1030"><span class="visually-hidden">10:30, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1100"><span class="visually-hidden">11:00, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1130"><span class="visually-hidden">11:30, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1200"><span class="visually-hidden">12:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1230"><span class="visually-hidden">12:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1300"><span class="visually-hidden">13:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1330"><span class="visually-hidden">13:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1400"><span class="visually-hidden">14:00, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1430"><span class="visually-hidden">14:30, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1500"><span class="visually-hidden">15:00, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1530"><span class="visually-hidden">15:30, low</span></a></li><li><a class="gm-bandchart__link" href="#slot-1600"><span class="visually-hidden">16:00, moderate</span></a></li></ol>
+            </div>
+            <div class="gm-bandchart__hours" aria-hidden="true"><span style="grid-column: 1">07</span><span style="grid-column: 3">08</span><span style="grid-column: 5">09</span><span style="grid-column: 7">10</span><span style="grid-column: 9">11</span><span style="grid-column: 11">12</span><span style="grid-column: 13">13</span><span style="grid-column: 15">14</span><span style="grid-column: 17">15</span><span style="grid-column: 19">16</span></div>
+            <div class="gm-bandchart__now"><span style="grid-column: 1">now<span class="visually-hidden">, 07:00</span></span></div>
+          </div>
+        </details>
         <ol class="gm-timeline">
-          <li class="gm-slot gm-slot--now">
-            <time class="gm-slot__time" datetime="2026-06-16T07:00">07:00</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
-            <ul class="gm-slot__bikes">
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M07</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span><span class="gm-bike-row__flags"><span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M08</span><span class="gm-bike-row__body"><span class="gm-state gm-state--overdue"><svg class="gm-icon" aria-hidden="true"><use href="#i-clock-alert"/></svg><span>Overdue – not checked in <span class="gm-due">due Mon 16:30</span></span></span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G04</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G05</span><span class="gm-bike-row__body"><span class="gm-state gm-state--service"><svg class="gm-icon" aria-hidden="true"><use href="#i-ban"/></svg>Out of service</span></span></a></li>
-              <li class="gm-muted small ps-1">…and the other 14 bikes</li>
-            </ul>
+          <li class="gm-slot gm-slot--now" id="slot-0700">
+            <details class="gm-slot__details">
+              <summary class="gm-slot__head">
+                <time class="gm-slot__time" datetime="2026-06-16T07:00" aria-current="time">07:00</time>
+                <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+                <span class="gm-slot__count">All 18 bikes</span>
+                <svg class="gm-icon gm-slot__chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+              </summary>
+              <ul class="gm-slot__bikes">
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M07</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span><span class="gm-bike-row__flags"><span class="gm-flag gm-flag--fault"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-triangle-alert"/></svg>Open fault</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M08</span><span class="gm-bike-row__body"><span class="gm-state gm-state--overdue"><svg class="gm-icon" aria-hidden="true"><use href="#i-clock-alert"/></svg><span>Overdue – not checked in <span class="gm-due">due Mon 16:30</span></span></span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G04</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">G05</span><span class="gm-bike-row__body"><span class="gm-state gm-state--service"><svg class="gm-icon" aria-hidden="true"><use href="#i-ban"/></svg>Out of service</span></span></a></li>
+                <li class="gm-muted small ps-1">…and the other 14 bikes</li>
+              </ul>
+            </details>
           </li>
-          <li class="gm-slot">
-            <time class="gm-slot__time" datetime="2026-06-16T07:30">07:30</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
-            <ul class="gm-slot__bikes">
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M10</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
-            </ul>
+          <li class="gm-slot" id="slot-0730">
+            <details class="gm-slot__details">
+              <summary class="gm-slot__head">
+                <time class="gm-slot__time" datetime="2026-06-16T07:30">07:30</time>
+                <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+                <span class="gm-slot__count">2 bikes change</span>
+                <svg class="gm-icon gm-slot__chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+              </summary>
+              <ul class="gm-slot__bikes">
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M10</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--loan"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Out on loan</span><span class="gm-next">No booking</span></span></a></li>
+              </ul>
+            </details>
           </li>
-          <li class="gm-slot">
-            <time class="gm-slot__time" datetime="2026-06-16T08:30">08:30</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
-            <p class="gm-slot__quiet">No changes</p>
+          <li class="gm-slot" id="slot-0830">
+            <div class="gm-slot__head">
+              <time class="gm-slot__time" datetime="2026-06-16T08:30">08:30</time>
+              <span class="gm-slot__band"><span class="gm-band gm-band--moderate">moderate</span></span>
+              <p class="gm-slot__quiet">No changes</p>
+            </div>
           </li>
-          <li class="gm-slot">
-            <time class="gm-slot__time" datetime="2026-06-16T12:00">12:00</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--very-low"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-leaf"/></svg>very low</span></span>
-            <ul class="gm-slot__bikes">
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span></a></li>
-              <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M01</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">next out: <strong>14:00</strong></span></span></a></li>
-            </ul>
+          <li class="gm-slot" id="slot-1200">
+            <details class="gm-slot__details">
+              <summary class="gm-slot__head">
+                <time class="gm-slot__time" datetime="2026-06-16T12:00">12:00</time>
+                <span class="gm-slot__band"><span class="gm-band gm-band--very-low"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-leaf"/></svg>very low</span></span>
+                <span class="gm-slot__count">2 bikes change</span>
+                <svg class="gm-icon gm-slot__chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+              </summary>
+              <ul class="gm-slot__bikes">
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M11</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">No booking</span></span></a></li>
+                <li><a class="gm-bike-row" href="#"><span class="gm-bike-row__tag">M01</span><span class="gm-bike-row__body"><span class="gm-state gm-state--workshop"><svg class="gm-icon" aria-hidden="true"><use href="#i-warehouse"/></svg>In the workshop</span><span class="gm-next">next out: <strong>14:00</strong></span></span></a></li>
+              </ul>
+            </details>
           </li>
-          <li class="gm-slot">
-            <time class="gm-slot__time" datetime="2026-06-16T15:30">15:30</time>
-            <span class="gm-slot__band"><span class="gm-band gm-band--none">No forecast</span></span>
-            <p class="gm-slot__quiet">No changes</p>
+          <li class="gm-slot" id="slot-1530">
+            <div class="gm-slot__head">
+              <time class="gm-slot__time" datetime="2026-06-16T15:30">15:30</time>
+              <span class="gm-slot__band"><span class="gm-band gm-band--none">No forecast</span></span>
+              <p class="gm-slot__quiet">No changes</p>
+            </div>
           </li>
         </ol>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="ref-section" id="c18">
+  <h2>Band chart <span class="ref-id">C18 · SCR-02 · SCR-03 · DEC-76 · DEC-80</span></h2>
+  <p class="ref-note">Today's 19 slots, one bar each in its band's colour, at the top of the day plan above the slots or grid, whose band tags stay. Bar height is relative to the day's lowest and highest: no axis values, numbers other than the hours, tooltip, highlighted window or advice. On phones in "Rest of day" it draws only the slots from the current one (DEC-82). A slot with no forecast is a short hatched bar. Each whole hour is numbered under its bar in small text and "now" is marked in text; the band names are on the slots' band tags, not under the bars (DEC-80). A native <code>&lt;details&gt;</code> ("Carbon forecast"), open by default; each device remembers open or closed in the <code>gm_bandchart</code> cookie, and without JavaScript it's always open. Each bar links to its slot. Not printed. Switch your device to dark mode to see the dark theme: band colours don't change. Below: now is 12:10, open; and closed.</p>
+  <div class="ref-grid">
+    <div>
+      <span class="ref-label">Open, phone width (now 12:10)</span>
+      <div class="ref-phone"><div class="gm-main">
+        <details class="gm-bandchart" open>
+          <summary>Carbon forecast</summary>
+          <div class="gm-bandchart__body">
+            <div class="gm-bandchart__plot">
+              <svg class="gm-bandchart__svg" viewBox="0 0 190 60" preserveAspectRatio="none" role="img" aria-labelledby="ref-bc-open-title ref-bc-open-desc" focusable="false"><title id="ref-bc-open-title">Today's carbon bands</title><desc id="ref-bc-open-desc">07:00 to 09:30 moderate, 10:00 to 11:30 low, 12:00 to 13:30 very low, 14:00 to 15:30 low, 16:00 moderate</desc><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="1" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="11" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="21" y="3.1" width="8" height="56.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="31" y="0" width="8" height="60"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="41" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="51" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="61" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="71" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="81" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="91" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="101" y="42.7" width="8" height="17.3"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="111" y="41.8" width="8" height="18.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="121" y="45" width="8" height="15"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="131" y="44.1" width="8" height="15.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="141" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="151" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="161" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="171" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="181" y="3.1" width="8" height="56.9"/></svg>
+              <ol class="gm-bandchart__links"><li><a class="gm-bandchart__link" href="#ref-slot-0700"><span class="visually-hidden">07:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0730"><span class="visually-hidden">07:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0800"><span class="visually-hidden">08:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0830"><span class="visually-hidden">08:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0900"><span class="visually-hidden">09:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0930"><span class="visually-hidden">09:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1000"><span class="visually-hidden">10:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1030"><span class="visually-hidden">10:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1100"><span class="visually-hidden">11:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1130"><span class="visually-hidden">11:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1200"><span class="visually-hidden">12:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1230"><span class="visually-hidden">12:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1300"><span class="visually-hidden">13:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1330"><span class="visually-hidden">13:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1400"><span class="visually-hidden">14:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1430"><span class="visually-hidden">14:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1500"><span class="visually-hidden">15:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1530"><span class="visually-hidden">15:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1600"><span class="visually-hidden">16:00, moderate</span></a></li></ol>
+            </div>
+            <div class="gm-bandchart__hours" aria-hidden="true"><span style="grid-column: 1">07</span><span style="grid-column: 3">08</span><span style="grid-column: 5">09</span><span style="grid-column: 7">10</span><span style="grid-column: 9">11</span><span style="grid-column: 11">12</span><span style="grid-column: 13">13</span><span style="grid-column: 15">14</span><span style="grid-column: 17">15</span><span style="grid-column: 19">16</span></div>
+            <div class="gm-bandchart__now"><span style="grid-column: 11">now<span class="visually-hidden">, 12:00</span></span></div>
+          </div>
+        </details>
+      </div></div>
+    </div>
+    <div>
+      <span class="ref-label">Closed</span>
+      <div class="ref-phone"><div class="gm-main">
+        <details class="gm-bandchart">
+          <summary>Carbon forecast</summary>
+          <div class="gm-bandchart__body">
+            <div class="gm-bandchart__plot">
+              <svg class="gm-bandchart__svg" viewBox="0 0 190 60" preserveAspectRatio="none" role="img" aria-labelledby="ref-bc-closed-title ref-bc-closed-desc" focusable="false"><title id="ref-bc-closed-title">Today's carbon bands</title><desc id="ref-bc-closed-desc">07:00 to 09:30 moderate, 10:00 to 11:30 low, 12:00 to 13:30 very low, 14:00 to 15:30 low, 16:00 moderate</desc><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="1" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="11" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="21" y="3.1" width="8" height="56.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="31" y="0" width="8" height="60"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="41" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="51" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="61" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="71" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="81" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="91" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="101" y="42.7" width="8" height="17.3"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="111" y="41.8" width="8" height="18.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="121" y="45" width="8" height="15"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="131" y="44.1" width="8" height="15.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="141" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="151" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="161" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="171" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="181" y="3.1" width="8" height="56.9"/></svg>
+              <ol class="gm-bandchart__links"><li><a class="gm-bandchart__link" href="#ref-slot-0700"><span class="visually-hidden">07:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0730"><span class="visually-hidden">07:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0800"><span class="visually-hidden">08:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0830"><span class="visually-hidden">08:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0900"><span class="visually-hidden">09:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0930"><span class="visually-hidden">09:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1000"><span class="visually-hidden">10:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1030"><span class="visually-hidden">10:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1100"><span class="visually-hidden">11:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1130"><span class="visually-hidden">11:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1200"><span class="visually-hidden">12:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1230"><span class="visually-hidden">12:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1300"><span class="visually-hidden">13:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1330"><span class="visually-hidden">13:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1400"><span class="visually-hidden">14:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1430"><span class="visually-hidden">14:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1500"><span class="visually-hidden">15:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1530"><span class="visually-hidden">15:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1600"><span class="visually-hidden">16:00, moderate</span></a></li></ol>
+            </div>
+            <div class="gm-bandchart__hours" aria-hidden="true"><span style="grid-column: 1">07</span><span style="grid-column: 3">08</span><span style="grid-column: 5">09</span><span style="grid-column: 7">10</span><span style="grid-column: 9">11</span><span style="grid-column: 11">12</span><span style="grid-column: 13">13</span><span style="grid-column: 15">14</span><span style="grid-column: 17">15</span><span style="grid-column: 19">16</span></div>
+          </div>
+        </details>
+      </div></div>
+    </div>
+  </div>
+  <span class="ref-label mt-4">Open, wide (above the grid from 992 px)</span>
+  <div class="ref-wide">
+    <details class="gm-bandchart" open>
+      <summary>Carbon forecast</summary>
+      <div class="gm-bandchart__body">
+        <div class="gm-bandchart__plot">
+          <svg class="gm-bandchart__svg" viewBox="0 0 190 60" preserveAspectRatio="none" role="img" aria-labelledby="ref-bc-wide-title ref-bc-wide-desc" focusable="false"><title id="ref-bc-wide-title">Today's carbon bands</title><desc id="ref-bc-wide-desc">07:00 to 09:30 moderate, 10:00 to 11:30 low, 12:00 to 13:30 very low, 14:00 to 15:30 low, 16:00 moderate</desc><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="1" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="11" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="21" y="3.1" width="8" height="56.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="31" y="0" width="8" height="60"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="41" y="8.1" width="8" height="51.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="51" y="5.4" width="8" height="54.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="61" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="71" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="81" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="91" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="101" y="42.7" width="8" height="17.3"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="111" y="41.8" width="8" height="18.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="121" y="45" width="8" height="15"/><rect class="gm-bandchart__bar gm-bandchart__bar--very-low" x="131" y="44.1" width="8" height="15.9"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="141" y="21.6" width="8" height="38.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="151" y="19.8" width="8" height="40.2"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="161" y="25.6" width="8" height="34.4"/><rect class="gm-bandchart__bar gm-bandchart__bar--low" x="171" y="23.4" width="8" height="36.6"/><rect class="gm-bandchart__bar gm-bandchart__bar--moderate" x="181" y="3.1" width="8" height="56.9"/></svg>
+          <ol class="gm-bandchart__links"><li><a class="gm-bandchart__link" href="#ref-slot-0700"><span class="visually-hidden">07:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0730"><span class="visually-hidden">07:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0800"><span class="visually-hidden">08:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0830"><span class="visually-hidden">08:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0900"><span class="visually-hidden">09:00, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-0930"><span class="visually-hidden">09:30, moderate</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1000"><span class="visually-hidden">10:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1030"><span class="visually-hidden">10:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1100"><span class="visually-hidden">11:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1130"><span class="visually-hidden">11:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1200"><span class="visually-hidden">12:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1230"><span class="visually-hidden">12:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1300"><span class="visually-hidden">13:00, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1330"><span class="visually-hidden">13:30, very low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1400"><span class="visually-hidden">14:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1430"><span class="visually-hidden">14:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1500"><span class="visually-hidden">15:00, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1530"><span class="visually-hidden">15:30, low</span></a></li><li><a class="gm-bandchart__link" href="#ref-slot-1600"><span class="visually-hidden">16:00, moderate</span></a></li></ol>
+        </div>
+        <div class="gm-bandchart__hours" aria-hidden="true"><span style="grid-column: 1">07</span><span style="grid-column: 3">08</span><span style="grid-column: 5">09</span><span style="grid-column: 7">10</span><span style="grid-column: 9">11</span><span style="grid-column: 11">12</span><span style="grid-column: 13">13</span><span style="grid-column: 15">14</span><span style="grid-column: 17">15</span><span style="grid-column: 19">16</span></div>
+        <div class="gm-bandchart__now"><span style="grid-column: 11">now<span class="visually-hidden">, 12:00</span></span></div>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -399,13 +492,14 @@
 <!-- ===================================================================== -->
 <section class="ref-section" id="c08">
   <h2>Fleet list <span class="ref-id">C08 · SCR-04 · REQ-08</span></h2>
-  <p class="ref-note">Bikes and Batteries as two views of one page. The battery view lists all 26 with their location (AC-08.5, DEC-43). Rows are links to the record.</p>
+  <p class="ref-note">Bikes, Batteries and Battery types as three views of one page. The battery view lists all 26 with their location (AC-08.5, DEC-43). Battery type rows lead with the name, so they use <code>.gm-list__row--name</code> and long names don't wrap (UI-A-02). Rows are links to the record.</p>
   <div class="ref-grid">
     <div class="ref-phone"><div class="gm-main">
       <div class="gm-page-head"><h1>Fleet</h1></div>
       <nav class="gm-segment" aria-label="Fleet view">
         <a href="#">Bikes</a>
         <a href="#" aria-current="page">Batteries</a>
+        <a href="#">Battery types</a>
       </nav>
       <ul class="gm-list">
         <li><a class="gm-list__row" href="#"><span class="gm-list__tag">B-07</span><span class="gm-location gm-location--fitted" style="font-size:1rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-battery"/></svg>Fitted to M07</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
@@ -413,6 +507,21 @@
         <li><a class="gm-list__row" href="#"><span class="gm-list__tag">B-17</span><span class="gm-location gm-location--shelf" style="font-size:1rem"><svg class="gm-icon gm-icon-sm" aria-hidden="true"><use href="#i-package"/></svg>On the shelf</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
       </ul>
       <div class="d-grid mt-3"><a class="btn btn-outline-primary" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add a battery</a></div>
+    </div></div>
+    <div class="ref-phone"><div class="gm-main">
+      <div class="gm-page-head"><h1>Fleet</h1></div>
+      <nav class="gm-segment" aria-label="Fleet view, battery types">
+        <a href="#">Bikes</a>
+        <a href="#">Batteries</a>
+        <a href="#" aria-current="page">Battery types</a>
+      </nav>
+      <ul class="gm-list">
+        <li><a class="gm-list__row gm-list__row--name" href="#"><span>Bosch PowerPack 400</span><span class="gm-mono">400 Wh</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+        <li><a class="gm-list__row gm-list__row--name" href="#"><span>Bosch PowerPack 500</span><span class="gm-mono">500 Wh</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+        <li><a class="gm-list__row gm-list__row--name" href="#"><span>Bosch PowerPack 545</span><span class="gm-empty">Not recorded</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+        <li><a class="gm-list__row gm-list__row--name" href="#"><span>Bosch PowerTube 500</span><span class="gm-mono">500 Wh</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+      </ul>
+      <div class="d-grid mt-3"><a class="btn btn-outline-primary" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add a battery type</a></div>
     </div></div>
   </div>
 </section>
@@ -703,7 +812,11 @@
   </div>
 </section>
 
-<p class="ref-note py-4">Reference v0.1, 12 November 2026. Source: <code>design/reference.html</code>, <code>design/planner-theme.scss</code>, <code>design/planner-components.scss</code>, <code>brand/tokens.css</code>. Icons: Lucide (ISC). Built on AdminLTE 4 (MIT) and Bootstrap 5.3 (MIT).</p>
+<p class="ref-note py-4">Reference v0.4, 15 November 2026 (C06 and C18, DEC-79 to DEC-82). v0.3, 15 November 2026 (C06 slots open and close, DEC-78). v0.2, 14 November 2026 (UI review: C06 current slot, C08 battery types, C18 band chart, the dock). v0.1, 12 November 2026. Source: <code>design/reference.html</code>, <code>design/planner-theme.scss</code>, <code>design/planner-components.scss</code>, <code>brand/tokens.css</code>. Icons: Lucide (ISC). Built on AdminLTE 4 (MIT) and Bootstrap 5.3 (MIT).</p>
 </main>
+<nav class="gm-tabbar" aria-label="Main">
+  <a class="gm-tab" href="#" aria-current="page"><svg class="gm-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg>Day plan</a>
+  <a class="gm-tab" href="#"><svg class="gm-icon" aria-hidden="true"><use href="#i-bike"/></svg>Fleet</a>
+</nav>
 </body>
 </html>

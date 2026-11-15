@@ -9,6 +9,16 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
         adapter: vercel(),
 	site: 'https://rob-cockerell.me.uk',
+	// Charging planner theme: Bootstrap 5.3 and AdminLTE 4 still use Sass @import and
+	// older functions. Hide their deprecation notices, as `npm run theme` does.
+	// Warnings only; the compiled CSS is the same. Added with Rob's agreement.
+	vite: {
+		css: {
+			preprocessorOptions: {
+				scss: { quietDeps: true, silenceDeprecations: ['import'] },
+			},
+		},
+	},
 	integrations: [mdx(), sitemap()],
 	fonts: [
 		{

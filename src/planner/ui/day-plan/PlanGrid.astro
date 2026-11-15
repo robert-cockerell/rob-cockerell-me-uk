@@ -7,6 +7,7 @@
 // name, so keyboard users can scroll it (WCAG 2.1.1; axe scrollable-region-focusable).
 import type { BikeState, DayPlan, DayPlanBike, SlotBikeState } from '../../plan/types.ts';
 import { dueLabel, planDateHeading, STATE_LABELS } from '../../plan/wording.ts';
+import { gridAnchor } from '../../plan/band-chart.ts';
 import BandTag from './BandTag.astro';
 import Flags from './Flags.astro';
 import NextBooking from './NextBooking.astro';
@@ -33,7 +34,7 @@ const hasFlags = (b: DayPlanBike) => b.openFault || b.bookedAgainAt !== null || 
 		<thead>
 			<tr>
 				<th scope="col">Bike</th>
-				{plan.slots.map((slot) => <th scope="col"><span class="gm-grid__time">{slot.time}</span><BandTag band={slot.band} /></th>)}
+				{plan.slots.map((slot) => <th scope="col" id={gridAnchor(slot.time)}><span class="gm-grid__time">{slot.time}</span><BandTag band={slot.band} /></th>)}
 			</tr>
 		</thead>
 		<tbody>

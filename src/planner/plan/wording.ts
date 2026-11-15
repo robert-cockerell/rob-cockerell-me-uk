@@ -68,6 +68,20 @@ export function planDateHeading(planDate: string): string {
 
 /** Timeline slot with no bike changing (C06). */
 export const NO_CHANGES = 'No changes';
+/** Count on a closed timeline slot (C06, DEC-78): the 07:00 slot lists every bike. */
+export const allBikes = (n: number): string => (n === 1 ? '1 bike' : `All ${n} bikes`);
+/** Count on a closed timeline slot (C06, DEC-78): later slots list the bikes that change. */
+export const bikesChange = (n: number): string => (n === 1 ? '1 bike changes' : `${n} bikes change`);
+/** C18 band chart's summary (DEC-80). */
+export const CARBON_FORECAST = 'Carbon forecast';
+/** Day plan views on phones (DEC-82). */
+export const VIEW_REST_OF_DAY = 'Rest of day';
+export const VIEW_ALL_DAY = 'All day';
+/** "Rest of day" once the staffed day is over (DEC-82). */
+export const NOTHING_MORE_TODAY = 'Nothing more today';
+/** Bikes in and out now, on phones (DEC-81). */
+export const BIKES_IN = 'Bikes in';
+export const BIKES_OUT = 'Bikes out';
 /** C17 link out (REQ-16). */
 export const CHARGING_RULES = 'Charging rules';
 /** C16 problem notice when LibreBooking can't be reached (PRD §7.3). */
