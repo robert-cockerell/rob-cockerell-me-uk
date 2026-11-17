@@ -19,7 +19,9 @@ export default defineConfig({
 			},
 		},
 	},
-	integrations: [mdx(), sitemap()],
+	// The charging planner demo is noindex, so it stays out of the sitemap too.
+	// Added with Rob's agreement.
+	integrations: [mdx(), sitemap({ filter: (page) => !page.includes('/demos/') })],
 	fonts: [
 		{
 			provider: fontProviders.local(),
