@@ -29,6 +29,8 @@ export interface PlanReservation {
 export interface PlanForecast {
 	periodStart: Date;
 	indexBand: IndexBand;
+	/** DI-004. Only used to scale the band chart's bars (DEC-76); never shown. */
+	forecastIntensity?: number;
 }
 
 /** DF-24 Open bike faults. */
@@ -67,6 +69,12 @@ export interface DayPlanSlot {
 	end: Date;
 	/** DI-005, or null for "No forecast" (BR-10). */
 	band: IndexBand | null;
+	/**
+	 * Where this slot sits between the day's lowest (0) and highest (1)
+	 * forecast, for the band chart's bar heights (DEC-76). Null with no
+	 * forecast. Relative only: never shown as a number (DEC-32).
+	 */
+	level: number | null;
 	/** One per bike, in the order of the bike list. Empty when bookings are unavailable. */
 	bikes: SlotBikeState[];
 }

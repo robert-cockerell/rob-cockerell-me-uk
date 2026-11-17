@@ -54,7 +54,7 @@ const current = (kind: View['kind']) => (view.kind === kind ? 'page' : undefined
 	<>
 		<ul class="gm-list">
 			{view.types.map((t) => (
-				<li><a class="gm-list__row" href={routes.batteryType(t.batteryType)}><span>{t.batteryType}</span><span class={t.capacity === null ? 'gm-empty' : 'gm-mono'}>{capacityLabel(t.capacity)}</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+				<li><a class="gm-list__row gm-list__row--name" href={routes.batteryType(t.batteryType)}><span>{t.batteryType}</span><span class={t.capacity === null ? 'gm-empty' : 'gm-mono'}>{capacityLabel(t.capacity)}</span><svg class="gm-icon gm-muted" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
 			))}
 		</ul>
 		<div class="d-grid mt-3"><a class="btn btn-outline-primary" href={routes.newBatteryType}><svg class="gm-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add a battery type</a></div>

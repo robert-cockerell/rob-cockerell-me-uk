@@ -20,7 +20,8 @@
     "db:new": "supabase migration new",
     "db:push": "supabase db push --remote",
     "theme": "sass --load-path=node_modules --quiet-deps --silence-deprecation=import --no-source-map design/planner-theme.scss design/planner.css",
-    "job:forecast": "node --env-file-if-exists=.env src/planner/forecast/cli.ts"
+    "job:forecast": "node --env-file-if-exists=.env src/planner/forecast/cli.ts",
+    "test:screenshots": "npm run theme && playwright test -c playwright.screenshots.config.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",

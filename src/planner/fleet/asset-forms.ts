@@ -17,6 +17,30 @@ export const BATTERY_TYPE_FIELDS = ['batteryType', 'capacity'];
 
 const s = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v));
 
+/**
+ * REQ-18: the next number after the highest in use for a tag's prefix
+ * (AC-18.2, invented rule), two digits. "B-" for batteries; a family letter
+ * for bikes. Null when the family is full (99).
+ */
+export function nextFreeTag(tags: string[], prefix: string): string | null {
+	const used = tags.filter((t) => t.startsWith(prefix)).map((t) => Number(t.slice(prefix.length))).filter(Number.isInteger);
+	const next = (used.length ? Math.max(...used) : 0) + 1;
+	return next > 99 ? null : `${prefix}${String(next).padStart(2, '0')}`;
+}
+
+/** DI-007's bike families. */
+const FAMILY: Record<string, string> = { M: 'a Motus', G: 'a GSD', D: 'a donated bike' };
+
+/** REQ-18 for bikes: the next free tag in each family in use, for the tag field's hint. */
+export function bikeTagHint(tags: string[]): string {
+	const families = [...new Set(tags.map((t) => t[0]))].sort((a, b) => (a === 'M' ? -1 : b === 'M' ? 1 : a.localeCompare(b)));
+	const suggestions = families
+		.map((f) => ({ tag: nextFreeTag(tags, f), family: FAMILY[f] }))
+		.filter((x): x is { tag: string; family: string | undefined } => x.tag !== null)
+		.map((x) => (x.family ? `${x.tag} for ${x.family}` : x.tag));
+	return suggestions.length ? `Next free: ${suggestions.join(', ')}` : 'For example, M13 or G07';
+}
+
 export const bikeValues = (b: Bike): Values => ({
 	bikeAssetTag: b.bikeAssetTag,
 	librebookingResourceId: s(b.librebookingResourceId),

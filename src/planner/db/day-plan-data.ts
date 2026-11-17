@@ -40,12 +40,17 @@ export function createDayPlanData(db: SupabaseClient): DayPlanData {
 		async listForecasts(from, to) {
 			const { data, error } = await db
 				.from('forecast_periods')
-				.select('period_start, index_band')
+				.select('period_start, index_band, forecast_intensity')
 				.eq('region', FORECAST_REGION)
 				.gte('period_start', from.toISOString())
 				.lt('period_start', to.toISOString());
 			check('Reading forecasts', error);
-			return (data ?? []).map((p) => ({ periodStart: new Date(p.period_start), indexBand: p.index_band as IndexBand }));
+			// The intensity only scales the band chart's bars (DEC-76); it's never shown.
+			return (data ?? []).map((p) => ({
+				periodStart: new Date(p.period_start),
+				indexBand: p.index_band as IndexBand,
+				forecastIntensity: p.forecast_intensity as number,
+			}));
 		},
 	};
 }

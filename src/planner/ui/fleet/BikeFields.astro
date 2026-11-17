@@ -9,13 +9,15 @@ interface Props {
 	/** Editing: the asset tag is shown, not changed (schema notes S-2). */
 	editing: boolean;
 	today: string;
+	/** REQ-18: the next free tags, when adding. */
+	tagHint?: string;
 }
-const { values: v, errors: e, editing, today } = Astro.props;
+const { values: v, errors: e, editing, today, tagHint = 'For example, M13 or G07' } = Astro.props;
 ---
 {editing ? (
 	<div class="gm-field"><span class="form-label">Asset tag</span><p class="m-0 gm-mono">{v.bikeAssetTag}</p></div>
 ) : (
-	<Field name="bikeAssetTag" label="Asset tag" hint="For example, M13 or G07" value={v.bikeAssetTag} error={e.bikeAssetTag} width="tag" tag />
+	<Field name="bikeAssetTag" label="Asset tag" hint={tagHint} value={v.bikeAssetTag} error={e.bikeAssetTag} width="tag" tag />
 )}
 <Field name="librebookingResourceId" label="LibreBooking resource ID" hint="The number LibreBooking gives this bike. Lewis can tell you" kind="number-text" value={v.librebookingResourceId} error={e.librebookingResourceId} width="short" mono />
 <Field name="make" label="Make" hint="For a donated bike, the brand on the frame, or Unknown" value={v.make} error={e.make} />

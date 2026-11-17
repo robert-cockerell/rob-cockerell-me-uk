@@ -33,6 +33,8 @@ test('DEC-61 a reader moves only their own clock', async ({ page, browser }) => 
 	await page.getByRole('button', { name: 'Set the demo time' }).click();
 	await expect(page).toHaveURL(url.dayPlan);
 	await expect(page.locator('.gm-page-head__sub')).toHaveText('Mon 30 Mar');
+	// At 09:00 "Rest of day" starts at 09:00 (DEC-82): read the morning in "All day".
+	await page.goto(url.dayPlanAll);
 	const bands = await page.locator('.gm-slot__band .gm-band').allInnerTexts();
 	expect(bands.slice(0, 3).map((b) => b.trim())).toEqual(['very low', 'very low', 'moderate']);
 

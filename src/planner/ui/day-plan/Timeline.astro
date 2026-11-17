@@ -1,11 +1,15 @@
 ---
-// C06 Phone timeline (design/reference.html #c06, REQ-04). 19 slots; 07:00
-// lists every bike (DEC-40), later slots only bikes that change, or "No
+// C06 Phone timeline (design/reference.html #c06, REQ-04). The first slot shown
+// lists every bike (DEC-40, DEC-82), later slots only bikes that change, or "No
 // changes". The current slot is marked "now". Each bike row links to its record.
-import { timeline } from '../../plan/timeline.ts';
+// DEC-78, DEC-79: each slot with bikes listed is a native <details>, closed on
+// load, showing the time, band and count. Slots with no changes don't open.
+// DEC-82: "Rest of day" starts at `start`; with nothing left, "Nothing more today".
+import { currentSlot, timeline } from '../../plan/timeline.ts';
 import type { DayPlan, DayPlanBike } from '../../plan/types.ts';
-import { NO_CHANGES } from '../../plan/wording.ts';
+import { NO_CHANGES, NOTHING_MORE_TODAY, allBikes, bikesChange } from '../../plan/wording.ts';
 import { routes } from '../routes.ts';
+import { slotAnchor } from '../../plan/band-chart.ts';
 import BandTag from './BandTag.astro';
 import Flags from './Flags.astro';
 import NextBooking from './NextBooking.astro';
@@ -13,34 +17,52 @@ import StateLabel from './StateLabel.astro';
 
 interface Props {
 	plan: DayPlan;
+	/** First slot shown, an index into plan.slots (DEC-82). */
+	start?: number;
 }
-const { plan } = Astro.props;
+const { plan, start = 0 } = Astro.props;
 const bikeInfo = new Map<string, DayPlanBike>(plan.bikes.map((b) => [b.bikeAssetTag, b]));
-const slots = timeline(plan);
-const now = plan.now.getTime();
+const slots = timeline(plan, start);
+const nowIndex = currentSlot(plan);
 const hasFlags = (b: DayPlanBike) => b.openFault || b.bookedAgainAt !== null || b.resourceMismatch;
 ---
+{slots.length === 0 ? (
+	<p class="gm-timeline__end">{NOTHING_MORE_TODAY}</p>
+) : (
 <ol class="gm-timeline">
-	{slots.map((slot, i) => {
-		const times = plan.slots[i];
-		const isNow = times.start.getTime() <= now && now < times.end.getTime();
+	{slots.map((slot, k) => {
+		const isNow = slot.index === nowIndex;
+		const listed = plan.bookingsAvailable && slot.bikes.length > 0;
+		const time = <time class="gm-slot__time" datetime={`${plan.planDate}T${slot.time}`} aria-current={isNow ? 'time' : undefined}>{slot.time}</time>;
+		const band = <span class="gm-slot__band"><BandTag band={slot.band} /></span>;
 		return (
-			<li class={isNow ? 'gm-slot gm-slot--now' : 'gm-slot'}>
-				<time class="gm-slot__time" datetime={`${plan.planDate}T${slot.time}`}>{slot.time}</time>
-				<span class="gm-slot__band"><BandTag band={slot.band} /></span>
-				{plan.bookingsAvailable && (slot.bikes.length > 0 ? (
-					<ul class="gm-slot__bikes">
-						{slot.bikes.map((state) => {
-							const bike = bikeInfo.get(state.bikeAssetTag) as DayPlanBike;
-							return (
-								<li><a class="gm-bike-row" href={routes.bike(state.bikeAssetTag)}><span class="gm-bike-row__tag">{state.bikeAssetTag}</span><span class="gm-bike-row__body"><StateLabel state={state.state} dueAt={state.dueAt} planDate={plan.planDate} /><NextBooking at={bike.nextBooking} planDate={plan.planDate} /></span>{hasFlags(bike) && <span class="gm-bike-row__flags"><Flags bike={bike} /></span>}</a></li>
-							);
-						})}
-					</ul>
+			<li class={isNow ? 'gm-slot gm-slot--now' : 'gm-slot'} id={slotAnchor(slot.time)}>
+				{listed ? (
+					<details class="gm-slot__details">
+						<summary class="gm-slot__head">
+							{time}
+							{band}
+							<span class="gm-slot__count">{k === 0 ? allBikes(slot.bikes.length) : bikesChange(slot.bikes.length)}</span>
+							<svg class="gm-icon gm-slot__chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+						</summary>
+						<ul class="gm-slot__bikes">
+							{slot.bikes.map((state) => {
+								const bike = bikeInfo.get(state.bikeAssetTag) as DayPlanBike;
+								return (
+									<li><a class="gm-bike-row" href={routes.bike(state.bikeAssetTag)}><span class="gm-bike-row__tag">{state.bikeAssetTag}</span><span class="gm-bike-row__body"><StateLabel state={state.state} dueAt={state.dueAt} planDate={plan.planDate} /><NextBooking at={bike.nextBooking} planDate={plan.planDate} /></span>{hasFlags(bike) && <span class="gm-bike-row__flags"><Flags bike={bike} /></span>}</a></li>
+								);
+							})}
+						</ul>
+					</details>
 				) : (
-					<p class="gm-slot__quiet">{NO_CHANGES}</p>
-				))}
+					<div class="gm-slot__head">
+						{time}
+						{band}
+						{plan.bookingsAvailable && <p class="gm-slot__quiet">{NO_CHANGES}</p>}
+					</div>
+				)}
 			</li>
 		);
 	})}
 </ol>
+)}

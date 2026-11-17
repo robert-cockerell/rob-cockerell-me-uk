@@ -49,6 +49,7 @@ const RESERVATIONS = parseCsv(reservationsCsv).map((r) => ({
 export const FORECASTS: PlanForecast[] = parseCsv(forecastsCsv).map((r) => ({
 	periodStart: new Date((r.period_start as string).replace('Z', ':00Z')),
 	indexBand: r.index_band as IndexBand,
+	forecastIntensity: Number(r.forecast_intensity),
 }));
 
 const OPEN_BIKE_FAULTS: OpenBikeFault[] = parseCsv(entriesCsv)

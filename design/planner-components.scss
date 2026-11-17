@@ -102,7 +102,6 @@ body.gm-planner {
 }
 .gm-header__brand { display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--gm-text); font-family: var(--gm-font-heading); font-weight: 600; font-size: 1.125rem; }
 .gm-header__brand img { width: 32px; height: 32px; }
-.gm-header__nav { display: none; gap: .25rem; margin-left: 1rem; }
 .gm-header__end { margin-left: auto; display: flex; align-items: center; gap: .5rem; }
 
 .gm-tab {
@@ -122,10 +121,16 @@ body.gm-planner {
 .gm-main { padding: 1rem 1rem calc(56px + 2rem); max-width: 720px; margin: 0 auto; }
 .gm-main--wide { max-width: none; }
 
+// From 992 px the tab bar is a dock: fixed to the bottom, centred, the width of
+// the content, same two destinations (DEC-77). Content keeps room for it.
 @media (min-width: 992px) {
-  .gm-header__nav { display: flex; }
-  .gm-tabbar { display: none; }
-  .gm-main { padding-bottom: 2rem; }
+  .gm-tabbar {
+    left: 50%; right: auto; bottom: .75rem; transform: translateX(-50%);
+    width: min(720px, calc(100% - 2rem));
+    border: 1px solid var(--gm-border); border-radius: var(--gm-radius-lg);
+    box-shadow: var(--gm-shadow-card); overflow: hidden; padding-bottom: 0;
+  }
+  .gm-main { padding-bottom: calc(56px + .75rem + 2rem); }
 }
 
 // Name chip (REQ-10)
@@ -200,15 +205,28 @@ body.gm-planner {
 // Phone timeline (REQ-04)
 // ---------------------------------------------------------------------------
 .gm-timeline { list-style: none; margin: 0; padding: 0; }
+// DEC-82: "Rest of day" once the staffed day is over.
+.gm-timeline__end { color: var(--gm-text-muted); padding: .75rem 0; border-top: 1px solid var(--gm-border); margin: 0; }
+// DEC-78: a slot with bikes listed is a native <details>; its summary is the
+// head row (time, band, count, chevron). A slot with no changes has the same
+// head row as a plain block and doesn't open.
 .gm-slot {
-  display: grid; grid-template-columns: 4rem 1fr; gap: .25rem .75rem;
   padding: .75rem 0; border-top: 1px solid var(--gm-border);
-  &__time { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.125rem; padding-top: .1rem; }
+  &__head { display: grid; grid-template-columns: 4rem 1fr auto; gap: .25rem .75rem; align-items: center; min-height: 44px; }
+  &__time { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.125rem; padding-top: .1rem; grid-row: 1 / span 2; align-self: start; }
   &__band { grid-column: 2; }
-  &__bikes { grid-column: 2; list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
-  &__quiet { grid-column: 2; color: var(--gm-text-muted); font-size: .875rem; margin: .25rem 0 0; }
-  &--now { background: linear-gradient(90deg, var(--gm-surface), transparent); }
+  &__count { grid-column: 2; font-size: .875rem; }
+  &__chevron { grid-column: 3; grid-row: 1 / span 2; color: var(--gm-text-muted); }
+  &__details[open] &__chevron { transform: rotate(90deg); }
+  &__bikes { list-style: none; margin: .5rem 0 0 4.75rem; padding: 0; display: grid; gap: .5rem; }
+  &__quiet { grid-column: 2; color: var(--gm-text-muted); font-size: .875rem; margin: 0; }
+  &--now { background: var(--gm-surface); padding-inline: .75rem; margin-inline: -.75rem; border-radius: var(--gm-radius-md); }
   &--now .gm-slot__time::after { content: "now"; display: block; font-family: var(--gm-font-body); font-size: .8125rem; font-weight: 700; color: var(--gm-link); }
+}
+summary.gm-slot__head {
+  list-style: none; cursor: pointer; border-radius: var(--gm-radius-sm);
+  &::-webkit-details-marker { display: none; }
+  &:focus-visible { outline: 2px solid var(--gm-text); box-shadow: var(--gm-focus-ring); }
 }
 .gm-bike-row {
   display: grid; grid-template-columns: 3.25rem 1fr; gap: .125rem .5rem; align-items: start;
@@ -239,6 +257,40 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
   .gm-grid__cell--service { color: var(--gm-text-muted); }
   .gm-grid__same { color: var(--gm-text-muted); }
 }
+// Dark theme: the same lighter red as fault flags, for AA contrast (AC-19.1). Added with Rob's agreement.
+@media (prefers-color-scheme: dark) { .gm-grid .gm-grid__cell--overdue { color: #FF9B8F; } }
+
+// ---------------------------------------------------------------------------
+// Band chart (C18, DEC-76): the day's bands at a glance. Bar heights are
+// relative only; no numbers, axis, tooltip, highlighted window or advice.
+// ---------------------------------------------------------------------------
+.gm-bandchart {
+  margin-bottom: 1rem; background: var(--gm-surface);
+  border: 1px solid var(--gm-border); border-radius: var(--gm-radius-md);
+  > summary { min-height: 44px; display: flex; align-items: center; padding: 0 1rem; font-weight: 700; cursor: pointer; }
+  &__body { padding: 0 1rem 1rem; }
+  &__plot { position: relative; height: 72px; }
+  &__svg { display: block; width: 100%; height: 100%; }
+  &__bar--very-low  { fill: var(--gm-band-very-low); }
+  &__bar--low       { fill: var(--gm-band-low); }
+  &__bar--moderate  { fill: var(--gm-band-moderate); }
+  &__bar--high      { fill: var(--gm-band-high); }
+  &__bar--very-high { fill: var(--gm-band-very-high); }
+  // The hatch fill is set on the bar (fill="url(#…)"): a page can carry two charts, each with its own pattern id.
+  &__bar--none      { stroke: var(--gm-slate); stroke-width: .6; stroke-dasharray: 1.5 1; }
+  &__hatch-bg { fill: var(--gm-mist); }
+  &__hatch-line { stroke: var(--gm-slate); stroke-width: 1; }
+  // One link per bar, over the drawing: at least 44 px tall, with the focus ring.
+  &__links { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(19, 1fr); margin: 0; padding: 0; list-style: none; }
+  &__link { display: block; height: 100%; min-height: 44px; border-radius: var(--gm-radius-sm);
+    &:focus-visible { outline: 2px solid var(--gm-text); box-shadow: var(--gm-focus-ring); } }
+  &__now { display: grid; grid-template-columns: repeat(19, 1fr); margin-top: .25rem; font-size: .8125rem; font-weight: 700; color: var(--gm-link); }
+  &__now span { text-align: center; white-space: nowrap; }
+  // DEC-80: the whole hours in small text under their bars; no band labels.
+  // The number of columns follows the bars drawn (set on the element, DEC-82).
+  &__hours { display: grid; grid-template-columns: repeat(19, 1fr); margin-top: .25rem; font-family: var(--gm-font-data); font-size: .6875rem; line-height: 1.2; color: var(--gm-text-muted); }
+  &__hours span { text-align: center; white-space: nowrap; }
+}
 
 // ---------------------------------------------------------------------------
 // Asset summary card (REQ-05, REQ-08)
@@ -253,6 +305,9 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
   &__fact dt { font-size: .875rem; font-weight: 700; color: var(--gm-text-muted); margin: 0; }
   &__fact dd { margin: .125rem 0 0; font-size: 1.0625rem; }
   &__stamp { font-size: .875rem; color: var(--gm-text-muted); border-top: 1px solid var(--gm-border); padding-top: .75rem; }
+  // DEC-81: Bikes in and Bikes out side by side on the day plan, at every width.
+  &--counts { margin-bottom: 1rem; }
+  &--counts &__facts { grid-template-columns: 1fr 1fr; }
   &--quarantined { border-left: 6px solid var(--gm-error); }
 }
 @media (min-width: 576px) { .gm-summary__facts { grid-template-columns: 1fr 1fr; } }
@@ -350,7 +405,8 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
   padding: .75rem 0; background: var(--gm-bg); border-top: 1px solid var(--gm-border);
   .btn-primary { flex: 1 1 12rem; }
 }
-@media (min-width: 992px) { .gm-actionbar { position: static; border: 0; .btn-primary { flex: 0 0 auto; } } }
+// Above the tab bar or dock at every width (DEC-77)
+@media (min-width: 992px) { .gm-actionbar { bottom: calc(56px + .75rem); .btn-primary { flex: 0 0 auto; } } }
 
 // ---------------------------------------------------------------------------
 // Confirm warning (REQ-11): non-blocking, safe choice first
@@ -395,6 +451,8 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
   &:hover { background: var(--gm-bg); }
 }
 .gm-list__tag { font-family: var(--gm-font-data); font-weight: 500; font-size: 1.0625rem; }
+// Battery types: the name takes the room (UI-A-02)
+.gm-list__row--name { grid-template-columns: 1fr auto auto; }
 
 // Segmented switch between Bikes and Batteries on the fleet list
 .gm-segment { display: inline-grid; grid-auto-flow: column; border: 1.5px solid var(--gm-action); border-radius: var(--gm-radius-md); overflow: hidden; margin-bottom: 1rem;
@@ -409,7 +467,12 @@ a.gm-bike-row { min-height: 44px; &:hover { border-color: var(--gm-text-muted); 
 // ---------------------------------------------------------------------------
 @media print {
   @page { size: A4 landscape; margin: 10mm; }
-  .gm-header, .gm-tabbar, .gm-actionbar, .gm-noprint, .gm-notice--demo { display: none !important; }
+  .gm-header, .gm-tabbar, .gm-actionbar, .gm-noprint, .gm-notice--demo, .gm-bandchart { display: none !important; }
+  // No room kept for the tab bar or dock, which aren't printed (DEC-77)
+  .gm-main { padding-bottom: 0; }
+  // The day plan is full width on screen; in print it keeps the 720 px width it
+  // had before the review, which prints the grid on one A4 landscape page (AC-12.2).
+  .gm-main--wide { max-width: 720px; }
   body.gm-planner { background: #fff; color: #000; }
   .gm-timeline { display: none !important; }
   .gm-print-grid { display: block !important; }

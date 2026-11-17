@@ -32,6 +32,7 @@ export const MSG = {
 	batteryPurchaseDateFormat: 'Enter the purchase date as a real date',
 	batteryPurchaseDateFuture: "Battery purchase date can't be in the future",
 	cycleCountRange: 'Enter a cycle count from 0 to 9,999',
+	cycleCountBattery: 'Choose the battery this cycle count is for',
 	batteryTypeNameMissing: 'Enter the battery type',
 	batteryTypeNameTooLong: 'Enter a battery type of 40 characters or fewer',
 	batteryTypeInUse: (name: string) => `${name} is already a battery type`,
