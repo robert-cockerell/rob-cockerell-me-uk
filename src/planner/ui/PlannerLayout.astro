@@ -58,8 +58,9 @@ const name = pickedName(Astro.cookies);
 			<slot />
 		</main>
 		{/* Shown in every mode. On phones it clears the fixed tab bar (56 px); the
-		    sticky action bar lives inside <main>, so it never overlaps this. */}
-		<footer class="gm-site-footer">
+		    sticky action bar lives inside <main>, so it never overlaps this.
+		    Not printed: the day plan's print must fit one A4 page (AC-12.2). */}
+		<footer class="gm-site-footer gm-noprint">
 			<p>
 				Greener Miles is a fictional e-bike library. This demo is route A of a worked example for
 				{/* TODO: replace "/" with the article's final path once it is published. */}
