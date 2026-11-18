@@ -76,6 +76,26 @@ export default defineConfig({
 			subsets: ['latin'],
 			fallbacks: ['ui-monospace', 'Menlo', 'monospace'],
 		},
+		// Homepage (src/pages/index.astro). Downloaded at build time and served
+		// from the site, like the fonts above. Added with Rob's agreement.
+		{
+			provider: fontProviders.google(),
+			name: 'Instrument Sans',
+			cssVariable: '--font-instrument-sans',
+			weights: [600, 700],
+			styles: ['normal'],
+			subsets: ['latin'],
+			fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
+		},
+		{
+			provider: fontProviders.google(),
+			name: 'Source Serif 4',
+			cssVariable: '--font-source-serif',
+			weights: [400],
+			styles: ['normal', 'italic'],
+			subsets: ['latin'],
+			fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+		},
 	],
 	// Charging planner settings (technical note §7.1, DEC-60). Server only.
 	// All optional, so the blog builds without them.
