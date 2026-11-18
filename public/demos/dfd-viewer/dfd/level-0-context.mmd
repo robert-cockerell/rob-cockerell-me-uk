@@ -1,0 +1,24 @@
+%% Day planner and fleet records DFD: Level 0 – Context diagram (v0.7)
+%% Fictional worked example. SSADM required system, logical view.
+%% Rectangles: external entities. Rounded boxes: processes. Cylinders: data stores.
+%% Data only moves between entities and stores through a process.
+%% Library staff = volunteers and the coordinator (DEC-12).
+%% v0.7: no change to the flows. Bookings and resource status now covers reservations
+%% up to the next staffed day (DEC-17); Battery fitted can have no bike (DEC-20).
+flowchart LR
+    STAFF[Library staff]
+    BKS[LibreBooking]
+    CIA[Carbon Intensity API]
+
+    P0(("0<br/>Day planner and fleet records"))
+
+    BKS -- Bookings and resource status --> P0
+    CIA -- Carbon intensity forecast --> P0
+    P0 -- Day plan --> STAFF
+    STAFF -- Asset details --> P0
+    STAFF -- Battery fitted --> P0
+    STAFF -- Fault report --> P0
+    STAFF -- Fault cleared --> P0
+    STAFF -- Service check --> P0
+    STAFF -- Dealer service --> P0
+    P0 -- Asset record --> STAFF
